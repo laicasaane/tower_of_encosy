@@ -45,6 +45,7 @@ namespace EncosyTower.EnumExtensions
 
         /// <param name="enumType">To provide members for the enum generated from [EnumTemplate]</param>
         /// <param name="order"></param>
+        /// <inheritdoc cref="EnumTemplateMembersFromEnumAttribute" />
         public EnumTemplateMembersFromEnumAttribute(Type enumType, ulong order)
         {
             EnumType = enumType;
@@ -81,6 +82,7 @@ namespace EncosyTower.EnumExtensions
 
         public string AlternateName { get; }
 
+        /// <inheritdoc cref="EnumTemplateMemberFromTypeAttribute" />
         public EnumTemplateMemberFromTypeAttribute(
               Type type
             , ulong order
@@ -116,6 +118,7 @@ namespace EncosyTower.EnumExtensions
 
         public ulong Order { get; }
 
+        /// <inheritdoc cref="EnumMembersForTemplateAttribute" />
         public EnumMembersForTemplateAttribute(Type templateType, ulong order)
         {
             TemplateType = templateType;
@@ -157,6 +160,7 @@ namespace EncosyTower.EnumExtensions
 
         public string AlternateName { get; }
 
+        /// <inheritdoc cref="TypeAsEnumMemberForTemplateAttribute" />
         public TypeAsEnumMemberForTemplateAttribute(
               Type templateType
             , ulong order

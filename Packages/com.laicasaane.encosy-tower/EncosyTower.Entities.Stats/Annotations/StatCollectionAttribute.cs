@@ -37,6 +37,7 @@ namespace EncosyTower.Entities.Stats
         /// <param name="statSystemType">
         /// The type of the target stat system, which is annotated with <see cref="StatSystemAttribute"/>.
         /// </param>
+        /// <inheritdoc cref="StatCollectionAttribute" />
         public StatCollectionAttribute(Type statSystemType)
         {
             StatSystemType = statSystemType;
@@ -52,6 +53,7 @@ namespace EncosyTower.Entities.Stats
         /// The offset for TypeId values when they are casted to Stat.UserData.
         /// The sum of this value and the number of TypeId values should not exceed <see cref="uint.MaxValue"/>.
         /// </param>
+        /// <inheritdoc cref="StatCollectionAttribute" />
         public StatCollectionAttribute(Type statSystemType, uint typeIdOffset)
         {
             StatSystemType = statSystemType;

@@ -22,6 +22,7 @@ namespace EncosyTower.Entities.Stats
             ValueType = valueType;
         }
 
+        /// <inheritdoc cref="StatDataAttribute" />
         public StatDataAttribute(Type enumType)
         {
             EnumType = enumType;

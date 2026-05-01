@@ -50,6 +50,7 @@ namespace EncosyTower.Mvvm.ComponentModel
         /// The other command names to also notify when the annotated property changes. This parameter can optionally
         /// be used to indicate a series of dependent commands from the same attribute, to keep the code more compact.
         /// </param>
+        /// <inheritdoc cref="NotifyCanExecuteChangedForAttribute" />
         public NotifyCanExecuteChangedForAttribute(string commandName, params string[] otherCommandNames)
         {
             CommandNames = new[] { commandName }.Concat(otherCommandNames).ToArray();

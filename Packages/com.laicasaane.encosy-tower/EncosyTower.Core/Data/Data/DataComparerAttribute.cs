@@ -32,6 +32,7 @@ namespace EncosyTower.Data
     {
         public Type Type { get; }
 
+        /// <inheritdoc cref="DataComparerAttribute" />
         public DataComparerAttribute(Type type)
         {
             this.Type = type;

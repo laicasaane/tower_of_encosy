@@ -18,6 +18,7 @@ namespace EncosyTower.Variants
     [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
     public sealed class VariantAttribute : Attribute
     {
+        /// <inheritdoc cref="VariantAttribute" />
         public VariantAttribute(Type variantType)
         {
             Type = variantType;

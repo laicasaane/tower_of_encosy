@@ -35,6 +35,7 @@ namespace EncosyTower.Databases.Authoring
         /// <param name="databaseType">
         /// The runtime database type to bind to this authoring type.
         /// </param>
+        /// <inheritdoc cref="AuthorDatabaseAttribute" />
         public AuthorDatabaseAttribute(Type databaseType)
         {
             DatabaseType = databaseType;

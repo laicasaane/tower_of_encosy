@@ -65,6 +65,7 @@ namespace EncosyTower.VisualDebugging.Commands
         /// </summary>
         public bool IsDataStatic { get; }
 
+        /// <inheritdoc cref="VisualOptionsAttribute" />
         public VisualOptionsAttribute([NotNull] string optionsGetter, bool isDataStatic = false)
         {
             OptionsGetter = optionsGetter;

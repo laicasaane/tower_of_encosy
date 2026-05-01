@@ -18,6 +18,7 @@ namespace EncosyTower.EnumExtensions
     {
         public Type EnumType { get; }
 
+        /// <inheritdoc cref="EnumExtensionsForAttribute" />
         public EnumExtensionsForAttribute(Type enumType)
         {
             if (enumType == null)

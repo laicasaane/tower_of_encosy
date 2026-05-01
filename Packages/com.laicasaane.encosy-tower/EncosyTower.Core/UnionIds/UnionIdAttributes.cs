@@ -133,6 +133,7 @@ namespace EncosyTower.UnionIds
         /// are available on <see cref="KindType"/>.
         /// This option is used to optimize the source generator.
         /// </param>
+        /// <inheritdoc cref="UnionIdKindAttribute" />
         public UnionIdKindAttribute(
               Type kindType
             , ulong order
@@ -221,6 +222,7 @@ namespace EncosyTower.UnionIds
         /// Indicates whether TryParse methods that accept ReadOnlySpan&lt;char&gt; are available on this type.
         /// This option is used to optimize the source generator.
         /// </param>
+        /// <inheritdoc cref="KindForUnionIdAttribute" />
         public KindForUnionIdAttribute(
               Type idType
             , ulong order

@@ -8,12 +8,14 @@ namespace EncosyTower.Entities.Stats
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
     public sealed class StatSystemAttribute : Attribute
     {
+        /// <inheritdoc cref="StatSystemAttribute" />
         public StatSystemAttribute(StatDataSize maxDataSize)
         {
             MaxDataSize = maxDataSize;
             MaxUserDataSize = StatUserDataSize.Size1;
         }
 
+        /// <inheritdoc cref="StatSystemAttribute" />
         public StatSystemAttribute(StatDataSize maxDataSize, StatUserDataSize maxUserDataSize)
         {
             MaxDataSize = maxDataSize;

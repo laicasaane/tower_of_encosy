@@ -53,6 +53,7 @@ namespace EncosyTower.Mvvm.ComponentModel
         /// The other property names to also notify when the annotated property changes. This parameter can optionally
         /// be used to indicate a series of dependent properties from the same attribute, to keep the code more compact.
         /// </param>
+        /// <inheritdoc cref="NotifyPropertyChangedForAttribute" />
         public NotifyPropertyChangedForAttribute(string propertyName, params string[] otherPropertyNames)
         {
             PropertyNames = new[] { propertyName }.Concat(otherPropertyNames).ToArray();

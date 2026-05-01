@@ -31,10 +31,12 @@ namespace EncosyTower.Mvvm.ComponentModel
     {
         public string Name { get; }
 
+        /// <inheritdoc cref="ObservablePropertyAttribute" />
         public ObservablePropertyAttribute()
             : this("")
         { }
 
+        /// <inheritdoc cref="ObservablePropertyAttribute" />
         public ObservablePropertyAttribute(string name)
         {
             Name = name ?? string.Empty;

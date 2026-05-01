@@ -45,6 +45,7 @@ namespace EncosyTower.Databases.Authoring
         /// Thrown when <paramref name="propertyName"/> is null, empty, whitespace, or does not exist on
         /// <paramref name="targetType"/>.
         /// </exception>
+        /// <inheritdoc cref="HorizontalAttribute" />
         public HorizontalAttribute(Type targetType, string propertyName)
         {
             if (targetType == null)

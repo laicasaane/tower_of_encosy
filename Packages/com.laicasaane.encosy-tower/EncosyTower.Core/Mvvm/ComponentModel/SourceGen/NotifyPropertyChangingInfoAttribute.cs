@@ -18,6 +18,7 @@ namespace EncosyTower.Mvvm.ComponentModel.SourceGen
 
         public Type PropertyType { get; }
 
+        /// <inheritdoc cref="NotifyPropertyChangingInfoAttribute" />
         public NotifyPropertyChangingInfoAttribute(string propertyName, Type propertyType)
         {
             this.PropertyName = propertyName;

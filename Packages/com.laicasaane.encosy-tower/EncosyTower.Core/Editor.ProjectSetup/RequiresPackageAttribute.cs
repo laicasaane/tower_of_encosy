@@ -34,6 +34,7 @@ namespace EncosyTower.Editor.ProjectSetup
         /// <seealso href="https://docs.unity3d.com/ScriptReference/PackageManager.Client.Add.html"/>
         public string Version { get; }
 
+        /// <inheritdoc cref="RequiresPackageAttribute" />
         public RequiresPackageAttribute(
              PackageRegistry registry
             , [NotNull] string packageName

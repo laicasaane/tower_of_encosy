@@ -16,10 +16,12 @@ namespace EncosyTower.Mvvm.ViewBinding
 
         public int Order { get; }
 
+        /// <inheritdoc cref="AdapterAttribute" />
         public AdapterAttribute(Type sourceType, Type destType)
             : this(sourceType, destType, DEFAULT_ORDER)
         { }
 
+        /// <inheritdoc cref="AdapterAttribute" />
         public AdapterAttribute(Type sourceType, Type destType, int order)
         {
             this.SourceType = sourceType;

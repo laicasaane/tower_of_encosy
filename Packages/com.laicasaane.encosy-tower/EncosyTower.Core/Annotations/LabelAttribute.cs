@@ -12,12 +12,14 @@ namespace EncosyTower.Annotations
 
         public string Directory { get; }
 
+        /// <inheritdoc cref="LabelAttribute" />
         public LabelAttribute(string label)
         {
             this.Label = label;
             this.Directory = "";
         }
 
+        /// <inheritdoc cref="LabelAttribute" />
         public LabelAttribute(string label, string directory)
         {
             this.Label = label;

@@ -135,6 +135,7 @@ namespace EncosyTower.PolyEnumStructs
         /// <param name="value">
         /// The value to associate with the case-struct. Can be a primitive, enum, or any constant value.
         /// </param>
+        /// <inheritdoc cref="EnumCaseValueAttribute" />
         public EnumCaseValueAttribute([NotNull] object value)
         {
             Value = value;
@@ -200,6 +201,7 @@ namespace EncosyTower.PolyEnumStructs
         /// wrapped.
         /// </summary>
         /// <param name="type">The poly enum struct type to be wrapped.</param>
+        /// <inheritdoc cref="PolyEnumFactoryForAttribute" />
         public PolyEnumFactoryForAttribute(Type type)
         {
             Type = type;

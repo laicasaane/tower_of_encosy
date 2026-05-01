@@ -20,6 +20,7 @@ namespace EncosyTower.Annotations
 #if UNITY_EDITOR
         public string FilePath { get; }
 
+        /// <inheritdoc cref="ThisFilePathAttribute" />
         public ThisFilePathAttribute([CallerFilePath][NotNull] string filePath = "")
         {
             FilePath = filePath;

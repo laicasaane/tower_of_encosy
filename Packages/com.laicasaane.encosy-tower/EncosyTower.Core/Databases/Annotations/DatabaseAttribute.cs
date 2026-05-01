@@ -29,11 +29,13 @@ namespace EncosyTower.Databases
 
         public bool WithInstanceAPI { get; set; }
 
+        /// <inheritdoc cref="DatabaseAttribute" />
         public DatabaseAttribute(params Type[] converters)
         {
             Converters = converters ?? Array.Empty<Type>();
         }
 
+        /// <inheritdoc cref="DatabaseAttribute" />
         public DatabaseAttribute(NamingStrategy namingStrategy, params Type[] converters)
         {
             NamingStrategy = namingStrategy;

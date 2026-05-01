@@ -76,6 +76,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         /// </summary>
         public bool ExcludeObsolete { get; set; }
 
+        /// <inheritdoc cref="MonoBinderAttribute" />
         public MonoBinderAttribute(Type type)
         {
             Type = type;
@@ -123,6 +124,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         /// </summary>
         public Type ParentType { get; }
 
+        /// <inheritdoc cref="MonoBinderExcludeParentAttribute" />
         public MonoBinderExcludeParentAttribute(Type parentType)
         {
             ParentType = parentType;
@@ -170,6 +172,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         /// </summary>
         public string MemberName { get; }
 
+        /// <inheritdoc cref="MonoBindingExcludeAttribute" />
         public MonoBindingExcludeAttribute(string memberName)
         {
             MemberName = memberName;

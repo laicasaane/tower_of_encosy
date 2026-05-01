@@ -94,6 +94,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         /// </summary>
         public string Label { get; set; }
 
+        /// <inheritdoc cref="MonoBindingCommandAttribute" />
         public MonoBindingCommandAttribute(string memberName)
         {
             MemberName = memberName;

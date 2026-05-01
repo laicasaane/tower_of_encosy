@@ -35,6 +35,7 @@ namespace EncosyTower.Data
     {
         public Type Type { get; }
 
+        /// <inheritdoc cref="DataConverterAttribute" />
         public DataConverterAttribute(Type type)
         {
             this.Type = type;

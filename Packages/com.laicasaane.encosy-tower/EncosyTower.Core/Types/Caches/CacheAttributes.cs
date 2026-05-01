@@ -46,6 +46,7 @@ namespace EncosyTower.Types.Caches
     {
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheTypesDerivedFromThisTypeAttribute" />
         public CacheTypesDerivedFromThisTypeAttribute(params string[] assemblyNames)
         {
             AssemblyNames = assemblyNames;
@@ -66,6 +67,7 @@ namespace EncosyTower.Types.Caches
     {
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheTypesWithThisAttributeAttribute" />
         public CacheTypesWithThisAttributeAttribute(params string[] assemblyNames)
         {
             AssemblyNames = assemblyNames;
@@ -86,6 +88,7 @@ namespace EncosyTower.Types.Caches
     {
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheFieldsWithThisAttributeAttribute" />
         public CacheFieldsWithThisAttributeAttribute(params string[] assemblyNames)
         {
             AssemblyNames = assemblyNames;
@@ -106,6 +109,7 @@ namespace EncosyTower.Types.Caches
     {
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheMethodsWithThisAttributeAttribute" />
         public CacheMethodsWithThisAttributeAttribute(params string[] assemblyNames)
         {
             AssemblyNames = assemblyNames;
@@ -125,6 +129,7 @@ namespace EncosyTower.Types.Caches
     {
         public Type Type { get; }
 
+        /// <inheritdoc cref="CacheTypeAttribute" />
         public CacheTypeAttribute(Type baseType)
         {
             Type = baseType;
@@ -147,6 +152,7 @@ namespace EncosyTower.Types.Caches
 
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheTypesDerivedFromAttribute" />
         public CacheTypesDerivedFromAttribute(Type baseType, params string[] assemblyNames)
         {
             Type = baseType;
@@ -170,6 +176,7 @@ namespace EncosyTower.Types.Caches
 
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheTypesWithAttributeAttribute" />
         public CacheTypesWithAttributeAttribute(Type attributeType, params string[] assemblyNames)
         {
             Type = attributeType;
@@ -193,6 +200,7 @@ namespace EncosyTower.Types.Caches
 
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheFieldsWithAttributeAttribute" />
         public CacheFieldsWithAttributeAttribute(Type attributeType, params string[] assemblyNames)
         {
             Type = attributeType;
@@ -216,6 +224,7 @@ namespace EncosyTower.Types.Caches
 
         public string[] AssemblyNames { get; }
 
+        /// <inheritdoc cref="CacheMethodsWithAttributeAttribute" />
         public CacheMethodsWithAttributeAttribute(Type attributeType, params string[] assemblyNames)
         {
             Type = attributeType;

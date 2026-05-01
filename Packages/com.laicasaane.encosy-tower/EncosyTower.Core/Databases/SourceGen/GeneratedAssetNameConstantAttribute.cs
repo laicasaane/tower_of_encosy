@@ -17,6 +17,7 @@ namespace EncosyTower.Databases.SourceGen
 
         public Type AssetType { get; }
 
+        /// <inheritdoc cref="GeneratedAssetNameConstantAttribute" />
         public GeneratedAssetNameConstantAttribute(Type containerType, Type assetType)
         {
             ContainerType = containerType;
