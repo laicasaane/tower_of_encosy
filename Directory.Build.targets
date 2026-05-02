@@ -2,8 +2,8 @@
     <Target Name="DisableAnalyzers" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' == 'true'">
         <ItemGroup>
             <AnalyzerToBeRemoved Include="@(Analyzer)"
-                Condition="$([System.String]::Copy('%(Analyzer.Identity)').Contains('Unity.Entities/SourceGenerators'))
-                        Or $([System.String]::Copy('%(Analyzer.Identity)').Contains('Unity.Entities\SourceGenerators'))" />
+                Condition="'%(Analyzer.Filename)' == 'SystemGenerator'
+                        Or '%(Analyzer.Filename)' == 'JobEntityGenerator'" />
             <Analyzer Remove="@(AnalyzerToBeRemoved)" />
         </ItemGroup>
     </Target>
