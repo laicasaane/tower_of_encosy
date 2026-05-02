@@ -39,7 +39,7 @@ using Unity.Mathematics;
 
                         p.PrintLine(GeneratorAPI.AGGRESSIVE_INLINING);
                         p.PrintBeginLine("public static StatSingle<").Print(type).Print("> ToStatSingle(this ")
-                            .PrintSelect("in ", "", size > 8).Print(type).PrintEndLine(" value)");
+                            .PrintIf(size > 8, "in ", "").Print(type).PrintEndLine(" value)");
                         p.WithIncreasedIndent().PrintLine("=> new(value);");
                         p.PrintEndLine();
                     }

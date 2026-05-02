@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using EncosyTower.Common;
 
@@ -73,7 +72,8 @@ namespace EncosyTower.CodeGen
         /// Creates a copy of this printer but with a relative indentCount
         /// </summary>
         /// <returns></returns>
-        public readonly Printer WithRelativeIndent(int indentCount) => new(_builder, _currentIndentIndex + indentCount);
+        public readonly Printer WithRelativeIndent(int indentCount)
+            => new(_builder, _currentIndentIndex + indentCount);
 
         public Printer RelativeIndent(int indentCount)
         {
@@ -85,7 +85,8 @@ namespace EncosyTower.CodeGen
         /// Creates a copy of this printer but with a deeper indent
         /// </summary>
         /// <returns></returns>
-        public readonly Printer WithIncreasedIndent() => new(_builder, _currentIndentIndex + 1);
+        public readonly Printer WithIncreasedIndent()
+            => new(_builder, _currentIndentIndex + 1);
 
         public Printer IncreasedIndent()
         {
@@ -97,7 +98,8 @@ namespace EncosyTower.CodeGen
         /// Creates a copy of this printer but with a shallower indent
         /// </summary>
         /// <returns></returns>
-        public readonly Printer WithDecreasedIndent() => new(_builder, _currentIndentIndex - 1);
+        public readonly Printer WithDecreasedIndent()
+            => new(_builder, _currentIndentIndex - 1);
 
         public Printer DecreasedIndent()
         {
@@ -306,7 +308,7 @@ namespace EncosyTower.CodeGen
         /// <param name="condition"></param>
         /// <param name="character"></param>
         /// <returns></returns>
-        public readonly Printer Print(char character, bool condition)
+        public readonly Printer PrintIf(bool condition, char character)
         {
             if (condition)
                 Print(character);
@@ -320,7 +322,7 @@ namespace EncosyTower.CodeGen
         /// <param name="condition"></param>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer Print(ReadOnlySpan<char> text, bool condition)
+        public readonly Printer PrintIf(bool condition, ReadOnlySpan<char> text)
         {
             if (condition)
                 Print(text);
@@ -335,7 +337,7 @@ namespace EncosyTower.CodeGen
         /// <param name="trueCharacter"></param>
         /// <param name="falseCharacter"></param>
         /// <returns></returns>
-        public readonly Printer PrintSelect(char trueCharacter, char falseCharacter, bool condition)
+        public readonly Printer PrintIf(bool condition, char trueCharacter, char falseCharacter)
         {
             Print(condition ? trueCharacter : falseCharacter);
             return this;
@@ -348,7 +350,7 @@ namespace EncosyTower.CodeGen
         /// <param name="trueText"></param>
         /// <param name="falseText"></param>
         /// <returns></returns>
-        public readonly Printer PrintSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
+        public readonly Printer PrintIf(bool condition, ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText)
         {
             Print(condition ? trueText : falseText);
             return this;
@@ -361,7 +363,7 @@ namespace EncosyTower.CodeGen
         /// <param name="repeatCount"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer Print(char character, int repeatCount, bool condition)
+        public readonly Printer PrintIf(bool condition, char character, int repeatCount)
         {
             if (condition)
                 Print(character, repeatCount);
@@ -407,7 +409,7 @@ namespace EncosyTower.CodeGen
         /// <param name="text"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintBeginLine(ReadOnlySpan<char> text, bool condition)
+        public readonly Printer PrintBeginLineIf(bool condition, ReadOnlySpan<char> text)
         {
             if (condition)
                 PrintBeginLine(text);
@@ -422,7 +424,7 @@ namespace EncosyTower.CodeGen
         /// <param name="falseText"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintBeginLineSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
+        public readonly Printer PrintBeginLineIf(bool condition, ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText)
         {
             PrintBeginLine(condition ? trueText : falseText);
             return this;
@@ -515,7 +517,7 @@ namespace EncosyTower.CodeGen
         /// <param name="condition"></param>
         /// <param name="text"></param>
         /// <returns></returns>
-        public readonly Printer PrintLine(ReadOnlySpan<char> text, bool condition)
+        public readonly Printer PrintLineIf(bool condition, ReadOnlySpan<char> text)
         {
             if (condition)
                 PrintLine(text);
@@ -538,7 +540,7 @@ namespace EncosyTower.CodeGen
         /// <param name="falseText"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintLineSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
+        public readonly Printer PrintLineIf(bool condition, ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText)
         {
             PrintLine(condition ? trueText : falseText);
             return this;
@@ -551,7 +553,7 @@ namespace EncosyTower.CodeGen
         /// <param name="repeatCount"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintLine(char character, int repeatCount, bool condition)
+        public readonly Printer PrintLineIf(bool condition, char character, int repeatCount)
         {
             if (condition)
                 PrintLine(character, repeatCount);
@@ -565,7 +567,7 @@ namespace EncosyTower.CodeGen
         /// <param name="text"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintEndLine(ReadOnlySpan<char> text, bool condition)
+        public readonly Printer PrintEndLineIf(bool condition, ReadOnlySpan<char> text)
         {
             if (condition)
                 PrintEndLine(text);
@@ -580,19 +582,11 @@ namespace EncosyTower.CodeGen
         /// <param name="falseText"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public readonly Printer PrintEndLineSelect(ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText, bool condition)
+        public readonly Printer PrintEndLineIf(bool condition, ReadOnlySpan<char> trueText, ReadOnlySpan<char> falseText)
         {
             PrintEndLine(condition ? trueText : falseText);
             return this;
         }
-
-        /// <summary>
-        /// Create a list printer from this printer
-        /// </summary>
-        /// <param name="separator"></param>
-        /// <returns></returns>
-        public readonly ListPrinter AsListPrinter(string separator)
-            => new(this, separator);
 
         /// <summary>
         /// Print the scope open string and return a new printer with deeper indent.
@@ -640,108 +634,6 @@ namespace EncosyTower.CodeGen
             DecreasedIndent();
             PrintLine(scopeClose);
             return this;
-        }
-
-        /// <summary>
-        /// Print item in a list with a separator
-        /// </summary>
-        public struct ListPrinter
-        {
-            internal Printer _printer;
-            internal readonly string  _separator;
-            internal bool _started;
-
-            public ListPrinter(Printer printer, string separator)
-            {
-                _printer = printer;
-                _separator = separator;
-                _started = false;
-            }
-
-            /// <summary>
-            /// Get the next item printer
-            /// </summary>
-            /// <returns></returns>
-            public Printer NextItemPrinter()
-            {
-                if (_started)
-                    _printer.Print(_separator);
-                else
-                    _started = true;
-
-                return _printer;
-            }
-
-            /// <summary>
-            /// Print all the element in an IEnumerable as list items
-            /// </summary>
-            /// <param name="elements"></param>
-            /// <returns></returns>
-            public ListPrinter PrintAll(IEnumerable<string> elements)
-            {
-                if (elements == null)
-                {
-                    return this;
-                }
-
-                foreach (var e in elements)
-                {
-                    NextItemPrinter().Print(e);
-                }
-
-                return this;
-            }
-
-            /// <summary>
-            /// Get a multiline list version of this list
-            /// </summary>
-            public readonly MultilineListPrinter AsMultiline => new(this);
-
-            /// <summary>
-            /// Get a multiline list where each item is indented one level deeper
-            /// </summary>
-            public readonly MultilineListPrinter AsMultilineIndented
-            {
-                get
-                {
-                    var printer                  = AsMultiline;
-                    printer.listPrinter._printer = printer.listPrinter._printer.WithIncreasedIndent();
-                    return printer;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Print item in a multi-line list such as:
-        /// "item0, item1, ..., itemN"
-        /// </summary>
-        public struct MultilineListPrinter
-        {
-            public ListPrinter listPrinter;
-
-            public MultilineListPrinter(ListPrinter listPrinter)
-            {
-                this.listPrinter = listPrinter;
-            }
-
-            /// <summary>
-            /// Get the next item printer
-            /// </summary>
-            /// <returns></returns>
-            public Printer NextItemPrinter()
-            {
-                if (listPrinter._started)
-                {
-                    listPrinter._printer.PrintEndLine(listPrinter._separator);
-                    listPrinter._printer.PrintBeginLine();
-                }
-                else
-                {
-                    listPrinter._started = true;
-                }
-
-                return listPrinter._printer;
-            }
         }
     }
 }

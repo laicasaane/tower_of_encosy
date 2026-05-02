@@ -42,7 +42,7 @@ using Unity.Mathematics;
 
                         p.PrintLine("/// <summary>");
                         p.PrintBeginLine("/// <see cref=\"").Print(types[i]).Print("\"/> | ").Print(size)
-                            .PrintEndLineSelect(" bytes.", " byte.", size > 1);
+                            .PrintEndLineIf(size > 1, " bytes.", " byte.");
                         p.PrintLine("/// </summary>");
                         p.PrintBeginLine(typeName).Print(" = ").Print(i).PrintEndLine(",");
                         p.PrintEndLine();

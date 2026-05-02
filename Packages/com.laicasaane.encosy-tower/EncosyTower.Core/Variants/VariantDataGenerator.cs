@@ -120,10 +120,10 @@ namespace EncosyTower.Editor.Variants
 
                         var nextCount = nextSize / SIZE_OF_LONG;
 
-                        p.PrintSelect(
-                              $"#else"
+                        p.PrintIf(
+                              nextSize == SIZE_OF_LONG
+                            , $"#else"
                             , $"#elif (VARIANT_{nextSize}_BYTES || VARIANT_{nextCount * 2}_INTS || VARIANT_{nextCount}_LONGS)"
-                            , nextSize == SIZE_OF_LONG
                         ).PrintEndLine();
                     }
 

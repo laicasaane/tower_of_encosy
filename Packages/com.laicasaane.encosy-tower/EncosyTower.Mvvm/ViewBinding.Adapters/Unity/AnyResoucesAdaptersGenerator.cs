@@ -2,6 +2,7 @@
 
 using System;
 using EncosyTower.CodeGen;
+using EncosyTower.Common;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Unity
@@ -29,24 +30,41 @@ using EncosyTower.Variants.Converters;
 
                 for (var i = 0; i < unityTypes.Length; i++)
                 {
-                    var type = unityTypes[i];
-                    var name = type.Name;
-                    var typeName = type.FullName;
+                    var group = unityTypes[i];
+                    var condition = group.Condition ?? string.Empty;
+                    var types = group.Types.AsSpan();
 
-                    p.PrintLine($"[Serializable]");
-                    p.PrintLine($"[Label(\"Resources.Load<{typeName}>(string)\", \"Default\")]");
-                    p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({typeName}), order: 0)]");
-                    p.PrintLine($"public sealed class {name}ResourcesAdapter : ResourcesAdapter<{typeName}>");
-                    p.OpenScope();
+                    if (condition.IsNotEmpty())
                     {
-                        p.PrintBeginLine($"public ")
-                            .Print(name)
-                            .Print("ResourcesAdapter() : base(CachedVariantConverter<")
-                            .Print(typeName)
-                            .PrintEndLine(">.Default) { }");
+                        p.Print("#if ").PrintEndLine(condition);
                     }
-                    p.CloseScope();
-                    p.PrintEndLine();
+
+                    for (var k = 0; k < types.Length; k++)
+                    {
+                        var type = types[k];
+                        var name = type.Name;
+                        var typeName = type.FullName;
+
+                        p.PrintLine($"[Serializable]");
+                        p.PrintLine($"[Label(\"Resources.Load<{typeName}>(string)\", \"Default\")]");
+                        p.PrintLine($"[Adapter(sourceType: typeof(string), destType: typeof({typeName}), order: 0)]");
+                        p.PrintLine($"public sealed class {name}ResourcesAdapter : ResourcesAdapter<{typeName}>");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine($"public ")
+                                .Print(name)
+                                .Print("ResourcesAdapter() : base(CachedVariantConverter<")
+                                .Print(typeName)
+                                .PrintEndLine(">.Default) { }");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+
+                    if (condition.IsNotEmpty())
+                    {
+                        p.Print("#endif").PrintEndLine().PrintEndLine();
+                    }
                 }
             }
             p.CloseScope();

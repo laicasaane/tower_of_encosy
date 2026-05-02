@@ -67,7 +67,7 @@ using Unity.Mathematics;
 
                         p.PrintLine(GeneratorAPI.AGGRESSIVE_INLINING);
                         p.PrintBeginLine("public StatVariant(")
-                            .PrintSelect("in ", "", size > 8).Print(type).PrintEndLine(" value) : this()");
+                            .PrintIf(size > 8, "in ", "").Print(type).PrintEndLine(" value) : this()");
                         p.OpenScope();
                         {
                             p.PrintBeginLine("Type = StatVariantType.").Print(typeName).PrintEndLine(";");
@@ -200,7 +200,7 @@ using Unity.Mathematics;
                         p.PrintLine("ThrowHelper.ThrowIfDestinationTypeMismatch(Type, destination.Type);");
                         p.PrintLine("ThrowHelper.ThrowIfUnsupportedType(destination.Type);");
                         p.PrintEndLine();
-                        
+
                         p.PrintLine("Option<StatVariant> valueOpt = Type switch");
                         p.OpenScope();
                         {
@@ -278,7 +278,7 @@ using Unity.Mathematics;
 
                         p.PrintLine(GeneratorAPI.AGGRESSIVE_INLINING);
                         p.PrintBeginLine("public static implicit operator StatVariant(")
-                            .PrintSelect("in ", "", size > 8).Print(type).PrintEndLine(" value)");
+                            .PrintIf(size > 8, "in ", "").Print(type).PrintEndLine(" value)");
                         p = p.IncreasedIndent();
                         {
                             p.PrintLine("=> new(value);");

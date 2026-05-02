@@ -102,7 +102,7 @@ namespace EncosyTower.Types
                 for (var i = 0; i < typeParameters.Length; ++i)
                 {
                     var typeParamName = GetFriendlyName(typeParameters[i], fullName);
-                    printer.Print(',', i > 0).Print(typeParamName);
+                    printer.PrintIf(i > 0, ',').Print(typeParamName);
                 }
 
                 printer.Print('>');

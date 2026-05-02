@@ -140,8 +140,8 @@ using UnityEngine;
                             .PrintEndLine(".ToString();")
                             .PrintEndLine();
 
-                        p.PrintLine("[HideInCallstack, DoesNotReturn]");
-                        p.PrintLine("[Conditional(\"UNITY_EDITOR\"), Conditional(\"DEVELOPMENT_BUILD\")]");
+                        p.PrintBeginLine("[HideInCallstack, StackTraceHidden, ")
+                            .PrintEndLine("Conditional(\"UNITY_EDITOR\"), Conditional(\"DEVELOPMENT_BUILD\")]");
                         p.PrintLine("private static void ThrowIfInvalidCast()");
                         p.OpenScope();
                         {

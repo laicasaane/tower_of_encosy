@@ -91,7 +91,7 @@ namespace EncosyTower.CodeGen
         {
             if (string.IsNullOrWhiteSpace(generatorName))
             {
-                generatorName = "Untitled Code Generator";
+                generatorName = "Unnamed Code Generator";
             }
 
             var generatorNameLength = generatorName.Length;

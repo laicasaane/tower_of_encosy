@@ -16,6 +16,7 @@ using EncosyTower.Variants.Converters;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
 {
+#if UNITY_ANIMATION
     [Serializable]
     [Label("Resources.Load<UnityEngine.AnimationClip>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AnimationClip), order: 0)]
@@ -24,6 +25,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
         public AnimationClipResourcesAdapter() : base(CachedVariantConverter<UnityEngine.AnimationClip>.Default) { }
     }
 
+#endif
+
+#if UNITY_AUDIO
     [Serializable]
     [Label("Resources.Load<UnityEngine.AudioClip>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.AudioClip), order: 0)]
@@ -40,6 +44,9 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
         public AudioMixerResourcesAdapter() : base(CachedVariantConverter<UnityEngine.Audio.AudioMixer>.Default) { }
     }
 
+#endif
+
+#if UNITY_6000_0_OR_NEWER
     [Serializable]
     [Label("Resources.Load<UnityEngine.TextCore.Text.FontAsset>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.TextCore.Text.FontAsset), order: 0)]
@@ -47,6 +54,8 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
     {
         public FontAssetResourcesAdapter() : base(CachedVariantConverter<UnityEngine.TextCore.Text.FontAsset>.Default) { }
     }
+
+#endif
 
     [Serializable]
     [Label("Resources.Load<UnityEngine.GameObject>(string)", "Default")]
@@ -62,14 +71,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
     public sealed class MaterialResourcesAdapter : ResourcesAdapter<UnityEngine.Material>
     {
         public MaterialResourcesAdapter() : base(CachedVariantConverter<UnityEngine.Material>.Default) { }
-    }
-
-    [Serializable]
-    [Label("Resources.Load<UnityEngine.UIElements.PanelSettings>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
-    public sealed class PanelSettingsResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.PanelSettings>
-    {
-        public PanelSettingsResourcesAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
     }
 
     [Serializable]
@@ -105,19 +106,28 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
     }
 
     [Serializable]
-    [Label("Resources.Load<UnityEngine.UIElements.StyleSheet>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
-    public sealed class StyleSheetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.StyleSheet>
-    {
-        public StyleSheetResourcesAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
-    }
-
-    [Serializable]
     [Label("Resources.Load<UnityEngine.Texture>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.Texture), order: 0)]
     public sealed class TextureResourcesAdapter : ResourcesAdapter<UnityEngine.Texture>
     {
         public TextureResourcesAdapter() : base(CachedVariantConverter<UnityEngine.Texture>.Default) { }
+    }
+
+#if UNITY_UI_ELEMENTS
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.PanelSettings>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.PanelSettings), order: 0)]
+    public sealed class PanelSettingsResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.PanelSettings>
+    {
+        public PanelSettingsResourcesAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.PanelSettings>.Default) { }
+    }
+
+    [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.StyleSheet>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.StyleSheet), order: 0)]
+    public sealed class StyleSheetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.StyleSheet>
+    {
+        public StyleSheetResourcesAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.StyleSheet>.Default) { }
     }
 
     [Serializable]
@@ -129,6 +139,17 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
     }
 
     [Serializable]
+    [Label("Resources.Load<UnityEngine.UIElements.VisualTreeAsset>(string)", "Default")]
+    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
+    public sealed class VisualTreeAssetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.VisualTreeAsset>
+    {
+        public VisualTreeAssetResourcesAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
+    }
+
+#endif
+
+#if UNITY_TEXTMESHPRO
+    [Serializable]
     [Label("Resources.Load<TMPro.TMP_FontAsset>(string)", "Default")]
     [Adapter(sourceType: typeof(string), destType: typeof(TMPro.TMP_FontAsset), order: 0)]
     public sealed class TMP_FontAssetResourcesAdapter : ResourcesAdapter<TMPro.TMP_FontAsset>
@@ -136,13 +157,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters.Unity
         public TMP_FontAssetResourcesAdapter() : base(CachedVariantConverter<TMPro.TMP_FontAsset>.Default) { }
     }
 
-    [Serializable]
-    [Label("Resources.Load<UnityEngine.UIElements.VisualTreeAsset>(string)", "Default")]
-    [Adapter(sourceType: typeof(string), destType: typeof(UnityEngine.UIElements.VisualTreeAsset), order: 0)]
-    public sealed class VisualTreeAssetResourcesAdapter : ResourcesAdapter<UnityEngine.UIElements.VisualTreeAsset>
-    {
-        public VisualTreeAssetResourcesAdapter() : base(CachedVariantConverter<UnityEngine.UIElements.VisualTreeAsset>.Default) { }
-    }
+#endif
 
 }
 

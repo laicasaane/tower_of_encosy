@@ -44,7 +44,7 @@ namespace EncosyTower.Entities.Stats.Generators
                         }
 
                         p.PrintLine("/// <summary>");
-                        p.PrintBeginLine("/// ").Print(size).PrintEndLineSelect(" bytes.", " byte.", size > 1);
+                        p.PrintBeginLine("/// ").Print(size).PrintEndLineIf(size > 1, " bytes.", " byte.");
                         p.PrintLine("/// </summary>");
                         p.PrintBeginLine("Size").Print(size).Print(" = ").Print(size).PrintEndLine(",");
                         p.PrintEndLine();

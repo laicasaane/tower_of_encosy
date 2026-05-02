@@ -21,7 +21,7 @@ namespace EncosyTower.Entities.Stats
     public enum StatVariantType : byte
     {
         /// <summary>
-        /// <see cref="Stats.None"/> | 1 byte.
+        /// <see cref="None"/> | 1 byte.
         /// </summary>
         None = 0,
 
