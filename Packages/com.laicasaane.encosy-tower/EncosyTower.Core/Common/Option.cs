@@ -15,21 +15,38 @@ namespace EncosyTower.Common
         public static Option<T> Some<T>(T value)
             => new(value);
 
+        /// <summary>
+        /// Returns an <see cref="Option{T}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
+        /// otherwise, returns <see cref="Option{T}.None"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> SomeIf<T>(bool condition, T trueValue)
+            => condition ? Some(trueValue) : Option<T>.None;
+
+        /// <summary>
+        /// Returns an <see cref="Option{T}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
+        /// otherwise, returns an <see cref="Option{T}"/> containing <paramref name="falseValue"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> SomeIf<T>(bool condition, T trueValue, T falseValue)
+            => condition ? Some(trueValue) : Some(falseValue);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Equals<T>(in Option<T> a, in Option<T> b)
             where T : IEquatable<T>
         {
-            return a.HasValue == b.HasValue && a._value.Equals(b._value);
+            return a._hasValue == b._hasValue && a._value.Equals(b._value);
         }
     }
 
-    public readonly struct Option<T>
+    public readonly struct Option<T> : IHasValue
     {
         public readonly static Option<T> None = default;
 
         internal readonly T _value;
-
-        public readonly ByteBool HasValue;
+        internal readonly ByteBool _hasValue;
 
         internal Option(T value)
         {
@@ -40,27 +57,33 @@ namespace EncosyTower.Common
 
             if (isValueType)
             {
-                HasValue = true;
+                _hasValue = true;
             }
             else
             {
                 var result = true;
                 ValidateNotNull(value, ref result);
 
-                HasValue = result;
+                _hasValue = result;
             }
+        }
+
+        public bool HasValue
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _hasValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deconstruct(out bool hasValue, out T value)
         {
-            hasValue = HasValue;
+            hasValue = _hasValue;
             value = _value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Bool<T> other)
-            => HasValue == other;
+            => _hasValue == other;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
@@ -72,29 +95,29 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(HasValue, _value);
+            => HashCode.Combine(_hasValue, _value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValueOrThrow()
         {
-            ThrowIfHasNoValue(HasValue);
+            ThrowIfHasNoValue(_hasValue);
             return _value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(out T value)
         {
-            value = HasValue ? _value : default;
-            return HasValue;
+            value = _hasValue ? _value : default;
+            return _hasValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetValueOrDefault(T defaultValue = default)
-            => HasValue ? _value : defaultValue;
+            => _hasValue ? _value : defaultValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
-            => HasValue
+            => _hasValue
             ? string.Format("{0}({1})", OptionExtensions.OPTION_VALUE_STRING, _value)
             : OptionExtensions.OPTION_NONE_STRING;
 
@@ -104,27 +127,27 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(Option _)
-            => default;
+            => None;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in Option<T> left, in Bool<T> right)
-            => left.HasValue == right;
+            => left._hasValue == right;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in Option<T> left, in Bool<T> right)
-            => left.HasValue != right;
+            => left._hasValue != right;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in Bool<T> left, in Option<T> right)
-            => left == right.HasValue;
+            => left == right._hasValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in Bool<T> left, in Option<T> right)
-            => left != right.HasValue;
+            => left != right._hasValue;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static bool DefaultEquals(in Option<T> a, in Option<T> b)
-            => a.HasValue == b.HasValue && EqualityComparer<T>.Default.Equals(a._value, b._value);
+            => a._hasValue == b._hasValue && EqualityComparer<T>.Default.Equals(a._value, b._value);
 
 #if UNITY_BURST
         [Unity.Burst.BurstDiscard]
@@ -225,14 +248,14 @@ namespace EncosyTower.Common
         public static T? AsNullable<T>(in this Option<T> self)
             where T : struct
         {
-            return self.HasValue ? self._value : null;
+            return self._hasValue ? self._value : null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetValueOrNull<T>(in this Option<T> self)
             where T : class
         {
-            return self.HasValue ? self._value : null;
+            return self._hasValue ? self._value : null;
         }
     }
 
