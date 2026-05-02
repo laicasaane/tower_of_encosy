@@ -43,7 +43,7 @@ namespace EncosyTower.Common
         public static bool Equals<TValue>(in Result<TValue> a, in Result<TValue> b)
             where TValue : IEquatable<TValue>
         {
-            return Option.Equals(a.Value, b.Value) || a.Error == b.Error;
+            return Option.Equals(a.Value, b.Value) || Error.Equals(a.Error, b.Error);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,27 +51,32 @@ namespace EncosyTower.Common
             where TValue : IEquatable<TValue>
             where TError : IEquatable<TError>
         {
-            return Option.Equals(a.Value, b.Value) || Option.Equals(a.Error, b.Error);
+            return Option.Equals(a.Value, b.Value) || Error.Equals(a.Error, b.Error);
         }
     }
 
-    public readonly struct Result<TValue> : IResult<TValue, Error>
+    public readonly struct Result<TValue> : IResult<TValue, Error<StringOrException>>
     {
-        public readonly Error Error;
+        public readonly Error<StringOrException> Error;
 
         internal readonly TValue _value;
         internal readonly ByteBool _hasValue;
 
+        static Result()
+        {
+            ThrowIfSameType(IsSameType());
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Result(TValue value)
         {
-            Error = Error.None;
+            Error = Error<StringOrException>.None;
             _value = value;
             _hasValue = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Result(Error error)
+        public Result(Error<StringOrException> error)
         {
             Error = error;
             _value = default;
@@ -81,7 +86,7 @@ namespace EncosyTower.Common
         public bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _hasValue || Error.IsValid;
+            get => _hasValue || Error.HasValue;
         }
 
         public bool IsSuccess
@@ -93,7 +98,7 @@ namespace EncosyTower.Common
         public bool IsError
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => IsValid && Error.IsValid;
+            get => IsValid && Error.HasValue;
         }
 
         public Option<TValue> Value
@@ -107,11 +112,15 @@ namespace EncosyTower.Common
             => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Result<TValue> Err(Error error)
+        public static Result<TValue> Err(StringOrException error)
+            => new((Error<StringOrException>)error);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<TValue> Err(Error<StringOrException> error)
             => new(error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deconstruct(out Option<TValue> value, out Error error)
+        public void Deconstruct(out Option<TValue> value, out Error<StringOrException> error)
         {
             value = Value;
             error = Error;
@@ -122,13 +131,13 @@ namespace EncosyTower.Common
             => IsSuccess == other;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Bool<Error> other)
+        public bool Equals(Bool<Error<StringOrException>> other)
             => IsError == other;
 
         public override bool Equals(object obj)
             => obj switch {
                 Result<TValue> other => DefaultEquals(this, other),
-                Bool<Error> other => IsError == other,
+                Bool<Error<StringOrException>> other => IsError == other,
                 Bool<TValue> other => IsSuccess == other,
                 _ => false,
             };
@@ -150,13 +159,13 @@ namespace EncosyTower.Common
             => Value.GetValueOrDefault(defaultValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Error GetErrorOrThrow()
+        public Error<StringOrException> GetErrorOrThrow()
             => Error;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetError(out Error error)
+        public bool TryGetError(out Error<StringOrException> error)
         {
-            if (Error.IsValid)
+            if (Error.HasValue)
             {
                 error = Error;
                 return true;
@@ -169,8 +178,8 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Error GetErrorOrDefault(Error defaultError = default)
-            => Error.IsValid ? Error : defaultError;
+        public Error<StringOrException> GetErrorOrDefault(Error<StringOrException> defaultError = default)
+            => Error.HasValue ? Error : defaultError;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -194,12 +203,8 @@ namespace EncosyTower.Common
             => new(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TValue>(Error error)
+        public static implicit operator Result<TValue>(Error<StringOrException> error)
             => new(error);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Result<TValue>(Exception error)
-            => new(new Error(error));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in Result<TValue> left, in Bool<TValue> right)
@@ -218,24 +223,41 @@ namespace EncosyTower.Common
             => left != right.IsSuccess;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in Result<TValue> left, in Bool<Error> right)
+        public static bool operator ==(in Result<TValue> left, in Bool<Error<StringOrException>> right)
             => left.IsError == right;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in Result<TValue> left, in Bool<Error> right)
+        public static bool operator !=(in Result<TValue> left, in Bool<Error<StringOrException>> right)
             => left.IsError != right;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in Bool<Error> left, in Result<TValue> right)
+        public static bool operator ==(in Bool<Error<StringOrException>> left, in Result<TValue> right)
             => left == right.IsError;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in Bool<Error> left, in Result<TValue> right)
+        public static bool operator !=(in Bool<Error<StringOrException>> left, in Result<TValue> right)
             => left != right.IsError;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static bool DefaultEquals(in Result<TValue> a, in Result<TValue> b)
             => Option<TValue>.DefaultEquals(a.Value, b.Value) || a.Error.Equals(b.Error);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsSameType()
+            => typeof(TValue) == typeof(Error<StringOrException>);
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfSameType([DoesNotReturnIf(true)] bool check)
+        {
+            if (check)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new($"{typeof(Result<TValue>)} is not allowed. Value type must be different from {typeof(Error<StringOrException>)}.");
+        }
     }
 
     public readonly struct Result<TValue, TError> : IResult<TValue, TError>
@@ -292,10 +314,10 @@ namespace EncosyTower.Common
             get => _hasValue ? Option.Some(_value) : Option.None;
         }
 
-        public Option<TError> Error
+        public Error<TError> Error
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _hasError ? Option.Some(_error) : Option.None;
+            get => _hasError ? new Error<TError>(_error) : Error<TError>.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -324,7 +346,7 @@ namespace EncosyTower.Common
         public override bool Equals(object obj)
             => obj switch {
                 Result<TValue, TError> other => DefaultEquals(this, other),
-                Bool<Error> other => IsError == other,
+                Bool<Error<StringOrException>> other => IsError == other,
                 Bool<TValue> other => IsSuccess == other,
                 _ => false,
             };
@@ -400,7 +422,7 @@ namespace EncosyTower.Common
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             static InvalidOperationException CreateException()
-                => new($"{typeof(Result<TValue, TError>)} is not allowed. Value type and error type must be different.");
+                => new($"{typeof(Result<TValue, TError>)} is not allowed. Value type must be different from  error type.");
         }
     }
 
@@ -573,9 +595,9 @@ namespace EncosyTower.Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Error? AsNullableError<T>(in this Result<T> self)
+        public static Error<StringOrException>? AsNullableError<T>(in this Result<T> self)
         {
-            return self.Error.IsValid ? self.Error : default(Error?);
+            return self.Error.HasValue ? self.Error : default(Error<StringOrException>?);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

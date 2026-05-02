@@ -26,7 +26,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             }
             catch (Exception ex)
             {
-                return ex;
+                return Result<AssemblyDefinitionInfo>.Err(ex);
             }
 
             var tryResult = TryGetInfo(json);
@@ -41,7 +41,7 @@ namespace EncosyTower.Editor.AssemblyDefs
                 return error;
             }
 
-            return new Error($"Unexpected error while parsing {assetPath}");
+            return Result<AssemblyDefinitionInfo>.Err($"Unexpected error while parsing {assetPath}");
         }
 
         public static Result<AssemblyDefinitionInfo> TryGetInfo(string json)
@@ -56,7 +56,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             }
             catch (Exception ex)
             {
-                return ex;
+                return Result<AssemblyDefinitionInfo>.Err(ex);
             }
         }
 
@@ -68,7 +68,7 @@ namespace EncosyTower.Editor.AssemblyDefs
             var assemblyAsset = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(assetPath);
 
             return assemblyAsset.IsInvalid()
-                ? new FileNotFoundException($"Assembly Definition asset not found at {assetPath}")
+                ? Result<AssemblyData>.Err(new FileNotFoundException($"Assembly Definition asset not found at {assetPath}"))
                 : TryGetData(assetPath, assemblyAsset, assemblyDef);
         }
 
@@ -86,7 +86,7 @@ namespace EncosyTower.Editor.AssemblyDefs
 
             if (guidStringsLength < 1)
             {
-                return new FileNotFoundException(NO_ASMDEF_MSG);
+                return Result<AssemblyData>.Err(new FileNotFoundException(NO_ASMDEF_MSG));
             }
 
             var references = assemblyDef.references.AsSpan();

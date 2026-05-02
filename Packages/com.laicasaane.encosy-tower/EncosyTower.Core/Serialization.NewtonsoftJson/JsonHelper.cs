@@ -118,12 +118,12 @@ namespace EncosyTower.Serialization.NewtonsoftJson
 
                 if (string.Equals(json, "null", StringComparison.OrdinalIgnoreCase))
                 {
-                    return Result<string>.Err(new Error(GetSerializedStringIsNullMessage()));
+                    return Result<string>.Err(GetSerializedStringIsNullMessage());
                 }
 
                 return string.IsNullOrWhiteSpace(json) == false
                     ? Result<string>.Succeed(json)
-                    : Result<string>.Err(new Error(GetSerializedStringIsEmptyMessage()));
+                    : Result<string>.Err(GetSerializedStringIsEmptyMessage());
             }
             catch (Exception ex)
             {
@@ -139,7 +139,7 @@ namespace EncosyTower.Serialization.NewtonsoftJson
 
                 return data != null
                     ? Result<T>.Succeed(data)
-                    : Result<T>.Err(new Error(GetDeserializedObjectIsNullMessage()));
+                    : Result<T>.Err(GetDeserializedObjectIsNullMessage());
             }
             catch (Exception ex)
             {
