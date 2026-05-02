@@ -9,13 +9,32 @@ namespace EncosyTower.Common
 {
     public readonly struct Success
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Success Succeed()
-            => default;
+        /// <summary>
+        /// Represents a successful state.
+        /// </summary>
+        public static readonly Success Yes = default;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Success<TFailure> Fail<TFailure>(TFailure value)
+        public static Success<TFailure> No<TFailure>(TFailure value)
             => new(value);
+
+        /// <summary>
+        /// Returns a <see cref="Success{TFailure}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
+        /// otherwise, returns <see cref="Success.Yes"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Success<TFailure> NoIf<TFailure>(bool condition, TFailure trueValue)
+            => condition ? No(trueValue) : Yes;
+
+        /// <summary>
+        /// Returns a <see cref="Success{TFailure}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
+        /// otherwise, returns a <see cref="Success{TFailure}"/> containing <paramref name="falseValue"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Success<TFailure> NoIf<TFailure>(bool condition, TFailure trueValue, TFailure falseValue)
+            => condition ? No(trueValue) : No(falseValue);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Equals<T>(in Success<T> a, in Success<T> b)
@@ -31,10 +50,16 @@ namespace EncosyTower.Common
     /// <typeparam name="TFailure">The type of the failure value.</typeparam>
     public readonly struct Success<TFailure>
     {
+        /// <summary>
+        /// Represents a successful state.
+        /// </summary>
+        public static readonly Success<TFailure> Yes = default;
+
         internal readonly TFailure _failure;
 
         public readonly ByteBool IsFailure;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Success(TFailure failure)
         {
             _failure = failure;
@@ -100,7 +125,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Success<TFailure>(Success _)
-            => default;
+            => Yes;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in Success<TFailure> left, in Bool<TFailure> right)
