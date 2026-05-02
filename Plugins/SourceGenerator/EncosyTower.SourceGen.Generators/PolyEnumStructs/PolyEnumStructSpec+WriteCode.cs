@@ -95,7 +95,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
-                    .Print(typeName).Print(" : SRCS.IUnion, ").Print(typeName).Print(".IEnumCase");
+                    .Print(typeName).Print(" : ")
+                    .Print(typeName).Print(".IEnumCase, ")
+                    .Print("SRCS.IUnion, ET.IHasValue");
 
                 if (autoEquatable)
                 {
@@ -594,7 +596,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(typeName).Print("(")
-                    .Print(structIn).Print(def.name).PrintEndLine(" @case) : this()");
+                    .Print(structIn).Print(def.name).Print(" @case) : this()");
                 p.OpenScope();
                 {
                     p.PrintBeginLine("this.enumCase = EnumCase.").Print(def.identifier).PrintEndLine(";");
