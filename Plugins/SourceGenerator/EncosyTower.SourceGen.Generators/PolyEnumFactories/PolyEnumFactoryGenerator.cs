@@ -144,6 +144,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 openingSource = openingSource,
                 closingSource = closingSource,
                 parentIsNamespace = typeSyntax.Parent is BaseNamespaceDeclarationSyntax,
+                isStruct = IsStruct(typeSyntax),
             };
 
             ResolveBackingField(wrapperSymbol, enumStructSymbol, ref result);
@@ -547,6 +548,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             }
 
             return false;
+        }
+
+        private static bool IsStruct(TypeDeclarationSyntax typeSyntax)
+        {
+            return typeSyntax is RecordDeclarationSyntax record
+                ? record.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword)
+                : typeSyntax is StructDeclarationSyntax;
         }
 
         private static string GetWrapperKindKeyword(TypeDeclarationSyntax typeSyntax)

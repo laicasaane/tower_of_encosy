@@ -67,7 +67,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             p.PrintLine(EXCLUDE_COVERAGE);
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintBeginLine("private ").Print(wrapperTypeName)
-                .Print("(").Print(enumStructFullyQualifiedName).PrintEndLine(" value) : this()");
+                .Print("(").Print(enumStructFullyQualifiedName).Print(" value)")
+                .PrintIf(isStruct, " : this()")
+                .PrintEndLine();
             p.OpenScope();
             {
                 p.PrintBeginLine("this.").Print(fieldName).PrintEndLine(" = value;");

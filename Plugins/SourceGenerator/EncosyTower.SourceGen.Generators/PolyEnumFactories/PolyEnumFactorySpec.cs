@@ -26,6 +26,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         public bool emitBackingField;
         public bool emitExplicitUndefinedMethod;
         public bool parentIsNamespace;
+        public bool isStruct;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(wrapperTypeName) == false
@@ -51,6 +52,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             && emitBackingField == other.emitBackingField
             && emitExplicitUndefinedMethod == other.emitExplicitUndefinedMethod
             && parentIsNamespace == other.parentIsNamespace
+            && isStruct == other.isStruct
             ;
 
         public readonly override bool Equals(object obj)
@@ -75,6 +77,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             hash.Add(emitBackingField);
             hash.Add(emitExplicitUndefinedMethod);
             hash.Add(parentIsNamespace);
+            hash.Add(isStruct);
             return hash.ToHashCode();
         }
 
