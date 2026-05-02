@@ -39,11 +39,11 @@
             p.PrintLine(string.Format(STRUCT_LAYOUT_SIZE, TypeSize));
             p.PrintBeginLine(EXCLUDE_COVERAGE).PrintEndLine(GENERATED_CODE);
             p.PrintLine("[SCM.TypeConverter(typeof(TypeConverter))]");
-            p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ")
-                .Print("SRCS.IUnion, ")
-                .Print("ETUI.IUnionId<")
+            p.PrintBeginLine("partial struct ").Print(typeName).Print(" : ETUI.IUnionId<")
                 .Print(RawTypeName).Print(", ").Print(typeName)
-                .PrintEndLine(">");
+                .Print(">, SRCS.IUnion, ET.IHasValue")
+                .PrintEndLine();
+
             p = p.IncreasedIndent();
             {
                 if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
