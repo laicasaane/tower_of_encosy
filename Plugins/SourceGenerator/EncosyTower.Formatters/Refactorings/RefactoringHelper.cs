@@ -76,6 +76,57 @@ namespace EncosyTower.Formatters.Refactorings
             return listNode;
         }
 
+        public static string GetIndentBefore(SyntaxNode node)
+        {
+            var current = node;
+
+            while (current is not null)
+            {
+                var leading = current.GetLeadingTrivia();
+                var indent = ExtractTrailingWhitespace(leading);
+
+                if (indent is not null)
+                {
+                    return indent;
+                }
+
+                current = current.Parent;
+            }
+
+            return string.Empty;
+        }
+
+        private static string ExtractTrailingWhitespace(SyntaxTriviaList leading)
+        {
+            var count = leading.Count;
+            var lastEol = -1;
+
+            for (var i = 0; i < count; i++)
+            {
+                if (leading[i].IsKind(SyntaxKind.EndOfLineTrivia))
+                {
+                    lastEol = i;
+                }
+            }
+
+            if (lastEol < 0)
+            {
+                return null;
+            }
+
+            var sb = new System.Text.StringBuilder();
+
+            for (var i = lastEol + 1; i < count; i++)
+            {
+                if (leading[i].IsKind(SyntaxKind.WhitespaceTrivia))
+                {
+                    sb.Append(leading[i].ToString());
+                }
+            }
+
+            return sb.ToString();
+        }
+
         private static bool IsTargetList(SyntaxNode node)
         {
             return node is ParameterListSyntax

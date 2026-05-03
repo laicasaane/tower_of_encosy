@@ -49,7 +49,7 @@ namespace EncosyTower.Formatters.Refactorings
             }
 
             var style = EditorConfigSettings.GetCommaStyle(context.Document, listNode.SyntaxTree);
-            var title = style == CommaStyle.Leading
+            var title = style == SeparatorStyle.Leading
                 ? "Split into multiple lines (leading comma)"
                 : "Split into multiple lines (trailing comma)";
 
@@ -65,7 +65,7 @@ namespace EncosyTower.Formatters.Refactorings
         private static async Task<Document> SplitAsync(
               Document document
             , SyntaxNode listNode
-            , CommaStyle style
+            , SeparatorStyle style
             , CancellationToken token
         )
         {

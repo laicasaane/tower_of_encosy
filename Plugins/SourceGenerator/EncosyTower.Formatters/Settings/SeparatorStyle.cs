@@ -1,6 +1,6 @@
 namespace EncosyTower.Formatters.Settings
 {
-    internal enum CommaStyle
+    internal enum SeparatorStyle
     {
         Leading,
         Trailing,

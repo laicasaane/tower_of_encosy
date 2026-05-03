@@ -15,7 +15,7 @@ namespace EncosyTower.Formatters.Formatting
         public static SyntaxNode SplitList(
               SyntaxNode listNode
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
             , CancellationToken token
         )
         {
@@ -66,12 +66,12 @@ namespace EncosyTower.Formatters.Formatting
                 return false;
             }
 
-            if (TriviaListHasComment(open.LeadingTrivia) || TriviaListHasComment(open.TrailingTrivia))
+            if (TriviaUtil.TriviaListHasComment(open.LeadingTrivia) || TriviaUtil.TriviaListHasComment(open.TrailingTrivia))
             {
                 return true;
             }
 
-            if (TriviaListHasComment(close.LeadingTrivia) || TriviaListHasComment(close.TrailingTrivia))
+            if (TriviaUtil.TriviaListHasComment(close.LeadingTrivia) || TriviaUtil.TriviaListHasComment(close.TrailingTrivia))
             {
                 return true;
             }
@@ -87,8 +87,8 @@ namespace EncosyTower.Formatters.Formatting
                 {
                     var item = nt.AsNode();
 
-                    if (TriviaListHasComment(item.GetLeadingTrivia())
-                        || TriviaListHasComment(item.GetTrailingTrivia())
+                    if (TriviaUtil.TriviaListHasComment(item.GetLeadingTrivia())
+                        || TriviaUtil.TriviaListHasComment(item.GetTrailingTrivia())
                     )
                     {
                         return true;
@@ -98,7 +98,7 @@ namespace EncosyTower.Formatters.Formatting
                 {
                     var tok = nt.AsToken();
 
-                    if (TriviaListHasComment(tok.LeadingTrivia) || TriviaListHasComment(tok.TrailingTrivia))
+                    if (TriviaUtil.TriviaListHasComment(tok.LeadingTrivia) || TriviaUtil.TriviaListHasComment(tok.TrailingTrivia))
                     {
                         return true;
                     }
@@ -118,19 +118,6 @@ namespace EncosyTower.Formatters.Formatting
                 AttributeArgumentListSyntax aal => aal.Arguments.GetWithSeparators(),
                 _ => default,
             };
-        }
-
-        private static bool TriviaListHasComment(SyntaxTriviaList trivia)
-        {
-            for (var i = 0; i < trivia.Count; i++)
-            {
-                if (IsCommentTrivia(trivia[i]))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public static bool TryGetListTokens(
@@ -182,7 +169,7 @@ namespace EncosyTower.Formatters.Formatting
         private static ParameterListSyntax SplitParameterList(
               ParameterListSyntax node
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
         )
         {
             var newList = BuildSplitSeparated(node.Parameters, baseIndent, style);
@@ -195,7 +182,7 @@ namespace EncosyTower.Formatters.Formatting
         private static BracketedParameterListSyntax SplitBracketedParameterList(
               BracketedParameterListSyntax node
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
         )
         {
             var newList = BuildSplitSeparated(node.Parameters, baseIndent, style);
@@ -208,7 +195,7 @@ namespace EncosyTower.Formatters.Formatting
         private static ArgumentListSyntax SplitArgumentList(
               ArgumentListSyntax node
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
         )
         {
             var newList = BuildSplitSeparated(node.Arguments, baseIndent, style);
@@ -221,7 +208,7 @@ namespace EncosyTower.Formatters.Formatting
         private static BracketedArgumentListSyntax SplitBracketedArgumentList(
               BracketedArgumentListSyntax node
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
         )
         {
             var newList = BuildSplitSeparated(node.Arguments, baseIndent, style);
@@ -234,7 +221,7 @@ namespace EncosyTower.Formatters.Formatting
         private static AttributeArgumentListSyntax SplitAttributeArgumentList(
               AttributeArgumentListSyntax node
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
         )
         {
             var newList = BuildSplitSeparated(node.Arguments, baseIndent, style);
@@ -287,13 +274,13 @@ namespace EncosyTower.Formatters.Formatting
         private static SeparatedSyntaxList<T> BuildSplitSeparated<T>(
               SeparatedSyntaxList<T> list
             , string baseIndent
-            , CommaStyle style
+            , SeparatorStyle style
         )
             where T : SyntaxNode
         {
-            var eol = SyntaxFactory.EndOfLine("\n");
+            var eol = TriviaUtil.Eol();
             var itemIndent = baseIndent + INDENT_UNIT;
-            var firstItemIndent = style == CommaStyle.Leading
+            var firstItemIndent = style == SeparatorStyle.Leading
                 ? baseIndent + INDENT_UNIT + LEADING_FIRST_EXTRA
                 : itemIndent;
 
@@ -308,12 +295,12 @@ namespace EncosyTower.Formatters.Formatting
                 if (nt.IsNode)
                 {
                     var item = (T)nt.AsNode();
-                    var keptLeading = KeepCommentsOnly(item.GetLeadingTrivia());
-                    var keptTrailing = KeepCommentsOnly(item.GetTrailingTrivia());
+                    var keptLeading = TriviaUtil.KeepCommentsOnly(item.GetLeadingTrivia());
+                    var keptTrailing = TriviaUtil.KeepCommentsOnly(item.GetTrailingTrivia());
 
                     SyntaxTriviaList newLeading;
 
-                    if (style == CommaStyle.Leading && itemIndex > 0)
+                    if (style == SeparatorStyle.Leading && itemIndex > 0)
                     {
                         newLeading = keptLeading;
                     }
@@ -333,11 +320,11 @@ namespace EncosyTower.Formatters.Formatting
                 {
                     var sep = nt.AsToken();
 
-                    if (style == CommaStyle.Leading)
+                    if (style == SeparatorStyle.Leading)
                     {
                         sep = sep
                             .WithLeadingTrivia(BuildLeading(eol, itemIndent, default))
-                            .WithTrailingTrivia(SyntaxFactory.Whitespace(" "));
+                            .WithTrailingTrivia(TriviaUtil.Space());
                     }
                     else
                     {
@@ -375,7 +362,7 @@ namespace EncosyTower.Formatters.Formatting
                 {
                     var sep = nt.AsToken()
                         .WithLeadingTrivia()
-                        .WithTrailingTrivia(SyntaxFactory.Whitespace(" "));
+                        .WithTrailingTrivia(TriviaUtil.Space());
                     rebuilt.Add(sep);
                 }
             }
@@ -390,14 +377,14 @@ namespace EncosyTower.Formatters.Formatting
 
         private static SyntaxToken BuildClose(SyntaxToken close, string baseIndent)
         {
-            var eol = SyntaxFactory.EndOfLine("\n");
+            var eol = TriviaUtil.Eol();
 
             if (baseIndent.Length == 0)
             {
                 return close.WithLeadingTrivia(eol);
             }
 
-            var ws = SyntaxFactory.Whitespace(baseIndent);
+            var ws = TriviaUtil.Indent(baseIndent);
             return close.WithLeadingTrivia(eol, ws);
         }
 
@@ -407,7 +394,7 @@ namespace EncosyTower.Formatters.Formatting
             , SyntaxTriviaList comments
         )
         {
-            var ws = SyntaxFactory.Whitespace(indent);
+            var ws = TriviaUtil.Indent(indent);
 
             if (comments.Count == 0)
             {
@@ -426,40 +413,6 @@ namespace EncosyTower.Formatters.Formatting
             list.Add(eol);
             list.Add(ws);
             return SyntaxFactory.TriviaList(list);
-        }
-
-        private static SyntaxTriviaList KeepCommentsOnly(SyntaxTriviaList trivia)
-        {
-            List<SyntaxTrivia> kept = null;
-
-            for (var i = 0; i < trivia.Count; i++)
-            {
-                var t = trivia[i];
-
-                if (IsCommentTrivia(t) == false)
-                {
-                    continue;
-                }
-
-                kept ??= new List<SyntaxTrivia>();
-                kept.Add(t);
-            }
-
-            if (kept is null)
-            {
-                return default;
-            }
-
-            return SyntaxFactory.TriviaList(kept);
-        }
-
-        private static bool IsCommentTrivia(SyntaxTrivia trivia)
-        {
-            var kind = trivia.Kind();
-            return kind == SyntaxKind.SingleLineCommentTrivia
-                || kind == SyntaxKind.MultiLineCommentTrivia
-                || kind == SyntaxKind.SingleLineDocumentationCommentTrivia
-                || kind == SyntaxKind.MultiLineDocumentationCommentTrivia;
         }
     }
 }
