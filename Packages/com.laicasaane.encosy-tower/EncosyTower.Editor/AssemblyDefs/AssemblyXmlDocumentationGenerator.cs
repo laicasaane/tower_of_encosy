@@ -57,6 +57,8 @@ namespace EncosyTower.Editor.AssemblyDefs
         {
             EditorApplication.update -= Update;
             EditorApplication.update += Update;
+            AssemblyReloadEvents.beforeAssemblyReload -= CopyXmlDocToScriptAssembliesFolder;
+            AssemblyReloadEvents.beforeAssemblyReload += CopyXmlDocToScriptAssembliesFolder;
         }
 
         [MenuItem(MENU_AUTO_GENERATE, priority = 88_00_00_00)]
