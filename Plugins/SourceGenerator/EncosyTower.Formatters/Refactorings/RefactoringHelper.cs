@@ -1,0 +1,93 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+
+namespace EncosyTower.Formatters.Refactorings
+{
+    internal static class RefactoringHelper
+    {
+        public static bool TryFindList(SyntaxNode root, TextSpan span, out SyntaxNode listNode)
+        {
+            var node = root.FindNode(span, getInnermostNodeForTie: true);
+
+            while (node is not null)
+            {
+                if (IsTargetList(node) && SpanTouchesList(node, span))
+                {
+                    listNode = node;
+                    return true;
+                }
+
+                node = node.Parent;
+            }
+
+            listNode = null;
+            return false;
+        }
+
+        public static string GetBaseIndent(SyntaxNode listNode)
+        {
+            var anchor = FindIndentAnchor(listNode);
+
+            if (anchor is null)
+            {
+                return string.Empty;
+            }
+
+            var leading = anchor.GetLeadingTrivia();
+            var lastEol = -1;
+
+            for (var i = 0; i < leading.Count; i++)
+            {
+                if (leading[i].IsKind(SyntaxKind.EndOfLineTrivia))
+                {
+                    lastEol = i;
+                }
+            }
+
+            var sb = new System.Text.StringBuilder();
+
+            for (var i = lastEol + 1; i < leading.Count; i++)
+            {
+                if (leading[i].IsKind(SyntaxKind.WhitespaceTrivia))
+                {
+                    sb.Append(leading[i].ToString());
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private static SyntaxNode FindIndentAnchor(SyntaxNode listNode)
+        {
+            var node = listNode.Parent;
+
+            while (node is not null)
+            {
+                if (node is MemberDeclarationSyntax or StatementSyntax)
+                {
+                    return node;
+                }
+
+                node = node.Parent;
+            }
+
+            return listNode;
+        }
+
+        private static bool IsTargetList(SyntaxNode node)
+        {
+            return node is ParameterListSyntax
+                or BracketedParameterListSyntax
+                or ArgumentListSyntax
+                or BracketedArgumentListSyntax
+                or AttributeArgumentListSyntax;
+        }
+
+        private static bool SpanTouchesList(SyntaxNode listNode, TextSpan span)
+        {
+            return listNode.FullSpan.IntersectsWith(span);
+        }
+    }
+}
