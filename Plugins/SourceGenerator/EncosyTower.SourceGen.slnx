@@ -8,6 +8,7 @@
     <Project Path="Samples/Samples.Entities.TypeHandles/Samples.Entities.TypeHandles.csproj" />
     <Project Path="Samples/Samples.EnumExtensions/Samples.EnumExtensions.csproj" />
     <Project Path="Samples/Samples.EnumTemplates/Samples.EnumTemplates.csproj" />
+    <Project Path="Samples/Samples.Formatters/Samples.Formatters.csproj" />
     <Project Path="Samples/Samples.Mvvm/Samples.Mvvm.csproj" />
     <Project Path="Samples/Samples.NewtonsoftAotHelpers/Samples.NewtonsoftAotHelpers.csproj" />
     <Project Path="Samples/Samples.PolyEnumStructs/Samples.PolyEnumStructs.csproj" />

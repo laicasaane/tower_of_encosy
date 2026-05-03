@@ -1,0 +1,6 @@
+root = false
+
+[*.cs]
+encosy_formatter_comma_style = leading
+encosy_formatter_operator_style = leading
+encosy_formatter_inheritance_style = leading
