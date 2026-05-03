@@ -95,12 +95,43 @@ namespace EncosyTower.Formatters.Refactorings
                 return document;
             }
 
-            var typeDecl = baseList.Parent;
-            var baseIndent = typeDecl is not null
-                ? RefactoringHelper.GetIndentBefore(typeDecl)
-                : RefactoringHelper.GetIndentBefore(baseList);
-            var rebuilt = BaseListFormatter.Split(baseList, baseIndent, style);
-            var newRoot = root.ReplaceNode(baseList, rebuilt);
+            var typeDecl = baseList.Parent as TypeDeclarationSyntax;
+
+            if (typeDecl is null)
+            {
+                var rebuiltOnly = BaseListFormatter.Split(baseList, RefactoringHelper.GetIndentBefore(baseList), style);
+                return document.WithSyntaxRoot(root.ReplaceNode(baseList, rebuiltOnly));
+            }
+
+            var baseIndent = RefactoringHelper.GetIndentBefore(typeDecl);
+            var newBaseList = BaseListFormatter.Split(baseList, baseIndent, style);
+            var prevToken = baseList.GetFirstToken().GetPreviousToken();
+            var newPrevToken = RefactoringHelper.WithoutTrailingWhitespace(prevToken);
+            var newOpenBrace = RefactoringHelper.WithBraceLeadingOwnLine(typeDecl.OpenBraceToken, baseIndent);
+
+            var newDecl = typeDecl.ReplaceSyntax(
+                  nodes: new[] { (SyntaxNode)baseList }
+                , computeReplacementNode: (orig, _) => newBaseList
+                , tokens: new[] { prevToken, typeDecl.OpenBraceToken }
+                , computeReplacementToken: (orig, _) =>
+                {
+                    if (orig == prevToken)
+                    {
+                        return newPrevToken;
+                    }
+
+                    if (orig == typeDecl.OpenBraceToken)
+                    {
+                        return newOpenBrace;
+                    }
+
+                    return orig;
+                }
+                , trivia: null
+                , computeReplacementTrivia: null
+            );
+
+            var newRoot = root.ReplaceNode(typeDecl, newDecl);
             return document.WithSyntaxRoot(newRoot);
         }
     }

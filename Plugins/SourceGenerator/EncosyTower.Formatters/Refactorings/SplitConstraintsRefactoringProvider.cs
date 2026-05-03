@@ -95,9 +95,29 @@ namespace EncosyTower.Formatters.Refactorings
                 return document;
             }
 
-            var baseIndent = RefactoringHelper.GetIndentBefore(clause);
-            var rebuilt = ConstraintsFormatter.Split(clause, baseIndent, style);
-            var newRoot = root.ReplaceNode(clause, rebuilt);
+            var clauseIndent = RefactoringHelper.GetIndentBefore(clause);
+            var newClause = ConstraintsFormatter.Split(clause, clauseIndent, style);
+
+            var typeDecl = clause.Parent as TypeDeclarationSyntax;
+
+            if (typeDecl is null)
+            {
+                return document.WithSyntaxRoot(root.ReplaceNode(clause, newClause));
+            }
+
+            var declIndent = RefactoringHelper.GetIndentBefore(typeDecl);
+            var newOpenBrace = RefactoringHelper.WithBraceLeadingOwnLine(typeDecl.OpenBraceToken, declIndent);
+
+            var newDecl = typeDecl.ReplaceSyntax(
+                  nodes: new[] { (SyntaxNode)clause }
+                , computeReplacementNode: (orig, _) => newClause
+                , tokens: new[] { typeDecl.OpenBraceToken }
+                , computeReplacementToken: (orig, _) => orig == typeDecl.OpenBraceToken ? newOpenBrace : orig
+                , trivia: null
+                , computeReplacementTrivia: null
+            );
+
+            var newRoot = root.ReplaceNode(typeDecl, newDecl);
             return document.WithSyntaxRoot(newRoot);
         }
     }

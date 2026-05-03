@@ -87,7 +87,24 @@ namespace EncosyTower.Formatters.Refactorings
             }
 
             var baseIndent = RefactoringHelper.GetIndentBefore(conditional);
-            var indent = baseIndent + INDENT_UNIT;
+            var rebuilt = BuildSplit(conditional, baseIndent, depth: 1);
+            var newRoot = root.ReplaceNode(conditional, rebuilt);
+            return document.WithSyntaxRoot(newRoot);
+        }
+
+        private static ConditionalExpressionSyntax BuildSplit(
+              ConditionalExpressionSyntax conditional
+            , string baseIndent
+            , int depth
+        )
+        {
+            var indent = baseIndent;
+
+            for (var i = 0; i < depth; i++)
+            {
+                indent += INDENT_UNIT;
+            }
+
             var eol = TriviaUtil.Eol();
             var ws = TriviaUtil.Indent(indent);
             var space = TriviaUtil.Space();
@@ -102,20 +119,30 @@ namespace EncosyTower.Formatters.Refactorings
             var newColon = conditional.ColonToken
                 .WithLeadingTrivia(eol, ws)
                 .WithTrailingTrivia(space);
-            var newWhenFalse = conditional.WhenFalse
-                .WithLeadingTrivia()
-                .WithTrailingTrivia(conditional.WhenFalse.GetTrailingTrivia());
 
-            var rebuilt = SyntaxFactory.ConditionalExpression(
+            ExpressionSyntax newWhenFalse;
+
+            if (conditional.WhenFalse is ConditionalExpressionSyntax innerFalse)
+            {
+                var innerTrailing = innerFalse.GetTrailingTrivia();
+                newWhenFalse = BuildSplit(innerFalse, baseIndent, depth + 1)
+                    .WithLeadingTrivia()
+                    .WithTrailingTrivia(innerTrailing);
+            }
+            else
+            {
+                newWhenFalse = conditional.WhenFalse
+                    .WithLeadingTrivia()
+                    .WithTrailingTrivia(conditional.WhenFalse.GetTrailingTrivia());
+            }
+
+            return SyntaxFactory.ConditionalExpression(
                   newCondition
                 , newQuestion
                 , newWhenTrue
                 , newColon
                 , newWhenFalse
             );
-
-            var newRoot = root.ReplaceNode(conditional, rebuilt);
-            return document.WithSyntaxRoot(newRoot);
         }
     }
 }

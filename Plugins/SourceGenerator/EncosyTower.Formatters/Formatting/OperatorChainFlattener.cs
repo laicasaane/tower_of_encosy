@@ -22,10 +22,9 @@ namespace EncosyTower.Formatters.Formatting
 
         public static BinaryPatternSyntax FindBinaryPatternChainRoot(BinaryPatternSyntax node)
         {
-            var kind = node.Kind();
             var current = node;
 
-            while (current.Parent is BinaryPatternSyntax parent && parent.Kind() == kind)
+            while (current.Parent is BinaryPatternSyntax parent)
             {
                 current = parent;
             }
@@ -104,9 +103,9 @@ namespace EncosyTower.Formatters.Formatting
             , List<SyntaxToken> ops
         )
         {
-            if (node.Left is BinaryPatternSyntax leftBin && leftBin.Kind() == kind)
+            if (node.Left is BinaryPatternSyntax leftBin)
             {
-                FlattenBinaryPattern(leftBin, kind, items, ops);
+                FlattenBinaryPattern(leftBin, leftBin.Kind(), items, ops);
             }
             else
             {

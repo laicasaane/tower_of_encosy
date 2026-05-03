@@ -1,3 +1,4 @@
+using EncosyTower.Formatters.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -7,6 +8,22 @@ namespace EncosyTower.Formatters.Refactorings
 {
     internal static class RefactoringHelper
     {
+        public static SyntaxToken WithoutTrailingWhitespace(SyntaxToken token)
+        {
+            var keep = TriviaUtil.KeepCommentsOnly(token.TrailingTrivia);
+            return token.WithTrailingTrivia(keep);
+        }
+
+        public static SyntaxToken WithBraceLeadingOwnLine(SyntaxToken brace, string indent)
+        {
+            return brace.WithLeadingTrivia(TriviaUtil.Eol(), TriviaUtil.Indent(indent));
+        }
+
+        public static SyntaxToken WithBraceLeadingSameLine(SyntaxToken brace)
+        {
+            return brace.WithLeadingTrivia(TriviaUtil.Space());
+        }
+
         public static bool TryFindList(SyntaxNode root, TextSpan span, out SyntaxNode listNode)
         {
             var node = root.FindNode(span, getInnermostNodeForTie: true);

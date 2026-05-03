@@ -33,7 +33,7 @@ namespace EncosyTower.Formatters.Formatting
         {
             var indent = baseIndent + INDENT_UNIT;
             ApplySplitTriviaPattern(items, ops, indent, style);
-            return RebuildPattern(root.Kind(), items, ops);
+            return RebuildPattern( items, ops);
         }
 
         public static ExpressionSyntax CombineBinary(
@@ -53,7 +53,7 @@ namespace EncosyTower.Formatters.Formatting
         )
         {
             ApplyCombineTriviaPattern(items, ops);
-            return RebuildPattern(root.Kind(), items, ops);
+            return RebuildPattern(items, ops);
         }
 
         public static bool ChainHasComment(List<ExpressionSyntax> items, List<SyntaxToken> ops)
@@ -278,8 +278,7 @@ namespace EncosyTower.Formatters.Formatting
         }
 
         private static PatternSyntax RebuildPattern(
-              SyntaxKind kind
-            , List<PatternSyntax> items
+              List<PatternSyntax> items
             , List<SyntaxToken> ops
         )
         {
@@ -288,7 +287,10 @@ namespace EncosyTower.Formatters.Formatting
 
             for (var i = 0; i < opCount; i++)
             {
-                pat = SyntaxFactory.BinaryPattern(kind, pat, ops[i], items[i + 1]);
+                var opKind = ops[i].IsKind(SyntaxKind.OrKeyword)
+                    ? SyntaxKind.OrPattern
+                    : SyntaxKind.AndPattern;
+                pat = SyntaxFactory.BinaryPattern(opKind, pat, ops[i], items[i + 1]);
             }
 
             return pat;

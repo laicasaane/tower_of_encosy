@@ -89,8 +89,42 @@ namespace EncosyTower.Formatters.Refactorings
                 return document;
             }
 
-            var rebuilt = BaseListFormatter.Combine(baseList);
-            var newRoot = root.ReplaceNode(baseList, rebuilt);
+            var typeDecl = baseList.Parent as TypeDeclarationSyntax;
+
+            if (typeDecl is null)
+            {
+                var rebuiltOnly = BaseListFormatter.Combine(baseList);
+                return document.WithSyntaxRoot(root.ReplaceNode(baseList, rebuiltOnly));
+            }
+
+            var newBaseList = BaseListFormatter.Combine(baseList);
+            var prevToken = baseList.GetFirstToken().GetPreviousToken();
+            var newPrevToken = RefactoringHelper.WithoutTrailingWhitespace(prevToken);
+            var newOpenBrace = RefactoringHelper.WithBraceLeadingSameLine(typeDecl.OpenBraceToken);
+
+            var newDecl = typeDecl.ReplaceSyntax(
+                  nodes: new[] { (SyntaxNode)baseList }
+                , computeReplacementNode: (orig, _) => newBaseList
+                , tokens: new[] { prevToken, typeDecl.OpenBraceToken }
+                , computeReplacementToken: (orig, _) =>
+                {
+                    if (orig == prevToken)
+                    {
+                        return newPrevToken;
+                    }
+
+                    if (orig == typeDecl.OpenBraceToken)
+                    {
+                        return newOpenBrace;
+                    }
+
+                    return orig;
+                }
+                , trivia: null
+                , computeReplacementTrivia: null
+            );
+
+            var newRoot = root.ReplaceNode(typeDecl, newDecl);
             return document.WithSyntaxRoot(newRoot);
         }
     }

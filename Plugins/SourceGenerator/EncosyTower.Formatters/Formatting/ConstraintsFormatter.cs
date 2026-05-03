@@ -81,7 +81,10 @@ namespace EncosyTower.Formatters.Formatting
                 }
             }
 
+            var newName = clause.Name.WithTrailingTrivia();
+
             return clause
+                .WithName(newName)
                 .WithColonToken(newColon)
                 .WithConstraints(SyntaxFactory.SeparatedList<TypeParameterConstraintSyntax>(rebuilt));
         }
@@ -117,7 +120,10 @@ namespace EncosyTower.Formatters.Formatting
                 }
             }
 
+            var newName = clause.Name.WithTrailingTrivia();
+
             return clause
+                .WithName(newName)
                 .WithColonToken(newColon)
                 .WithConstraints(SyntaxFactory.SeparatedList<TypeParameterConstraintSyntax>(rebuilt));
         }
