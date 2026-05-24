@@ -4,7 +4,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     /// <summary>
     /// Opts-in a <see cref="MonoBindingCommand{T}"/> binding for a <c>UnityEvent</c>-derived
-    /// event or C# delegate that is not auto-discovered by <see cref="MonoBinderGenerator"/>,
+    /// event or C# delegate that is not auto-discovered by <c>MonoBinderGenerator</c>,
     /// or overrides how an already-discovered event is bound (e.g. to supply a
     /// <see cref="WrapperType"/> for multi-parameter events or a custom <see cref="Label"/>).
     /// </summary>

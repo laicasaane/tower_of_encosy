@@ -13,7 +13,7 @@ namespace EncosyTower.Databases
     /// annotated with <see cref="TableAttribute"/>.
     /// </para>
     /// <para>
-    /// By default, generated table collections use <see cref="Cathei.BakingSheet.VerticalList{T}"/>.
+    /// By default, generated table collections use <c>Cathei.BakingSheet.VerticalList&lt;T&gt;</c>.
     /// To override this behavior, apply <see cref="Authoring.HorizontalAttribute"/> to indicate
     /// that the target property should use a horizontal list.
     /// </para>
@@ -29,13 +29,20 @@ namespace EncosyTower.Databases
 
         public bool WithInstanceAPI { get; set; }
 
-        /// <inheritdoc cref="DatabaseAttribute" />
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseAttribute"/> class.
+        /// </summary>
+        /// <param name="converters">The converter types used by this database.</param>
         public DatabaseAttribute(params Type[] converters)
         {
             Converters = converters ?? Array.Empty<Type>();
         }
 
-        /// <inheritdoc cref="DatabaseAttribute" />
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseAttribute"/> class.
+        /// </summary>
+        /// <param name="namingStrategy">The naming strategy for generated database members.</param>
+        /// <param name="converters">The converter types used by this database.</param>
         public DatabaseAttribute(NamingStrategy namingStrategy, params Type[] converters)
         {
             NamingStrategy = namingStrategy;

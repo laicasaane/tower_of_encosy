@@ -5,12 +5,12 @@ namespace EncosyTower.Databases.Authoring
 {
     /// <summary>
     /// Marks a member as using a horizontal BakingSheet layout instead of
-    /// <see cref="Cathei.BakingSheet.VerticalList{T}"/>.
+    /// <c>Cathei.BakingSheet.VerticalList&lt;T&gt;</c>.
     /// </summary>
     /// <remarks>
     /// Use this attribute for authoring members that should be imported as horizontal data.
     /// This is typically applied within types that participate in the authoring pipeline through
-    /// <see cref="AuthorDatabaseAttribute"/>.
+    /// <c>AuthorDatabaseAttribute</c>.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
     public sealed class HorizontalAttribute : Attribute
@@ -45,7 +45,6 @@ namespace EncosyTower.Databases.Authoring
         /// Thrown when <paramref name="propertyName"/> is null, empty, whitespace, or does not exist on
         /// <paramref name="targetType"/>.
         /// </exception>
-        /// <inheritdoc cref="HorizontalAttribute" />
         public HorizontalAttribute(Type targetType, string propertyName)
         {
             if (targetType == null)

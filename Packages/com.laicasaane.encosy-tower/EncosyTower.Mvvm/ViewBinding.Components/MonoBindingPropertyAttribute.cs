@@ -4,7 +4,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     /// <summary>
     /// Opts-in a <see cref="MonoBindingProperty{T}"/> binding for a member that is not
-    /// auto-discovered by <see cref="MonoBinderGenerator"/>, or overrides how an
+    /// auto-discovered by <c>MonoBinderGenerator</c>, or overrides how an
     /// already-discovered property is bound (e.g. to route assignment through a
     /// notification-suppressing setter method).
     /// </summary>
@@ -17,7 +17,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     ///   <item>The property was excluded via <see cref="MonoBindingExcludeAttribute"/> but
     ///         still needs a binding with custom configuration.</item>
     ///   <item>Assignment must go through a method instead of a direct setter
-    ///         (e.g. <see cref="SetterMethod"/> = <c>nameof(Slider.SetValueWithoutNotify)</c>).</item>
+    ///         (e.g. <c>SetterMethod</c> = <c>nameof(Slider.SetValueWithoutNotify)</c>).</item>
     ///   <item>A custom Inspector label is needed (use <see cref="Label"/>).</item>
     /// </list>
     /// </para>
@@ -31,7 +31,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// <para>
     /// The generator emits a sealed nested class that inherits
     /// <c>MonoBindingProperty&lt;TComponent&gt;</c> with a <c>[BindingProperty]</c>-annotated
-    /// private setter method. When <see cref="SetterMethod"/> is set the method body calls
+    /// private setter method. When <c>SetterMethod</c> is set the method body calls
     /// <c>targets[i].SetterMethod(value)</c>; otherwise it assigns
     /// <c>targets[i].MemberName = value</c>.
     /// </para>

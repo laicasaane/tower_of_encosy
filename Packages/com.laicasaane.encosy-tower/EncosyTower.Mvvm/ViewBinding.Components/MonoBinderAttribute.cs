@@ -4,7 +4,7 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
 {
     /// <summary>
     /// Entry-point decorator that designates a <c>partial</c> class as a MonoBinder and
-    /// triggers <see cref="MonoBinderGenerator"/> to generate nested
+    /// triggers <c>MonoBinderGenerator</c> to generate nested
     /// <c>MonoBindingProperty&lt;T&gt;</c> and <c>MonoBindingCommand&lt;T&gt;</c> binding
     /// classes for the specified <see cref="UnityEngine.Object"/> component type.
     /// </summary>

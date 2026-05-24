@@ -33,7 +33,6 @@ namespace EncosyTower.Mvvm.Input
     /// void Method(T);
     /// </code>
     /// Will generate an <see cref="IRelayCommand{T}"/> property (using a <see cref="RelayCommand{T}"/> instance).
-    /// <code>
     /// </para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
