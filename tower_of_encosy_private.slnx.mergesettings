@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <SlnMergeSettings>
   <MergeTargetSolution>Plugins/SourceGenerator/EncosyTower.SourceGen.slnx</MergeTargetSolution>
-  <ProjectConflictResolution>PreserveUnity</ProjectConflictResolution>
+  <ProjectConflictResolution>PreserveOverlay</ProjectConflictResolution>
   <DefaultProcessingPolicy>Merge</DefaultProcessingPolicy>
+  <NestedProjects />
 </SlnMergeSettings>
