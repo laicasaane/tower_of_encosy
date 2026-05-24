@@ -31,7 +31,7 @@
       "url": "https://package.openupm.com"
     },
     "com.cysharp.unitask": {
-      "version": "2.5.10",
+      "version": "2.5.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -142,7 +142,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.2d.aseprite": {
-      "version": "1.1.10",
+      "version": "1.1.11",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -283,7 +283,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.editorcoroutines": {
-      "version": "1.0.1",
+      "version": "1.1.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -340,7 +340,7 @@
         "com.unity.2d.spriteshape": "10.0.7",
         "com.unity.2d.tilemap": "1.0.0",
         "com.unity.2d.tilemap.extras": "4.1.0",
-        "com.unity.2d.aseprite": "1.1.10"
+        "com.unity.2d.aseprite": "1.1.11"
       }
     },
     "com.unity.ide.rider": {
@@ -521,7 +521,7 @@
       }
     },
     "com.unity.splines": {
-      "version": "2.8.3",
+      "version": "2.8.4",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -542,7 +542,7 @@
       }
     },
     "com.unity.test-framework.performance": {
-      "version": "3.2.0",
+      "version": "3.4.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -639,7 +639,7 @@
       "url": "https://package.openupm.com"
     },
     "today.comes.saintsfield": {
-      "version": "5.13.6",
+      "version": "5.15.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
