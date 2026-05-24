@@ -9,8 +9,8 @@ namespace EncosyTower.Databases
     /// <remarks>
     /// The annotated class must be declared as <c>partial</c>, must not be abstract,
     /// and must not be an open generic type. It must directly or indirectly inherit from either
-    /// <see cref="DataTableAsset{TDataId, TData}"/> or
-    /// <see cref="DataTableAsset{TDataId, TData, TConvertedId}"/>.
+    /// <see cref="DataTableAssetBase{TDataId, TData, TConvertedId}"/>.
+    /// <see cref="DataTableAssetBase{TDataId, TData}"/> or
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class DataTableAssetAttribute : Attribute

@@ -24,7 +24,7 @@
                 if (getIdMethodIsImplemented == false)
                 {
                     p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-                    p.PrintLine($"protected override {idTypeName} GetId(in {dataTypeName} entry)");
+                    p.PrintLine($"protected sealed override {idTypeName} GetId(in {dataTypeName} entry)");
                     p.OpenScope();
                     {
                         p.PrintLine("return entry.Id;");
@@ -36,7 +36,7 @@
                 if (initializeMethodIsImplemented == false && dataTypeImplementsIInitializable)
                 {
                     p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-                    p.PrintLine($"protected override void Initialize(ref {dataTypeName} entry)");
+                    p.PrintLine($"protected sealed override void Initialize(ref {dataTypeName} entry)");
                     p.OpenScope();
                     {
                         p.PrintLine("entry.Initialize();");
@@ -51,7 +51,7 @@
                 )
                 {
                     p.PrintBeginLine(PR_AGGRESSIVE_INLINING).Print(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-                    p.PrintLine($"protected override {convertedIdTypeName} ConvertId({idTypeName} value)");
+                    p.PrintLine($"protected sealed override {convertedIdTypeName} ConvertId({idTypeName} value)");
                     p.OpenScope();
                     {
                         p.PrintLine($"return {convertExpression};");

@@ -9,7 +9,6 @@
 // Please review the license for details on these and other terms and conditions.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 // Almost everything in this file was copied from Unity's source generators.
@@ -274,7 +273,11 @@ namespace EncosyTower.SourceGen
         /// <returns></returns>
         public Printer Print(string text)
         {
-            _builder.Append(text);
+            if (string.IsNullOrEmpty(text) == false)
+            {
+                _builder.Append(text);
+            }
+
             return this;
         }
 
@@ -285,7 +288,11 @@ namespace EncosyTower.SourceGen
         /// <returns></returns>
         public Printer Print(StringBuilder text)
         {
-            _builder.Append(text);
+            if (text != null)
+            {
+                _builder.Append(text);
+            }
+
             return this;
         }
 
@@ -358,7 +365,12 @@ namespace EncosyTower.SourceGen
         /// <returns></returns>
         public Printer PrintEndLine(string text)
         {
-            _builder.Append(text).Append(NEWLINE);
+            if (string.IsNullOrEmpty(text) == false)
+            {
+                _builder.Append(text);
+            }
+
+            _builder.Append(NEWLINE);
             return this;
         }
 

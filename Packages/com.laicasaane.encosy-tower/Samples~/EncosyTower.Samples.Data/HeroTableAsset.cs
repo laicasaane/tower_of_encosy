@@ -5,7 +5,7 @@ using EncosyTower.Databases;
 namespace EncosyTower.Samples.Data
 {
     [DataTableAsset]
-    public sealed partial class HeroTableAsset : DataTableAsset<EntityIdData, HeroData, EntityId> { }
+    public sealed partial class HeroTableAsset : DataTableAssetBase<EntityIdData, HeroData, EntityId> { }
 
     [Data, DataMutable(DataMutableOptions.WithReadOnlyView)]
     public partial struct HeroData

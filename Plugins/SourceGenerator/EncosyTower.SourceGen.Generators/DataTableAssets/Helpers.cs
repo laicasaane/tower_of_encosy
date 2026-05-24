@@ -13,7 +13,7 @@
         public const string HORIZONTAL_LIST_ATTRIBUTE = $"global::{NAMESPACE}.HorizontalAttribute";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
 
-        public const string IINITIALIZABLE = "global::EncosyTower.Common.IInitializable";
+        public const string IINITIALIZABLE = "global::EncosyTower.Initialization.IInitializable";
 
         public const string PR_AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         public const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.DataTableAssets.DataTableAssetGenerator\", \"{SourceGenVersion.VALUE}\")]";

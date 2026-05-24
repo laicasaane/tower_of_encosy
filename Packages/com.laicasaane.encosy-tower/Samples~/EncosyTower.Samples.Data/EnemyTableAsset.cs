@@ -4,7 +4,7 @@ using EncosyTower.Databases;
 namespace EncosyTower.Samples.Data
 {
     [DataTableAsset]
-    public sealed partial class EnemyTableAsset : DataTableAsset<EntityUidData, EnemyData, EntityUid> { }
+    public sealed partial class EnemyTableAsset : DataTableAssetBase<EntityUidData, EnemyData, EntityUid> { }
 
     [Data]
     public partial struct EnemyData
