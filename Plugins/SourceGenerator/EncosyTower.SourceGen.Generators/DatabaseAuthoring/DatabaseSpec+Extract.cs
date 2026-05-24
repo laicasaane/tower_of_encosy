@@ -12,6 +12,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
+    // TODO: 1. Custom conversion for (string -> T1)
+    // - Detect converters that take a string parameter, called (C)
+    // - For each (C), create a Cathei.BakingSheet.SheetValueConverter<T1> that use C internally (string -> T1)
+    // - Emit [SheetValueConverter(typeof(C))] on generated sheet properties
+    // - Return type of generated sheet properties is T1, not string
+    // - Do not use (C) in WriteConvertMember
+    // - WriteConvertMember should use (T1 -> T2) converter if available
+
+    // TODO: 2. Converter defined at property level should override converter defined at database level.
+
     partial struct DatabaseSpec
     {
         private const string GENERATOR_NAME = DatabaseAuthoringGenerator.GENERATOR_NAME;

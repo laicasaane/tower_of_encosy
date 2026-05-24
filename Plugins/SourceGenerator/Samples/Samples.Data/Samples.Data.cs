@@ -211,7 +211,7 @@ namespace Samples.Data.Enemies
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
-        [SerializeField] private EnemyType _type;
+        [SerializeField, DataConverter(typeof(CustomEnemyConverter))] private EnemyType _type;
         [SerializeField] private StatData _stat;
         [SerializeField] private HashSet<int> _intSet;
         [SerializeField] private Queue<float> _floatQueue;
@@ -219,6 +219,14 @@ namespace Samples.Data.Enemies
 
         public void Initialize()
         {
+        }
+    }
+
+    public struct CustomEnemyConverter
+    {
+        public readonly EnemyType Convert(string value)
+        {
+            return EnemyType.Normal;
         }
     }
 
