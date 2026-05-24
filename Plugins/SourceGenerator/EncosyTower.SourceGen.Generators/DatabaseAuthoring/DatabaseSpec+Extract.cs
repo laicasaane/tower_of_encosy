@@ -648,8 +648,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var collection = MakeCollectionModel(fieldType, out var keyType, out var elemType);
             EnqueueTypes(queue, fieldType, keyType, elemType);
 
-            var typeHasParameterlessCtor = CheckParameterlessConstructor(fieldType);
-
             var converter = TryMakeConverterModel(
                   memberSymbol
                 , fieldType
@@ -688,14 +686,19 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             return new MemberSpec {
                 propertyName = propertyName,
-                typeFullName = fieldType.ToFullName(),
-                typeSimpleName = fieldType.Name,
-                typeIsValueType = fieldType.IsValueType,
-                typeHasParameterlessConstructor = typeHasParameterlessCtor,
+                type = MakeTypeModel(fieldType),
                 collection = collection,
                 converter = converter,
             };
         }
+
+        private static TypeSpec MakeTypeModel(ITypeSymbol type)
+            => new() {
+                fullName = type.ToFullName(),
+                simpleName = type.Name,
+                isValueType = type.IsValueType,
+                hasParameterlessConstructor = CheckParameterlessConstructor(type),
+            };
 
         private static void EnqueueTypes(Queue<ITypeSymbol> queue, ITypeSymbol type, ITypeSymbol keyType, ITypeSymbol elemType)
         {
@@ -771,10 +774,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 elemType = arrayType.ElementType;
 
-                return new CollectionSpec {
+                return new() {
                     kind = CollectionKind.Array,
-                    elementTypeName = arrayType.ElementType.ToFullName(),
-                    elementTypeSimpleName = arrayType.ElementType.Name,
+                    elementType = MakeTypeModel(elemType),
                 };
             }
 
@@ -859,18 +861,22 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             return default;
 
             static CollectionSpec MakeListModel(ITypeSymbol elem)
-                => new() { kind = CollectionKind.List, elementTypeName = elem.ToFullName(), elementTypeSimpleName = elem.Name };
+                => new() {
+                    kind = CollectionKind.List,
+                    elementType = MakeTypeModel(elem),
+                };
 
             static CollectionSpec MakeKindModel(CollectionKind k, ITypeSymbol elem)
-                => new() { kind = k, elementTypeName = elem.ToFullName(), elementTypeSimpleName = elem.Name };
+                => new() {
+                    kind = k,
+                    elementType = MakeTypeModel(elem),
+                };
 
             static CollectionSpec MakeDictModel(ITypeSymbol key, ITypeSymbol elem)
                 => new() {
                     kind = CollectionKind.Dictionary,
-                    keyTypeName = key.ToFullName(),
-                    keyTypeSimpleName = key.Name,
-                    elementTypeName = elem.ToFullName(),
-                    elementTypeSimpleName = elem.Name,
+                    keyType = MakeTypeModel(key),
+                    elementType = MakeTypeModel(elem),
                 };
         }
 
@@ -941,7 +947,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         )
         {
             var sourceType = convertMethod.Parameters[0].Type;
-            var sourceHasParameterlessCtor = CheckParameterlessConstructor(sourceType);
             var sourceCollection = MakeCollectionModel(sourceType, out keyType, out elemType);
             type = keyType == null && elemType == null ? sourceType : null;
 
@@ -949,10 +954,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 kind = convertMethod.IsStatic ? ConverterKind.Static : ConverterKind.Instance,
                 converterTypeFullName = converterType.ToFullName(),
                 sourceCollection = sourceCollection,
-                sourceTypeFullName = sourceType.ToFullName(),
-                sourceTypeSimpleName = sourceType.Name,
-                sourceTypeIsValueType = sourceType.IsValueType,
-                sourceTypeHasParameterlessConstructor = sourceHasParameterlessCtor,
+                sourceType = MakeTypeModel(sourceType),
             };
         }
 
@@ -1172,16 +1174,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 if (coll.kind == CollectionKind.Dictionary)
                 {
-                    TryEnqueue(coll.keyTypeName, dataMap, uniqueTypes, queue);
-                    TryEnqueue(coll.elementTypeName, dataMap, uniqueTypes, queue);
+                    TryEnqueue(coll.keyType.fullName, dataMap, uniqueTypes, queue);
+                    TryEnqueue(coll.elementType.fullName, dataMap, uniqueTypes, queue);
                 }
                 else if (coll.kind != CollectionKind.NotCollection)
                 {
-                    TryEnqueue(coll.elementTypeName, dataMap, uniqueTypes, queue);
+                    TryEnqueue(coll.elementType.fullName, dataMap, uniqueTypes, queue);
                 }
                 else
                 {
-                    TryEnqueue(member.SelectTypeFullName(), dataMap, uniqueTypes, queue);
+                    TryEnqueue(member.SelectType().fullName, dataMap, uniqueTypes, queue);
                 }
             }
         }

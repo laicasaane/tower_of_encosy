@@ -175,7 +175,7 @@ namespace Samples.Data.Heroes
     }
 
     [DataTableAsset]
-    public partial class HeroDataTableAsset : DataTableAsset<IdData, HeroData>
+    public partial class HeroDataTableAsset : DataTableAssetBase<IdData, HeroData>
     {
     }
 
@@ -191,7 +191,7 @@ namespace Samples.Data.Heroes
     }
 
     [DataTableAsset]
-    public partial class NewHeroDataTableAsset : DataTableAsset<IdData, NewHeroData>
+    public partial class NewHeroDataTableAsset : DataTableAssetBase<IdData, NewHeroData>
     {
     }
 }
@@ -234,7 +234,7 @@ namespace Samples.Data.Enemies
     {
     }
 
-    public abstract class GenericDataTableAsset<T> : DataTableAsset<int, GenericData<T>>
+    public abstract class GenericDataTableAsset<T> : DataTableAssetBase<int, GenericData<T>>
     {
     }
 
@@ -326,7 +326,7 @@ namespace Samples.Data.ConvertibleIds
     }
 
     [DataTableAsset]
-    public sealed partial class ItemTableAsset : DataTableAsset<IdData, ItemData, int>
+    public sealed partial class ItemTableAsset : DataTableAssetBase<IdData, ItemData, int>
     {
     }
 }
@@ -352,7 +352,7 @@ namespace Samples.Data.Databases.Settings
     }
 
     [DataTableAsset]
-    internal sealed partial class FileTableAsset : DataTableAsset<int, FileData> { }
+    internal sealed partial class FileTableAsset : DataTableAssetBase<int, FileData> { }
 
     [Data]
     internal partial struct FileData

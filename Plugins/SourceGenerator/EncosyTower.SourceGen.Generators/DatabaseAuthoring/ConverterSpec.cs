@@ -7,10 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public ConverterKind kind;
         public string converterTypeFullName;
         public CollectionSpec sourceCollection;
-        public string sourceTypeFullName;
-        public string sourceTypeSimpleName;
-        public bool sourceTypeIsValueType;
-        public bool sourceTypeHasParameterlessConstructor;
+        public TypeSpec sourceType;
 
         public readonly string Convert(string expression)
         {
@@ -36,20 +33,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => kind == other.kind
             && string.Equals(converterTypeFullName, other.converterTypeFullName, StringComparison.Ordinal)
             && sourceCollection.Equals(other.sourceCollection)
-            && string.Equals(sourceTypeFullName, other.sourceTypeFullName, StringComparison.Ordinal)
-            && string.Equals(sourceTypeSimpleName, other.sourceTypeSimpleName, StringComparison.Ordinal)
-            && sourceTypeIsValueType == other.sourceTypeIsValueType
-            && sourceTypeHasParameterlessConstructor == other.sourceTypeHasParameterlessConstructor
+            && sourceType.Equals(other.sourceType)
             ;
 
         public readonly override bool Equals(object obj)
             => obj is ConverterSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(converterTypeFullName, sourceTypeFullName, sourceTypeSimpleName)
-            .Add((byte)kind)
-            .Add(sourceCollection.GetHashCode())
-            .Add(sourceTypeIsValueType)
-            .Add(sourceTypeHasParameterlessConstructor);
+            => HashValue.Combine(kind, converterTypeFullName, sourceCollection, sourceType);
     }
 }

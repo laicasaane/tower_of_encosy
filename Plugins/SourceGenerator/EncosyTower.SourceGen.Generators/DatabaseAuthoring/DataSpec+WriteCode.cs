@@ -140,8 +140,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                             }
                         }
 
-                        var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
-                            ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
+                        string elemTypeName;
+
+                        if (dataMap.ContainsKey(coll.elementType.fullName))
+                        {
+                            elemTypeName = $"__{coll.elementType.simpleName}";
+                        }
+                        else
+                        {
+                            elemTypeName = coll.elementType.fullName;
+                        }
 
                         newExpression = $"new {collectionTypeName}<{elemTypeName}>()";
                         break;
@@ -149,11 +157,26 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     case CollectionKind.Dictionary:
                     {
-                        var keyTypeName = dataMap.ContainsKey(coll.keyTypeName)
-                            ? $"__{coll.keyTypeSimpleName}" : coll.keyTypeName;
+                        string keyTypeName;
+                        string elemTypeName;
 
-                        var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
-                            ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
+                        if (dataMap.ContainsKey(coll.keyType.fullName))
+                        {
+                            keyTypeName = $"__{coll.keyType.simpleName}";
+                        }
+                        else
+                        {
+                            keyTypeName = coll.keyType.fullName;
+                        }
+
+                        if (dataMap.ContainsKey(coll.elementType.fullName))
+                        {
+                            elemTypeName = $"__{coll.elementType.simpleName}";
+                        }
+                        else
+                        {
+                            elemTypeName = coll.elementType.fullName;
+                        }
 
                         newExpression = $"new {PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>()";
                         break;
@@ -161,23 +184,23 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     default:
                     {
-                        var fieldTypeFull = member.SelectTypeFullName();
+                        var type = member.SelectType();
 
-                        if (dataMap.ContainsKey(fieldTypeFull))
+                        if (dataMap.ContainsKey(type.fullName))
                         {
-                            newExpression = $"new __{member.SelectTypeSimpleName()}()";
+                            newExpression = $"new __{type.simpleName}()";
                         }
-                        else if (member.SelectTypeIsValueType())
+                        else if (type.isValueType)
                         {
                             newExpression = "default";
                         }
-                        else if (fieldTypeFull == "string")
+                        else if (type.fullName == "string")
                         {
                             newExpression = "string.Empty";
                         }
-                        else if (member.typeHasParameterlessConstructor)
+                        else if (type.hasParameterlessConstructor)
                         {
-                            newExpression = $"new {fieldTypeFull}()";
+                            newExpression = $"new {type.fullName}()";
                         }
                         else
                         {
@@ -236,8 +259,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                             }
                         }
 
-                        var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
-                            ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
+                        string elemTypeName;
+
+                        if (dataMap.ContainsKey(coll.elementType.fullName))
+                        {
+                            elemTypeName = $"__{coll.elementType.simpleName}";
+                        }
+                        else
+                        {
+                            elemTypeName = coll.elementType.fullName;
+                        }
 
                         propTypeName = $"{collectionTypeName}<{elemTypeName}>";
                         break;
@@ -245,11 +276,26 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     case CollectionKind.Dictionary:
                     {
-                        var keyTypeName = dataMap.ContainsKey(coll.keyTypeName)
-                            ? $"__{coll.keyTypeSimpleName}" : coll.keyTypeName;
+                        string keyTypeName;
+                        string elemTypeName;
 
-                        var elemTypeName = dataMap.ContainsKey(coll.elementTypeName)
-                            ? $"__{coll.elementTypeSimpleName}" : coll.elementTypeName;
+                        if (dataMap.ContainsKey(coll.keyType.fullName))
+                        {
+                            keyTypeName = $"__{coll.keyType.simpleName}";
+                        }
+                        else
+                        {
+                            keyTypeName = coll.keyType.fullName;
+                        }
+
+                        if (dataMap.ContainsKey(coll.elementType.fullName))
+                        {
+                            elemTypeName = $"__{coll.elementType.simpleName}";
+                        }
+                        else
+                        {
+                            elemTypeName = coll.elementType.fullName;
+                        }
 
                         propTypeName = $"{PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>";
                         break;
@@ -257,9 +303,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     default:
                     {
-                        var fieldTypeFull = member.SelectTypeFullName();
-                        propTypeName = dataMap.ContainsKey(fieldTypeFull)
-                            ? $"__{member.SelectTypeSimpleName()}" : fieldTypeFull;
+                        var type = member.SelectType();
+
+                        if (dataMap.ContainsKey(type.fullName))
+                        {
+                            propTypeName = $"__{type.simpleName}";
+                        }
+                        else
+                        {
+                            propTypeName = type.fullName;
+                        }
                         break;
                     }
                 }
@@ -352,38 +405,41 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , MemberSpec member
         )
         {
+            var type = member.SelectType();
             var coll = member.SelectCollection();
+            var memberPropName = member.propertyName;
+
             string expression;
 
             switch (coll.kind)
             {
                 case CollectionKind.Array:
                 {
-                    if (dataMap.ContainsKey(coll.elementTypeName))
+                    if (dataMap.ContainsKey(coll.elementType.fullName))
                     {
-                        var methodName = GetToCollectionMethodName(member.propertyName, coll.elementTypeSimpleName, "Array");
+                        var methodName = GetToCollectionMethodName(memberPropName, coll.elementType.simpleName, "Array");
                         expression = member.converter.Convert($"this.{methodName}()");
                     }
                     else
                     {
-                        var elemFull = coll.elementTypeName;
-                        expression = member.converter.Convert($"this.{member.propertyName}?.ToArray() ?? new {elemFull}[0]");
+                        var elemFull = coll.elementType.fullName;
+                        expression = member.converter.Convert($"this.{memberPropName}?.ToArray() ?? new {elemFull}[0]");
                     }
                     break;
                 }
 
                 case CollectionKind.List:
                 {
-                    if (dataMap.ContainsKey(coll.elementTypeName))
+                    if (dataMap.ContainsKey(coll.elementType.fullName))
                     {
-                        var methodName = GetToCollectionMethodName(member.propertyName, coll.elementTypeSimpleName, "List");
+                        var methodName = GetToCollectionMethodName(memberPropName, coll.elementType.simpleName, "List");
                         expression = member.converter.Convert($"this.{methodName}()");
                     }
                     else
                     {
-                        var elemFull = coll.elementTypeName;
+                        var elemFull = coll.elementType.fullName;
                         expression = member.converter.Convert(
-                            $"this.{member.propertyName} ?? new {PR_LIST_T}<{elemFull}>()"
+                            $"this.{memberPropName} ?? new {PR_LIST_T}<{elemFull}>()"
                         );
                     }
                     break;
@@ -391,18 +447,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 case CollectionKind.Dictionary:
                 {
-                    var keyIsData = dataMap.ContainsKey(coll.keyTypeName);
-                    var elemIsData = dataMap.ContainsKey(coll.elementTypeName);
+                    var keyIsData = dataMap.ContainsKey(coll.keyType.fullName);
+                    var elemIsData = dataMap.ContainsKey(coll.elementType.fullName);
 
                     if (keyIsData == false && elemIsData == false)
                     {
                         expression = member.converter.Convert(
-                            $"this.{member.propertyName} ?? new {PR_DICTIONARY_T}<{coll.keyTypeName}, {coll.elementTypeName}>()"
+                            $"this.{memberPropName} ?? new {PR_DICTIONARY_T}<{coll.keyType.fullName}, {coll.elementType.fullName}>()"
                         );
                     }
                     else
                     {
-                        var methodName = GetToCollectionMethodName(member.propertyName, coll.elementTypeSimpleName, "Dictionary");
+                        var methodName = GetToCollectionMethodName(memberPropName, coll.elementType.simpleName, "Dictionary");
                         expression = member.converter.Convert($"this.{methodName}()");
                     }
                     break;
@@ -410,16 +466,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 case CollectionKind.HashSet:
                 {
-                    if (dataMap.ContainsKey(coll.elementTypeName))
+                    if (dataMap.ContainsKey(coll.elementType.fullName))
                     {
-                        var methodName = GetToCollectionMethodName(member.propertyName, coll.elementTypeSimpleName, "HashSet");
+                        var methodName = GetToCollectionMethodName(memberPropName, coll.elementType.simpleName, "HashSet");
                         expression = member.converter.Convert($"this.{methodName}()");
                     }
                     else
                     {
-                        var elemFull = coll.elementTypeName;
+                        var elemFull = coll.elementType.fullName;
                         expression = member.converter.Convert(
-                            $"this.{member.propertyName} == null ? new {PR_HASH_SET_T}<{elemFull}>() : new {PR_HASH_SET_T}<{elemFull}>(this.{member.propertyName})"
+                            $"this.{memberPropName} == null ? new {PR_HASH_SET_T}<{elemFull}>() : new {PR_HASH_SET_T}<{elemFull}>(this.{memberPropName})"
                         );
                     }
                     break;
@@ -427,16 +483,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 case CollectionKind.Queue:
                 {
-                    if (dataMap.ContainsKey(coll.elementTypeName))
+                    if (dataMap.ContainsKey(coll.elementType.fullName))
                     {
-                        var methodName = GetToCollectionMethodName(member.propertyName, coll.elementTypeSimpleName, "Queue");
+                        var methodName = GetToCollectionMethodName(memberPropName, coll.elementType.simpleName, "Queue");
                         expression = member.converter.Convert($"this.{methodName}()");
                     }
                     else
                     {
-                        var elemFull = coll.elementTypeName;
+                        var elemFull = coll.elementType.fullName;
                         expression = member.converter.Convert(
-                            $"this.{member.propertyName} == null ? new {PR_QUEUE_T}<{elemFull}>() : new {PR_QUEUE_T}<{elemFull}>(this.{member.propertyName})"
+                            $"this.{memberPropName} == null ? new {PR_QUEUE_T}<{elemFull}>() : new {PR_QUEUE_T}<{elemFull}>(this.{memberPropName})"
                         );
                     }
                     break;
@@ -444,16 +500,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 case CollectionKind.Stack:
                 {
-                    if (dataMap.ContainsKey(coll.elementTypeName))
+                    if (dataMap.ContainsKey(coll.elementType.fullName))
                     {
-                        var methodName = GetToCollectionMethodName(member.propertyName, coll.elementTypeSimpleName, "Stack");
+                        var methodName = GetToCollectionMethodName(memberPropName, coll.elementType.simpleName, "Stack");
                         expression = member.converter.Convert($"this.{methodName}()");
                     }
                     else
                     {
-                        var elemFull = coll.elementTypeName;
+                        var elemFull = coll.elementType.fullName;
                         expression = member.converter.Convert(
-                            $"this.{member.propertyName} == null ? new {PR_STACK_T}<{elemFull}>() : new {PR_STACK_T}<{elemFull}>(this.{member.propertyName})"
+                            $"this.{memberPropName} == null ? new {PR_STACK_T}<{elemFull}>() : new {PR_STACK_T}<{elemFull}>(this.{memberPropName})"
                         );
                     }
                     break;
@@ -461,22 +517,27 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 default:
                 {
-                    var fieldTypeFull = member.SelectTypeFullName();
-                    var fieldSimpleName = member.SelectTypeSimpleName();
-
-                    if (dataMap.ContainsKey(fieldTypeFull))
+                    if (dataMap.ContainsKey(type.fullName))
                     {
                         expression = member.converter.Convert(
-                            $"(this.{member.propertyName} ?? __{fieldSimpleName}.Default).To{fieldSimpleName}()"
+                            $"(this.{memberPropName} ?? __{type.simpleName}.Default).To{type.simpleName}()"
                         );
+                    }
+                    else if (type.isValueType)
+                    {
+                        expression = member.converter.Convert($"this.{memberPropName}");
+                    }
+                    else if (type.fullName == "string")
+                    {
+                        expression = member.converter.Convert($"this.{memberPropName} ?? string.Empty");
                     }
                     else
                     {
-                        var newSuffix = member.SelectTypeIsValueType()
-                            ? "" : member.typeHasParameterlessConstructor
-                            ? $" ?? new {fieldTypeFull}()" : " ?? default";
+                        var newSuffix = type.hasParameterlessConstructor
+                            ? $" ?? new {type.fullName}()"
+                            : " ?? default";
 
-                        expression = member.converter.Convert($"this.{member.propertyName}{newSuffix}");
+                        expression = member.converter.Convert($"this.{memberPropName}{newSuffix}");
                     }
                     break;
                 }
@@ -516,25 +577,26 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
         )
         {
-            if (dataMap.ContainsKey(coll.elementTypeName) == false)
+            if (dataMap.ContainsKey(coll.elementType.fullName) == false)
             {
                 return;
             }
 
-            var elemSimpleName = coll.elementTypeSimpleName;
-            var elemFullName = coll.elementTypeName;
-            var methodName = GetToCollectionMethodName(member.propertyName, elemSimpleName, "Array");
+            var memberPropName = member.propertyName;
+            var elemSimpleName = coll.elementType.simpleName;
+            var elemFullName = coll.elementType.fullName;
+            var methodName = GetToCollectionMethodName(memberPropName, elemSimpleName, "Array");
 
             p.PrintBeginLine("private ").Print(elemFullName).Print("[] ").Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintBeginLine("if (this.").Print(member.propertyName).Print(" == null || this.")
-                    .Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.PrintBeginLine("if (this.").Print(memberPropName).Print(" == null || this.")
+                    .Print(memberPropName).PrintEndLine(".Count == 0)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("return new ").Print(elemFullName).PrintEndLine("[0];");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
+                p.PrintBeginLine("var rows = this.").Print(memberPropName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
                 p.PrintBeginLine("var result = new ").Print(elemFullName).PrintEndLine("[count];");
                 p.PrintEndLine();
@@ -561,26 +623,27 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
         )
         {
-            if (dataMap.ContainsKey(coll.elementTypeName) == false)
+            if (dataMap.ContainsKey(coll.elementType.fullName) == false)
             {
                 return;
             }
 
-            var elemSimpleName = coll.elementTypeSimpleName;
-            var elemFullName = coll.elementTypeName;
-            var methodName = GetToCollectionMethodName(member.propertyName, elemSimpleName, "List");
+            var memberPropName = member.propertyName;
+            var elemSimpleName = coll.elementType.simpleName;
+            var elemFullName = coll.elementType.fullName;
+            var methodName = GetToCollectionMethodName(memberPropName, elemSimpleName, "List");
 
             p.PrintBeginLine("private ").Print(PR_LIST_T).Print("<").Print(elemFullName).Print("> ")
                 .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintBeginLine("if (this.").Print(member.propertyName)
-                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.PrintBeginLine("if (this.").Print(memberPropName)
+                    .Print(" == null || this.").Print(memberPropName).PrintEndLine(".Count == 0)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("return new ").Print(PR_LIST_T).Print("<").Print(elemFullName).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
+                p.PrintBeginLine("var rows = this.").Print(memberPropName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
                 p.PrintBeginLine("var result = new ")
                     .Print(PR_LIST_T).Print("<").Print(elemFullName).PrintEndLine(">(count);");
@@ -609,32 +672,33 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
         )
         {
-            var keyIsData = dataMap.ContainsKey(coll.keyTypeName);
-            var elemIsData = dataMap.ContainsKey(coll.elementTypeName);
+            var keyIsData = dataMap.ContainsKey(coll.keyType.fullName);
+            var elemIsData = dataMap.ContainsKey(coll.elementType.fullName);
 
             if (keyIsData == false && elemIsData == false)
             {
                 return;
             }
 
-            var keySimple = coll.keyTypeSimpleName;
-            var keyFull = coll.keyTypeName;
-            var elemSimple = coll.elementTypeSimpleName;
-            var elemFull = coll.elementTypeName;
-            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Dictionary");
+            var memberPropName = member.propertyName;
+            var keySimple = coll.keyType.simpleName;
+            var keyFull = coll.keyType.fullName;
+            var elemSimple = coll.elementType.simpleName;
+            var elemFull = coll.elementType.fullName;
+            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "Dictionary");
 
             p.PrintBeginLine("private ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
                 .Print(", ").Print(elemFull).Print("> ").Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintBeginLine("if (this.").Print(member.propertyName).Print(" == null || this.")
-                    .Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.PrintBeginLine("if (this.").Print(memberPropName).Print(" == null || this.")
+                    .Print(memberPropName).PrintEndLine(".Count == 0)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("return new ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
                     .Print(", ").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
+                p.PrintBeginLine("var rows = this.").Print(memberPropName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
                 p.PrintBeginLine("var result = new ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
                     .Print(", ").Print(elemFull).PrintEndLine(">(count);");
@@ -683,27 +747,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
         )
         {
-            if (dataMap.ContainsKey(coll.elementTypeName) == false)
+            if (dataMap.ContainsKey(coll.elementType.fullName) == false)
             {
                 return;
             }
 
-            var elemSimple = coll.elementTypeSimpleName;
-            var elemFull = coll.elementTypeName;
-            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "HashSet");
+            var memberPropName = member.propertyName;
+            var elemSimple = coll.elementType.simpleName;
+            var elemFull = coll.elementType.fullName;
+            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "HashSet");
 
             p.PrintBeginLine("private ").Print(PR_HASH_SET_T).Print("<").Print(elemFull).Print("> ")
                 .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintBeginLine("if (this.").Print(member.propertyName)
-                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.PrintBeginLine("if (this.").Print(memberPropName)
+                    .Print(" == null || this.").Print(memberPropName).PrintEndLine(".Count == 0)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("return new ")
                     .Print(PR_HASH_SET_T).Print("<").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
+                p.PrintBeginLine("var rows = this.").Print(memberPropName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
                 p.PrintBeginLine("var result = new ")
                     .Print(PR_HASH_SET_T).Print("<").Print(elemFull).PrintEndLine(">(count);");
@@ -732,27 +797,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
         )
         {
-            if (dataMap.ContainsKey(coll.elementTypeName) == false)
+            if (dataMap.ContainsKey(coll.elementType.fullName) == false)
             {
                 return;
             }
 
-            var elemSimple = coll.elementTypeSimpleName;
-            var elemFull = coll.elementTypeName;
-            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Queue");
+            var memberPropName = member.propertyName;
+            var elemSimple = coll.elementType.simpleName;
+            var elemFull = coll.elementType.fullName;
+            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "Queue");
 
             p.PrintBeginLine("private ").Print(PR_QUEUE_T).Print("<").Print(elemFull).Print("> ")
                 .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintBeginLine("if (this.").Print(member.propertyName)
-                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.PrintBeginLine("if (this.").Print(memberPropName)
+                    .Print(" == null || this.").Print(memberPropName).PrintEndLine(".Count == 0)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("return new ")
                     .Print(PR_QUEUE_T).Print("<").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
+                p.PrintBeginLine("var rows = this.").Print(memberPropName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
                 p.PrintBeginLine("var result = new ")
                     .Print(PR_QUEUE_T).Print("<").Print(elemFull).PrintEndLine(">(count);");
@@ -781,27 +847,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
         )
         {
-            if (dataMap.ContainsKey(coll.elementTypeName) == false)
+            if (dataMap.ContainsKey(coll.elementType.fullName) == false)
             {
                 return;
             }
 
-            var elemSimple = coll.elementTypeSimpleName;
-            var elemFull = coll.elementTypeName;
-            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Stack");
+            var memberPropName = member.propertyName;
+            var elemSimple = coll.elementType.simpleName;
+            var elemFull = coll.elementType.fullName;
+            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "Stack");
 
             p.PrintBeginLine("private ").Print(PR_STACK_T).Print("<").Print(elemFull).Print("> ")
                 .Print(methodName).PrintEndLine("()");
             p.OpenScope();
             {
-                p.PrintBeginLine("if (this.").Print(member.propertyName)
-                    .Print(" == null || this.").Print(member.propertyName).PrintEndLine(".Count == 0)");
+                p.PrintBeginLine("if (this.").Print(memberPropName)
+                    .Print(" == null || this.").Print(memberPropName).PrintEndLine(".Count == 0)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("return new ")
                     .Print(PR_STACK_T).Print("<").Print(elemFull).PrintEndLine(">();");
                 p.PrintEndLine();
 
-                p.PrintBeginLine("var rows = this.").Print(member.propertyName).PrintEndLine(";");
+                p.PrintBeginLine("var rows = this.").Print(memberPropName).PrintEndLine(";");
                 p.PrintLine("var count = rows.Count;");
                 p.PrintBeginLine("var result = new ")
                     .Print(PR_STACK_T).Print("<").Print(elemFull).PrintEndLine(">(count);");
