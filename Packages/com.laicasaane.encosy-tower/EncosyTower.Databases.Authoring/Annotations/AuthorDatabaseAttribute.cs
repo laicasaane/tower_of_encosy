@@ -29,15 +29,17 @@ namespace EncosyTower.Databases.Authoring
         /// </summary>
         public Type DatabaseType { get; }
 
+        public Type[] Converters { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthorDatabaseAttribute"/> class.
         /// </summary>
-        /// <param name="databaseType">
-        /// The runtime database type to bind to this authoring type.
-        /// </param>
-        public AuthorDatabaseAttribute(Type databaseType)
+        /// <param name="databaseType">The runtime database type to bind to this authoring type.</param>
+        /// <param name="converters">The converter types used by this database.</param>
+        public AuthorDatabaseAttribute(Type databaseType, params Type[] converters)
         {
             DatabaseType = databaseType;
+            Converters = converters;
         }
     }
 }

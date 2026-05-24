@@ -199,6 +199,7 @@ namespace Samples.Data.Heroes
 namespace Samples.Data.Enemies
 {
     using System.Collections.Generic;
+    using System.ComponentModel;
     using EncosyTower.Data;
     using EncosyTower.Databases;
     using EncosyTower.Initialization;
@@ -210,6 +211,7 @@ namespace Samples.Data.Enemies
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
+        [SerializeField] private EnemyType _type;
         [SerializeField] private StatData _stat;
         [SerializeField] private HashSet<int> _intSet;
         [SerializeField] private Queue<float> _floatQueue;
@@ -220,7 +222,14 @@ namespace Samples.Data.Enemies
         }
     }
 
-    public abstract class EnemyDataTableAsset<T> : DataTableAsset<IdData, T> where T : IDataWithId<IdData>
+    public enum EnemyType : byte
+    {
+        [Description("N")] Normal = 0,
+        [Description("E")] Elite = 1,
+        [Description("B")] Boss = 2,
+    }
+
+    public abstract class EnemyDataTableAsset<T> : DataTableAssetBase<IdData, T> where T : IDataWithId<IdData>
     {
     }
 

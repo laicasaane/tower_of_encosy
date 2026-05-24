@@ -28,7 +28,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             var authorAttrib = context.Attributes[0];
 
-            if (authorAttrib.ConstructorArguments.Length != 1
+            if (authorAttrib.ConstructorArguments.Length < 1
                 || authorAttrib.ConstructorArguments[0].Kind != TypedConstantKind.Type
                 || authorAttrib.ConstructorArguments[0].Value is not INamedTypeSymbol databaseSymbol
                 || databaseSymbol.GetAttribute(DATABASE_ATTRIBUTE) is not AttributeData databaseAttrib
@@ -69,6 +69,15 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
 
             var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
+
+            foreach (var arg in authorAttrib.ConstructorArguments)
+            {
+                if (arg.Kind == TypedConstantKind.Array)
+                {
+                    BuildConverterMap(arg.Values, dbConverterMap);
+                    break;
+                }
+            }
 
             foreach (var arg in databaseAttrib.ConstructorArguments)
             {
