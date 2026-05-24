@@ -55,6 +55,7 @@
 *.opendb
 *.VC.db
 .leu
+*.lscache
 
 # All .DS_Store files for macOS
 *.DS_Store
@@ -121,3 +122,4 @@ crashlytics-build.properties
 
 # Other generated contents
 .gitnexus
+.playwright-cli
