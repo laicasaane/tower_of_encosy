@@ -405,13 +405,25 @@ namespace EncosyTower.Databases.Settings.Views
 
         private void TryDisplayCredentialFileHelp(string relativePath)
         {
-            _credentialFileValid = DisplayIfFileNotExist(_credentialFileHelp, relativePath);
+            if (_authenticationEnum.value is AuthenticationType authentication
+                && authentication == AuthenticationType.OAuth
+            )
+            {
+                _credentialFileValid = DisplayIfFileNotExist(_credentialFileHelp, relativePath);
+            }
+
             RefreshDownloadButton();
         }
 
         private void TryDisplayApiKeyFileHelp(string relativePath)
         {
-            _apiKeyFileValid = DisplayIfFileNotExist(_apiKeyFileHelp, relativePath);
+            if (_authenticationEnum.value is AuthenticationType authentication
+                && authentication == AuthenticationType.ApiKey
+            )
+            {
+                _apiKeyFileValid = DisplayIfFileNotExist(_apiKeyFileHelp, relativePath);
+            }
+
             RefreshDownloadButton();
         }
 
