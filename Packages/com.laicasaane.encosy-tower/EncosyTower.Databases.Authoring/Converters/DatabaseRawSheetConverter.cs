@@ -21,7 +21,7 @@ namespace EncosyTower.Databases.Authoring
             , bool splitHeader = false
             , int emptyRowStreakThreshold = 5
         )
-            : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
+            : base(emptyRowStreakThreshold)
         {
             SplitHeader = splitHeader;
         }

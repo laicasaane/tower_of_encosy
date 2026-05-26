@@ -1,5 +1,5 @@
-using System;
 using Cathei.BakingSheet;
+using EncosyTower.Data;
 using EncosyTower.Databases.Authoring;
 
 namespace EncosyTower.Databases.Settings
@@ -12,15 +12,15 @@ namespace EncosyTower.Databases.Settings
 
             public override string ProgressTitle => PROGRESS_TITLE;
 
-            protected override ISheetImporter GetImporter(string inputFolderPath, TimeZoneInfo timeZone)
+            protected override ISheetImporter GetImporter(string inputFolderPath)
             {
+                var convertingCtx = DataConvertingContext.Default;
+
                 return new DatabaseCsvSheetConverter(
                       inputFolderPath
-                    , timeZone
                     , extension
                     , fileSystem: null
                     , splitHeader
-                    , formatProvider: null
                     , emptyRowStreakThreshold
                     , includeSubFolders
                     , includeCommentedFiles

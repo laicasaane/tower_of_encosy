@@ -1,6 +1,5 @@
-﻿// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
+// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +10,8 @@ using NReco.Csv;
 
 namespace EncosyTower.Databases.Authoring
 {
+    using DCC = EncosyTower.Data.DataConvertingContext;
+
     public class DatabaseCsvSheetConverter : DatabaseRawSheetConverter
     {
         private readonly Dictionary<string, List<Page>> _pages = new();
@@ -22,16 +23,14 @@ namespace EncosyTower.Databases.Authoring
 
         public DatabaseCsvSheetConverter(
               string loadPath
-            , TimeZoneInfo timeZoneInfo = null
             , string extension = "csv"
             , IExtendedFileSystem fileSystem = null
             , bool splitHeader = false
-            , IFormatProvider formatProvider = null
             , int emptyRowStreakThreshold = 5
             , bool includeSubFolders = true
             , bool includeCommentedFiles = false
         )
-            : base(timeZoneInfo, formatProvider, splitHeader, emptyRowStreakThreshold)
+            : base(DCC.Default.TimeZoneInfo, DCC.Default.FormatProvider, splitHeader, emptyRowStreakThreshold)
         {
             _loadPath = loadPath;
             _extension = extension;

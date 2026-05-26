@@ -1,6 +1,5 @@
 // BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -34,11 +33,9 @@ namespace EncosyTower.Databases.Authoring
               [NotNull] string spreadsheetId
             , [NotNull] string credential
             , [NotNull] string applicationName
-            , TimeZoneInfo timeZoneInfo = null
-            , IFormatProvider formatProvider = null
             , int emptyRowStreakThreshold = 5
         )
-            : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
+            : base(emptyRowStreakThreshold)
         {
             SpreadsheetId = spreadsheetId;
 
@@ -53,11 +50,9 @@ namespace EncosyTower.Databases.Authoring
         public DatabaseGoogleSheetConverter(
               [NotNull] string spreadsheetId
             , [NotNull] BaseClientService.Initializer initializer
-            , TimeZoneInfo timeZoneInfo = null
-            , IFormatProvider formatProvider = null
             , int emptyRowStreakThreshold = 5
         )
-            : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
+            : base(emptyRowStreakThreshold)
         {
             SpreadsheetId = spreadsheetId;
 

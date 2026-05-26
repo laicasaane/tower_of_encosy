@@ -29,13 +29,11 @@ namespace EncosyTower.Databases.Settings
                 , out string tokenFolderPath
                 , out string credentialText
                 , out ClientSecrets secrets
-                , out TimeZoneInfo timeZone
                 , out FileDatabaseAuthoring.SheetContainer fileContainer
             )
             {
                 fileContainer = new FileDatabaseAuthoring.SheetContainer();
                 tokenFolderPath = GetCredentialTokenFolderPath(rootPath, databaseAssetName);
-                timeZone = TimeZoneInfo.Utc;
                 secrets = default;
 
                 var secretsFilePath = authentication == AuthenticationType.OAuth

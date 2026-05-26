@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cathei.BakingSheet;
+using EncosyTower.Data;
 using EncosyTower.Databases.Authoring.SourceGen;
 using EncosyTower.UnityExtensions;
 using Microsoft.Extensions.Logging;
@@ -35,9 +35,9 @@ namespace EncosyTower.Databases.Authoring
             _databaseName = databaseName;
         }
 
-        public TimeZoneInfo TimeZoneInfo => TimeZoneInfo.Utc;
+        public TimeZoneInfo TimeZoneInfo => DataConvertingContext.Default.TimeZoneInfo;
 
-        public IFormatProvider FormatProvider => CultureInfo.InvariantCulture;
+        public IFormatProvider FormatProvider => DataConvertingContext.Default.FormatProvider;
 
         public TDatabaseAsset Result { get; private set; }
 

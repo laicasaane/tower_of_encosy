@@ -29,7 +29,6 @@ namespace EncosyTower.Databases.Settings
                     , out var tokenFolderPath
                     , out var credentialText
                     , out var secrets
-                    , out var timeZone
                     , out var fileContainer
                 );
 
@@ -61,8 +60,6 @@ namespace EncosyTower.Databases.Settings
                 var fileConverter = new DatabaseGoogleSheetConverter(
                       spreadsheetId
                     , initializer
-                    , timeZone
-                    , formatProvider: null
                     , emptyRowStreakThreshold
                 );
 
@@ -84,8 +81,6 @@ namespace EncosyTower.Databases.Settings
                         converters.Add(new DatabaseGoogleSheetConverter(
                               row.FileId
                             , initializer
-                            , timeZone
-                            , formatProvider: null
                             , emptyRowStreakThreshold
                         ));
                     }
@@ -135,7 +130,6 @@ namespace EncosyTower.Databases.Settings
                     , out var tokenFolderPath
                     , out var credentialText
                     , out var secrets
-                    , out var timeZone
                     , out var fileContainer
                 );
 
@@ -167,8 +161,6 @@ namespace EncosyTower.Databases.Settings
                 var fileConverter = new DatabaseGoogleSheetConverter(
                       spreadsheetId
                     , initializer
-                    , timeZone
-                    , formatProvider: null
                     , emptyRowStreakThreshold
                 );
 

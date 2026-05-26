@@ -82,7 +82,7 @@ namespace EncosyTower.Databases.Settings
                 );
             }
 
-            protected abstract ISheetImporter GetImporter(string inputFolderPath, TimeZoneInfo timeZone);
+            protected abstract ISheetImporter GetImporter(string inputFolderPath);
 
             private async Task<bool> ConvertAsync(
                   RootPath rootPath
@@ -94,7 +94,7 @@ namespace EncosyTower.Databases.Settings
                 try
                 {
                     var inputFolderPath = rootPath.GetFolderAbsolutePath(inputRelativeFolderPath);
-                    var converter = GetImporter(inputFolderPath, TimeZoneInfo.Utc);
+                    var converter = GetImporter(inputFolderPath);
 
                     await sheetContainer.Bake(converter).ConfigureAwait(continueOnCapturedContext);
 

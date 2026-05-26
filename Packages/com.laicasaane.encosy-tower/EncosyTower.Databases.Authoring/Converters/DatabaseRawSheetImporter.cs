@@ -2,13 +2,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cathei.BakingSheet;
 using Cathei.BakingSheet.Internal;
 using Cathei.BakingSheet.Raw;
+using EncosyTower.Data;
 using EncosyTower.Databases.Authoring.SourceGen;
 using EncosyTower.Naming;
 using Microsoft.Extensions.Logging;
@@ -22,20 +22,14 @@ namespace EncosyTower.Databases.Authoring
     {
         private bool _isLoaded;
 
-        public DatabaseRawSheetImporter(
-              TimeZoneInfo timeZoneInfo
-            , IFormatProvider formatProvider
-            , int emptyRowStreakThreshold
-        )
+        public DatabaseRawSheetImporter(int emptyRowStreakThreshold)
         {
-            TimeZoneInfo = timeZoneInfo ?? TimeZoneInfo.Utc;
-            FormatProvider = formatProvider ?? CultureInfo.InvariantCulture;
             EmptyRowStreakThreshold = emptyRowStreakThreshold;
         }
 
-        public TimeZoneInfo TimeZoneInfo { get; }
+        public TimeZoneInfo TimeZoneInfo => DataConvertingContext.Default.TimeZoneInfo;
 
-        public IFormatProvider FormatProvider { get; }
+        public IFormatProvider FormatProvider => DataConvertingContext.Default.FormatProvider;
 
         public int EmptyRowStreakThreshold { get; }
 

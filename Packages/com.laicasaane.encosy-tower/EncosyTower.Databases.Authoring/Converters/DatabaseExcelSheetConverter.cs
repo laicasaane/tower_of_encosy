@@ -23,15 +23,13 @@ namespace EncosyTower.Databases.Authoring
 
         public DatabaseExcelSheetConverter(
               string loadPath
-            , TimeZoneInfo timeZoneInfo = null
             , string extension = "xlsx"
             , IExtendedFileSystem fileSystem = null
-            , IFormatProvider formatProvider = null
             , int emptyRowStreakThreshold = 5
             , bool includeSubFolders = true
             , bool includeCommentedFiles = false
         )
-            : base(timeZoneInfo, formatProvider, emptyRowStreakThreshold)
+            : base(emptyRowStreakThreshold)
         {
             _loadPath = loadPath;
             _extension = extension;
