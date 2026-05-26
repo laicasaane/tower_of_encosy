@@ -75,6 +75,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 WriteToCollectionMethod(ref p, dataMap, propRefs);
                 WriteToCollectionMethod(ref p, dataMap, fieldRefs);
+
+                WriteSheetValueConverters(ref p);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -317,9 +319,81 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
+                if (member.sheetConverter.kind != ConverterKind.None)
+                {
+                    var converter = member.sheetConverter;
+                    var hash = HashValue64.FNV1a(converter.converterTypeFullName);
+
+                    p.PrintBeginLine("[CBS.SheetValueConverter(typeof(__SheetValueConverter_")
+                        .Print(member.type.simpleName.ToValidIdentifier()).Print('_').Print(hash)
+                        .PrintEndLine("))]");
+                }
+
                 p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(member.propertyName)
                     .PrintEndLine(" { get; private set; }");
                 p.PrintEndLine();
+            }
+        }
+
+        private readonly void WriteSheetValueConverters(ref Printer p)
+        {
+            var hashes = new HashSet<ulong>();
+
+            foreach (var layer in baseTypeLayers)
+            {
+                WriteSheetValueConverter(ref p, layer.propRefs, hashes);
+                WriteSheetValueConverter(ref p, layer.fieldRefs, hashes);
+            }
+
+            WriteSheetValueConverter(ref p, propRefs, hashes);
+            WriteSheetValueConverter(ref p, fieldRefs, hashes);
+
+            static void WriteSheetValueConverter(
+                  ref Printer p
+                , EquatableArray<MemberSpec> members
+                , HashSet<ulong> hashes
+            )
+            {
+                foreach (var member in members)
+                {
+                    var converter = member.sheetConverter;
+
+                    if (converter.kind == ConverterKind.None)
+                    {
+                        continue;
+                    }
+
+                    var hash = HashValue64.FNV1a(converter.converterTypeFullName);
+
+                    if (hashes.Add(hash) == false)
+                    {
+                        continue;
+                    }
+
+                    var targetType = member.SelectType().fullName;
+
+                    p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
+                    p.PrintBeginLine("public sealed class ").Print("__SheetValueConverter_")
+                        .Print(member.type.simpleName.ToValidIdentifier()).Print('_').Print(hash)
+                        .Print(" : CBS.SheetValueConverter<").Print(targetType).PrintEndLine(">");
+                    p.OpenScope();
+                    {
+                        p.PrintLine(PR_AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("protected override ").Print(targetType)
+                            .PrintEndLine(" StringToValue(S.Type type, string value, CBS.SheetValueConvertingContext context)");
+                        p.WithIncreasedIndent()
+                            .PrintBeginLine("=> ").Print(converter.Convert("value")).PrintEndLine(";");
+                        p.PrintEndLine();
+
+                        p.PrintLine(PR_AGGRESSIVE_INLINING);
+                        p.PrintBeginLine("protected override string ValueToString(S.Type type, ")
+                            .Print(targetType).PrintEndLine(" value, CBS.SheetValueConvertingContext context)");
+                        p.WithIncreasedIndent()
+                            .PrintBeginLine("=> S.Convert.ToString(value, context.FormatProvider) ?? string.Empty;").PrintEndLine();
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+                }
             }
         }
 

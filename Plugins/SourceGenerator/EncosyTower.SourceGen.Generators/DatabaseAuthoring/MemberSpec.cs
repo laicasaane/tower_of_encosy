@@ -8,6 +8,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public TypeSpec type;
         public CollectionSpec collection;
         public ConverterSpec converter;
+        public ConverterSpec sheetConverter;
 
         public readonly TypeSpec SelectType()
             => converter.kind == ConverterKind.None ? type : converter.sourceType;
@@ -20,12 +21,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && type.Equals(other.type)
             && collection.Equals(other.collection)
             && converter.Equals(other.converter)
+            && sheetConverter.Equals(other.sheetConverter)
             ;
 
         public readonly override bool Equals(object obj)
             => obj is MemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(propertyName, type, collection, converter);
+            => HashValue.Combine(propertyName, type, collection, converter, sheetConverter);
     }
 }

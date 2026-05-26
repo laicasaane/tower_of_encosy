@@ -211,7 +211,8 @@ namespace Samples.Data.Enemies
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
-        [SerializeField, DataConverter(typeof(CustomEnemyConverter))] private EnemyType _type;
+        [property: DataConverter(typeof(EnemyTypeExConverter))]
+        [SerializeField] private EnemyTypeEx _type;
         [SerializeField] private StatData _stat;
         [SerializeField] private HashSet<int> _intSet;
         [SerializeField] private Queue<float> _floatQueue;
@@ -222,15 +223,22 @@ namespace Samples.Data.Enemies
         }
     }
 
-    public struct CustomEnemyConverter
+    public struct EnemyTypeExConverter
     {
-        public readonly EnemyType Convert(string value)
+        public readonly EnemyTypeEx Convert(EnemyType value)
         {
-            return EnemyType.Normal;
+            return (EnemyTypeEx)value;
         }
     }
 
     public enum EnemyType : byte
+    {
+        [Description("N")] Normal = 0,
+        [Description("E")] Elite = 1,
+        [Description("B")] Boss = 2,
+    }
+
+    public enum EnemyTypeEx : byte
     {
         [Description("N")] Normal = 0,
         [Description("E")] Elite = 1,
