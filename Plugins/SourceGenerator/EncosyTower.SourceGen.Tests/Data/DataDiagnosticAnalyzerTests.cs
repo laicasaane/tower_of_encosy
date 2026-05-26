@@ -94,7 +94,7 @@ public class DataDiagnosticAnalyzerTests
                   [EncosyTower.Data.DataFieldPolicy(EncosyTower.Data.DataFieldPolicy.Private)]
                   public partial class {|#0:Foo|} { }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.CannotDecorateImmutableDataWithFieldPolicyAttribute)
+            , new DiagnosticResult(DataDiagnosticAnalyzer.CannotDecorateImmutableDataWithFieldPolicyAttribute)
                 .WithLocation(0)
                 .WithArguments("Foo")
         );
@@ -109,7 +109,7 @@ public class DataDiagnosticAnalyzerTests
                       [UnityEngine.SerializeField] public int {|#0:_x|};
                   }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.ImmutableDataFieldMustBePrivate)
+            , new DiagnosticResult(DataDiagnosticAnalyzer.ImmutableDataFieldMustBePrivate)
                 .WithLocation(0)
                 .WithArguments("Foo")
         );
@@ -124,7 +124,7 @@ public class DataDiagnosticAnalyzerTests
                       public int {|#0:X|} { get; set; }
                   }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.OnlyPrivateOrInitOnlySetterIsAllowed)
+            , new DiagnosticResult(DataDiagnosticAnalyzer.OnlyPrivateOrInitOnlySetterIsAllowed)
                 .WithLocation(0)
                 .WithArguments("Foo")
         );
@@ -140,7 +140,7 @@ public class DataDiagnosticAnalyzerTests
                       public int {|#0:X|} { get; set; }
                   }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.OnlyPrivateOrInitOnlySetterIsAllowed)
+            , new DiagnosticResult(DataDiagnosticAnalyzer.OnlyPrivateOrInitOnlySetterIsAllowed)
                 .WithLocation(0)
                 .WithArguments("Foo")
         );
@@ -155,9 +155,28 @@ public class DataDiagnosticAnalyzerTests
                       [UnityEngine.SerializeField] private int[] {|#0:_id|};
                   }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.CollectionIsNotApplicableForProperty)
+            , new DiagnosticResult(DataDiagnosticAnalyzer.CollectionIsNotApplicableForProperty)
                 .WithLocation(0)
                 .WithArguments("", "Id")
+        );
+
+    [TestMethod]
+    public Task DataConverterOnSerializedField_ReportsIgnoredByBakingSheet()
+        => RunAsync(
+              """
+                  [EncosyTower.Data.Data]
+                  public partial class Foo
+                  {
+                      [UnityEngine.SerializeField]
+                      [{|#0:EncosyTower.Data.DataConverter(typeof(IntConverter))|}]
+                      private int _value;
+                  }
+
+                  public sealed class IntConverter { }
+              """
+            , new DiagnosticResult(DataDiagnosticAnalyzer.DataConverterOnFieldWillBeIgnoredByBakingSheet)
+                .WithLocation(0)
+                .WithArguments("_value")
         );
 
     [TestMethod]
@@ -171,7 +190,7 @@ public class DataDiagnosticAnalyzerTests
                       public int[] {|#0:Id|} { get; private set; }
                   }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.CollectionIsNotApplicableForProperty)
+            , new DiagnosticResult(DataDiagnosticAnalyzer.CollectionIsNotApplicableForProperty)
                 .WithLocation(0)
                 .WithArguments("", "Id")
         );

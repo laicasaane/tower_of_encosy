@@ -66,6 +66,13 @@ internal static class DataAnalyzerStubs
                 public System.Type FieldType { get; }
             }
 
+            [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false)]
+            public sealed class DataConverterAttribute : System.Attribute
+            {
+                public DataConverterAttribute(System.Type type) { }
+                public System.Type Type { get; }
+            }
+
             [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
             public sealed class DataWithoutIdAttribute : System.Attribute { }
         }

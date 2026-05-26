@@ -10,12 +10,63 @@ namespace EncosyTower.SourceGen.Analyzers.Data
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     internal sealed class DataDiagnosticAnalyzer : DiagnosticAnalyzer
     {
+        public static readonly DiagnosticDescriptor CannotDecorateImmutableDataWithFieldPolicyAttribute = new(
+              id: "SG_DATA_0001"
+            , title: "Cannot decorate immutable data with [DataFieldPolicy] attribute"
+            , messageFormat: "\"{0}\" is immutable thus cannot be decorated with [DataFieldPolicy] attribute (are you missing [DataMutable] attribute?)"
+            , category: "DataGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "The data type must already decorated with [DataMutable] to be able have [DataFieldPolicy]."
+        );
+
+        public static readonly DiagnosticDescriptor ImmutableDataFieldMustBePrivate = new(
+              id: "SG_DATA_0002"
+            , title: "Fields of immutable data must be private"
+            , messageFormat: "\"{0}\" is immutable thus its fields must be private (are you missing [DataMutable] attribute?)"
+            , category: "DataGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "The data type must already decorated with [DataMutable] to be able have non-private fields."
+        );
+
+        public static readonly DiagnosticDescriptor OnlyPrivateOrInitOnlySetterIsAllowed = new(
+              id: "SG_DATA_0003"
+            , title: "Only private setter or init-only setter is allowed because the type is either immutable or decorated with [DataMutable(withoutPropertySetter: true)]"
+            , messageFormat: "Only private setter or init-only setter is allowed because \"{0}\" is either immutable or decorated with [DataMutable(withoutPropertySetter: true)]"
+            , category: "DataGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Use private setter, or init-only setter, or decorate the type with [DataMutable(withoutPropertySetter: false)]."
+        );
+
+        public static readonly DiagnosticDescriptor CollectionIsNotApplicableForProperty = new(
+              id: "SG_DATA_0004"
+            , title: "Collection type is not applicable for the property"
+            , messageFormat: "Type \"{0}\" is a collection thus it is not applicable for the \"{1}\" property"
+            , category: "DataGenerator"
+            , defaultSeverity: DiagnosticSeverity.Warning
+            , isEnabledByDefault: true
+            , description: "Collection type is not applicable for the property."
+        );
+
+        public static readonly DiagnosticDescriptor DataConverterOnFieldWillBeIgnoredByBakingSheet = new(
+              id: "SG_DATA_0005"
+            , title: "[DataConverter] on a serialized field will be ignored by the BakingSheet authoring pipeline"
+            , messageFormat: "[DataConverter] on field \"{0}\" will be ignored by the BakingSheet authoring pipeline; use [property: DataConverter(...)] instead"
+            , category: "DataGenerator"
+            , defaultSeverity: DiagnosticSeverity.Warning
+            , isEnabledByDefault: true
+            , description: "Data converters for serialized fields must target the generated property to be used by the BakingSheet authoring pipeline."
+        );
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                  DiagnosticDescriptors.CannotDecorateImmutableDataWithFieldPolicyAttribute
-                , DiagnosticDescriptors.ImmutableDataFieldMustBePrivate
-                , DiagnosticDescriptors.OnlyPrivateOrInitOnlySetterIsAllowed
-                , DiagnosticDescriptors.CollectionIsNotApplicableForProperty
+                  CannotDecorateImmutableDataWithFieldPolicyAttribute
+                , ImmutableDataFieldMustBePrivate
+                , OnlyPrivateOrInitOnlySetterIsAllowed
+                , CollectionIsNotApplicableForProperty
+                , DataConverterOnFieldWillBeIgnoredByBakingSheet
             );
 
         public override void Initialize(AnalysisContext context)
@@ -48,7 +99,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             if (isMutable == false && fieldPolicyAttrib != null)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
-                      DiagnosticDescriptors.CannotDecorateImmutableDataWithFieldPolicyAttribute
+                      CannotDecorateImmutableDataWithFieldPolicyAttribute
                     , typeLocation
                     , typeSymbol.Name
                 ));
@@ -137,6 +188,21 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 return;
             }
 
+            if (field.GetAttribute(DATA_CONVERTER_ATTRIBUTE) is { } converterAttrib)
+            {
+                var converterLocation = converterAttrib.ApplicationSyntaxReference != null
+                    ? converterAttrib.ApplicationSyntaxReference.GetSyntax(context.CancellationToken).GetLocation()
+                    : field.Locations.Length > 0
+                        ? field.Locations[0]
+                        : Location.None;
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      DataConverterOnFieldWillBeIgnoredByBakingSheet
+                    , converterLocation
+                    , field.Name
+                ));
+            }
+
             if (isMutable == false
                 && field.DeclaredAccessibility != Accessibility.Private
             )
@@ -146,7 +212,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                     : Location.None;
 
                 context.ReportDiagnostic(Diagnostic.Create(
-                      DiagnosticDescriptors.ImmutableDataFieldMustBePrivate
+                      ImmutableDataFieldMustBePrivate
                     , fieldLocation
                     , typeSymbol.Name
                 ));
@@ -168,7 +234,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                     : Location.None;
 
                 context.ReportDiagnostic(Diagnostic.Create(
-                      DiagnosticDescriptors.CollectionIsNotApplicableForProperty
+                      CollectionIsNotApplicableForProperty
                     , fieldLocation
                     , field.Type.Name
                     , "Id"
@@ -195,7 +261,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                     : Location.None;
 
                 context.ReportDiagnostic(Diagnostic.Create(
-                      DiagnosticDescriptors.OnlyPrivateOrInitOnlySetterIsAllowed
+                      OnlyPrivateOrInitOnlySetterIsAllowed
                     , propLocation
                     , typeSymbol.Name
                 ));
@@ -212,7 +278,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                     : Location.None;
 
                 context.ReportDiagnostic(Diagnostic.Create(
-                      DiagnosticDescriptors.CollectionIsNotApplicableForProperty
+                      CollectionIsNotApplicableForProperty
                     , propLocation
                     , property.Type.Name
                     , "Id"
