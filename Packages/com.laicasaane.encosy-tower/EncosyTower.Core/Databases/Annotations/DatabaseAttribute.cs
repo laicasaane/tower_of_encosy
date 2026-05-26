@@ -1,4 +1,5 @@
 using System;
+using EncosyTower.Core;
 using EncosyTower.Naming;
 
 namespace EncosyTower.Databases
@@ -18,11 +19,20 @@ namespace EncosyTower.Databases
     /// that the target property should use a horizontal list.
     /// </para>
     /// </remarks>
+    [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class DatabaseAttribute : Attribute
     {
         public NamingStrategy NamingStrategy { get; }
 
+        /// <remarks>
+        /// Converter precedences (smaller index means higher precedence):
+        /// <list type="number">
+        /// <item><see cref="EncosyTower.Data.DataConverterAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
+        /// </list>
+        /// </remarks>
         public Type[] Converters { get; }
 
         public string AssetName { get; set; }

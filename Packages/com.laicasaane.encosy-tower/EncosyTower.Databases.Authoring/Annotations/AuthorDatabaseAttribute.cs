@@ -29,6 +29,14 @@ namespace EncosyTower.Databases.Authoring
         /// </summary>
         public Type DatabaseType { get; }
 
+        /// <remarks>
+        /// Converter precedences (smaller index means higher precedence):
+        /// <list type="number">
+        /// <item><see cref="EncosyTower.Data.DataConverterAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
+        /// </list>
+        /// </remarks>
         public Type[] Converters { get; }
 
         /// <summary>

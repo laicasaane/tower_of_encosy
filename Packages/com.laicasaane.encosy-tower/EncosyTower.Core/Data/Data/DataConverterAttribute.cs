@@ -1,15 +1,24 @@
 using System;
+using EncosyTower.Core;
 
 namespace EncosyTower.Data
 {
     /// <summary>
     /// Instructs the source generator to use a custom converter for the annotated property or field
-    /// in the authoring pipeline.
+    /// in the authoring pipeline via Baking Sheet.
     /// </summary>
     /// <remarks>
     /// <para>
     /// <see cref="Type"/> must define a public <c>Convert</c> method that takes a single parameter
     /// and returns a value whose type matches the annotated member.
+    /// </para>
+    /// <para>
+    /// Converter precedences (smaller index means higher precedence):
+    /// <list type="number">
+    /// <item><see cref="EncosyTower.Data.DataConverterAttribute"/></item>
+    /// <item><see cref="EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"/></item>
+    /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
+    /// </list>
     /// </para>
     /// </remarks>
     /// <example>
@@ -30,6 +39,7 @@ namespace EncosyTower.Data
     /// }
     /// </code>
     /// </example>
+    [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class DataConverterAttribute : Attribute
     {
