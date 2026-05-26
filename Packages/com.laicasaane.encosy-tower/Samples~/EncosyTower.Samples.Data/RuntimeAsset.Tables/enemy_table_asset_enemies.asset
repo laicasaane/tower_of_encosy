@@ -19,15 +19,37 @@ MonoBehaviour:
         _subId: 1
       _rarity: 1
     _name: Wolf
+    _type: 0
     _stat:
       _hp: 1
       _atk: 1
   - _id:
       _entityId:
         _kind: Enemy
-        _subId: 1
-      _rarity: 2
+        _subId: 2
+      _rarity: 1
     _name: Goblin
+    _type: 0
     _stat:
       _hp: 2
       _atk: 2
+  - _id:
+      _entityId:
+        _kind: Enemy
+        _subId: 2
+      _rarity: 2
+    _name: Hob Goblin
+    _type: 1
+    _stat:
+      _hp: 3
+      _atk: 3
+  - _id:
+      _entityId:
+        _kind: Enemy
+        _subId: 2
+      _rarity: 3
+    _name: King Goblin
+    _type: 2
+    _stat:
+      _hp: 5
+      _atk: 5
