@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.NewtonsoftAotHelpers;
 using EncosyTower.SourceGen.Tests.Data;
 using Microsoft.CodeAnalysis.CSharp.Testing;

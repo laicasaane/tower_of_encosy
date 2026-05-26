@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;

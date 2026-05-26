@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;

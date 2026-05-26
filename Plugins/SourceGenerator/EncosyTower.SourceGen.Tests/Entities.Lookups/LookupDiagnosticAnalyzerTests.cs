@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.Entities.Lookups;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;

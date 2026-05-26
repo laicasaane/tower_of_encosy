@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.DataTableAssets;
 using EncosyTower.SourceGen.Tests.Data;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -77,7 +76,7 @@ public class DataTableAssetAnalyzerTests
                   [EncosyTower.Databases.DataTableAsset]
                   public partial class {|#0:Asset|} : EncosyTower.Databases.DataTableAsset<System.IComparable, Data> { }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.MustBeApplicableForTypeArgument)
+            , new DiagnosticResult(DataTableAssetAnalyzer.MustBeApplicableForTypeArgument)
                 .WithLocation(0)
                 .WithArguments("IComparable", "TDataId")
         );
@@ -91,7 +90,7 @@ public class DataTableAssetAnalyzerTests
                   [EncosyTower.Databases.DataTableAsset]
                   public partial class {|#0:Asset|} : EncosyTower.Databases.DataTableAsset<Id, System.IDisposable> { }
               """
-            , new DiagnosticResult(DiagnosticDescriptors.MustBeApplicableForTypeArgument)
+            , new DiagnosticResult(DataTableAssetAnalyzer.MustBeApplicableForTypeArgument)
                 .WithLocation(0)
                 .WithArguments("IDisposable", "TData")
         );

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.DatabaseAuthoring;
 using EncosyTower.SourceGen.Tests.Databases;
 using Microsoft.CodeAnalysis.CSharp.Testing;

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.PolyEnumStructs;
 using EncosyTower.SourceGen.Tests.EnumExtensions;
 using Microsoft.CodeAnalysis.CSharp.Testing;

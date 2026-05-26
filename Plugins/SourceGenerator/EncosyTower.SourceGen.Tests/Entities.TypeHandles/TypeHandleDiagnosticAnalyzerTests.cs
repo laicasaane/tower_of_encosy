@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using EncosyTower.SourceGen.Analyzers.Entities.TypeHandles;
 using EncosyTower.SourceGen.Generators.Entities.TypeHandles;
 using Microsoft.CodeAnalysis.CSharp.Testing;

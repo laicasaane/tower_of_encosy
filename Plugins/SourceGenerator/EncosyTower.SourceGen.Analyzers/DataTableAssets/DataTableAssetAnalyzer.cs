@@ -10,8 +10,18 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
         private const string DATA_TABLE_ASSET = "global::EncosyTower.Databases.DataTableAsset";
         private const string DATA_TABLE_ASSET_ATTRIBUTE = "EncosyTower.Databases.DataTableAssetAttribute";
 
+        public static readonly DiagnosticDescriptor MustBeApplicableForTypeArgument = new(
+              id: "SG_DATA_TABLE_ASSET_0001"
+            , title: "Must be either a struct, a class or an enum to replace type argument"
+            , messageFormat: "Type \"{0}\" is not applicable to replace \"{1}\", must be either a struct, a class or an enum"
+            , category: "DataTableAssetGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: "Must be either a struct, a class or an enum."
+        );
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
-            => ImmutableArray.Create(DiagnosticDescriptors.MustBeApplicableForTypeArgument);
+            => ImmutableArray.Create(MustBeApplicableForTypeArgument);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -69,7 +79,7 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
                         if (idType.TypeKind is not (TypeKind.Struct or TypeKind.Class or TypeKind.Enum))
                         {
                             context.ReportDiagnostic(Diagnostic.Create(
-                                  DiagnosticDescriptors.MustBeApplicableForTypeArgument
+                                  MustBeApplicableForTypeArgument
                                 , typeLocation
                                 , idType.Name
                                 , "TDataId"
@@ -79,7 +89,7 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
                         if (dataType.TypeKind is not (TypeKind.Struct or TypeKind.Class or TypeKind.Enum))
                         {
                             context.ReportDiagnostic(Diagnostic.Create(
-                                  DiagnosticDescriptors.MustBeApplicableForTypeArgument
+                                  MustBeApplicableForTypeArgument
                                 , typeLocation
                                 , dataType.Name
                                 , "TData"
