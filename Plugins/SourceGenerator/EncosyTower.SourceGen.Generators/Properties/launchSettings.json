@@ -2,7 +2,7 @@
   "profiles": {
     "EncosyTower.SourceGen": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../EncosyTower.SourceGen.Tests/EncosyTower.SourceGen.Tests.csproj"
+      "targetProject": "../Samples/Samples.DatabaseAuthoring/Samples.DatabaseAuthoring.csproj"
     }
   }
 }
