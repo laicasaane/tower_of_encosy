@@ -449,16 +449,30 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 {
                     if (multipleStatic == false)
                     {
-                        if (staticMethod != null) { staticMethod = null; multipleStatic = true; }
-                        else staticMethod = method;
+                        if (staticMethod != null)
+                        {
+                            staticMethod = null;
+                            multipleStatic = true;
+                        }
+                        else
+                        {
+                            staticMethod = method;
+                        }
                     }
                 }
                 else
                 {
                     if (multipleInstance == false)
                     {
-                        if (instanceMethod != null) { instanceMethod = null; multipleInstance = true; }
-                        else instanceMethod = method;
+                        if (instanceMethod != null)
+                        {
+                            instanceMethod = null;
+                            multipleInstance = true;
+                        }
+                        else
+                        {
+                            instanceMethod = method;
+                        }
                     }
                 }
             }
@@ -475,8 +489,13 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             if (convertMethod == null)
             {
                 var desc = returnType != null ? MissingConvertMethod : MissingConvertMethodReturnType;
-                context.ReportDiagnostic(Diagnostic.Create(desc, location, converterType.Name,
-                      returnType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? string.Empty));
+                context.ReportDiagnostic(Diagnostic.Create(
+                    desc
+                    , location
+                    , converterType.Name
+                    , returnType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? string.Empty
+                ));
+
                 return false;
             }
 
@@ -488,12 +507,16 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 DiagnosticDescriptor desc;
 
                 if (convertMethod.IsStatic)
+                {
                     desc = returnType != null ? InvalidStaticConvertMethodReturnType : InvalidStaticConvertMethod;
+                }
                 else
+                {
                     desc = returnType != null ? InvalidInstancedConvertMethodReturnType : InvalidInstancedConvertMethod;
+                }
 
                 context.ReportDiagnostic(Diagnostic.Create(
-                    desc
+                      desc
                     , location
                     , converterType.Name
                     , returnType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? string.Empty
