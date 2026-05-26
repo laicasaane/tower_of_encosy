@@ -466,11 +466,11 @@ namespace EncosyTower.SourceGen
             return false;
         }
 
-        public static bool HasAttribute(this ISymbol typeSymbol, string fullyQualifiedAttributeName)
+        public static bool HasAttribute(this ISymbol symbol, string fullyQualifiedAttributeName)
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            var attributes = typeSymbol.GetAttributes();
+            var attributes = symbol.GetAttributes();
 
             foreach (var attribute in attributes)
             {
@@ -483,19 +483,19 @@ namespace EncosyTower.SourceGen
             return false;
         }
 
-        public static bool TryGetAttribute(this ISymbol typeSymbol, string fullyQualifiedAttributeName, out AttributeData result)
+        public static bool TryGetAttribute(this ISymbol symbol, string fullyQualifiedAttributeName, out AttributeData result)
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            result = typeSymbol.GetAttribute(fullyQualifiedAttributeName);
+            result = symbol.GetAttribute(fullyQualifiedAttributeName);
             return result != null;
         }
 
-        public static AttributeData GetAttribute(this ISymbol typeSymbol, string fullyQualifiedAttributeName)
+        public static AttributeData GetAttribute(this ISymbol symbol, string fullyQualifiedAttributeName)
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            var attributes = typeSymbol.GetAttributes();
+            var attributes = symbol.GetAttributes();
 
             foreach (var attribute in attributes)
             {
@@ -508,15 +508,16 @@ namespace EncosyTower.SourceGen
             return default;
         }
 
-        public static IEnumerable<AttributeData> GetAttributes(this ISymbol typeSymbol, string fullyQualifiedAttributeName)
+        public static IEnumerable<AttributeData> GetAttributes(this ISymbol symbol, string fullyQualifiedAttributeName)
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            return typeSymbol.GetAttributes()
+            return symbol.GetAttributes()
                 .Where(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName));
         }
 
-        public static IEnumerable<AttributeData> GetAttributes(this ISymbol typeSymbol
+        public static IEnumerable<AttributeData> GetAttributes(
+              this ISymbol symbol
             , string fullyQualifiedAttributeName1
             , string fullyQualifiedAttributeName2
         )
@@ -524,19 +525,19 @@ namespace EncosyTower.SourceGen
             fullyQualifiedAttributeName1 = PrependGlobalIfMissing(fullyQualifiedAttributeName1);
             fullyQualifiedAttributeName2 = PrependGlobalIfMissing(fullyQualifiedAttributeName2);
 
-            return typeSymbol.GetAttributes()
+            return symbol.GetAttributes()
                 .Where(attribute => {
                     var attrClass = attribute.AttributeClass;
                     return attrClass.HasFullName(fullyQualifiedAttributeName1) || attrClass.HasFullName(fullyQualifiedAttributeName2);
                 });
         }
 
-        public static bool HasAttributeOrFieldWithAttribute(this ITypeSymbol typeSymbol, string fullyQualifiedAttributeName)
+        public static bool HasAttributeOrFieldWithAttribute(this ITypeSymbol symbol, string fullyQualifiedAttributeName)
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            return typeSymbol.HasAttribute(fullyQualifiedAttributeName)
-                || AnyValidField(typeSymbol.GetMembers(), fullyQualifiedAttributeName);
+            return symbol.HasAttribute(fullyQualifiedAttributeName)
+                || AnyValidField(symbol.GetMembers(), fullyQualifiedAttributeName);
 
             static bool AnyValidField(ImmutableArray<ISymbol> members, string fullyQualifiedAttributeName)
             {
