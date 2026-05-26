@@ -2,8 +2,13 @@
     <Target Name="DisableAnalyzers" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' == 'true'">
         <ItemGroup>
             <AnalyzerToBeRemoved Include="@(Analyzer)"
-                Condition="'%(Analyzer.Filename)' == 'SystemGenerator'
-                        Or '%(Analyzer.Filename)' == 'JobEntityGenerator'" />
+                Condition="'%(Analyzer.Filename)' == 'AspectGenerator'
+                        Or '%(Analyzer.Filename)' == 'SystemGenerator'
+                        Or '%(Analyzer.Filename)' == 'JobEntityGenerator'
+                        Or '%(Analyzer.Filename)' == 'LatiosFramework.SourceGen'
+                        Or '%(Analyzer.Filename)' == 'SaintsFieldSourceGenerator'
+                        Or '%(Analyzer.Filename)' == 'SaintsFieldSourceParser'
+                        " />
             <Analyzer Remove="@(AnalyzerToBeRemoved)" />
         </ItemGroup>
     </Target>
