@@ -94,6 +94,26 @@ public readonly partial record struct RingId(ushort Id)
     public FixedString32Bytes ToFixedString()
         => Id.ToFixedString();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T ToDisplayFixedString<T>()
+        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+    {
+        T result = default;
+        result.Append(ToDisplayFixedString());
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T ToFixedString<T>()
+        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+    {
+        T result = default;
+        result.Append(ToFixedString());
+        return result;
+    }
+
     public bool TryParse(ReadOnlySpan<char> str, out RingId result, bool ignoreCase, bool allowMatchingMetadataAttribute)
     {
         if (ushort.TryParse(str, out var value))
@@ -136,6 +156,26 @@ public readonly partial record struct NecklaceId(ushort Id)
     public FixedString32Bytes ToFixedString()
         => Id.ToFixedString();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T ToDisplayFixedString<T>()
+        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+    {
+        T result = default;
+        result.Append(ToDisplayFixedString());
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T ToFixedString<T>()
+        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+    {
+        T result = default;
+        result.Append(ToFixedString());
+        return result;
+    }
+
     public bool TryParse(ReadOnlySpan<char> str, out NecklaceId result, bool ignoreCase, bool allowMatchingMetadataAttribute)
     {
         if (ushort.TryParse(str, out var value))
@@ -161,8 +201,8 @@ public readonly partial record struct NecklaceId(ushort Id)
     , tryParseSpan: TryParseMethodType.Instance
 )]
 public readonly partial record struct BraceletId(ushort Id)
-    : IToFixedString<FixedString32Bytes>
-    , IToDisplayFixedString<FixedString32Bytes>
+    : IToFixedString, IToFixedString<FixedString32Bytes>
+    , IToDisplayFixedString, IToDisplayFixedString<FixedString32Bytes>
     , IToDisplayString
     , ITryParseSpan<BraceletId>
     , ITryParse<BraceletId>
@@ -178,6 +218,26 @@ public readonly partial record struct BraceletId(ushort Id)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public FixedString32Bytes ToFixedString()
         => Id.ToFixedString();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public TFixedString ToDisplayFixedString<TFixedString>()
+        where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+            , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+    {
+        TFixedString result = default;
+        result.Append(ToDisplayFixedString());
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public TFixedString ToFixedString<TFixedString>()
+        where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+            , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+    {
+        TFixedString result = default;
+        result.Append(ToFixedString());
+        return result;
+    }
 
     public bool TryParse(ReadOnlySpan<char> str, out BraceletId result, bool ignoreCase, bool allowMatchingMetadataAttribute)
     {

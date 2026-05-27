@@ -34,6 +34,26 @@ public readonly partial record struct WeaponId(ushort Id)
     public FixedString32Bytes ToFixedString()
         => Id.ToFixedString();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T ToDisplayFixedString<T>()
+        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+    {
+        T result = default;
+        result.Append(ToDisplayFixedString());
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T ToFixedString<T>()
+        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+    {
+        T result = default;
+        result.Append(ToFixedString());
+        return result;
+    }
+
     public bool TryParse(ReadOnlySpan<char> str, out WeaponId result, bool ignoreCase, bool allowMatchingMetadataAttribute)
     {
         if (ushort.TryParse(str, out var value))
