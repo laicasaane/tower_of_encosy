@@ -277,11 +277,12 @@ namespace EncosyTower.Common
 
 namespace EncosyTower.Common
 {
+    using System;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    public readonly partial struct Bool<T> : IToFixedString<FixedString32Bytes>
+    public readonly partial struct Bool<T> : IToFixedString, IToFixedString<FixedString32Bytes>
     {
         public static FixedString32Bytes FalseString
         {
@@ -298,6 +299,16 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FixedString32Bytes ToFixedString()
             => _value.ToFixedString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TFixedString ToFixedString<TFixedString>()
+            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+        {
+            TFixedString result = default;
+            result.Append(ToFixedString());
+            return result;
+        }
     }
 }
 

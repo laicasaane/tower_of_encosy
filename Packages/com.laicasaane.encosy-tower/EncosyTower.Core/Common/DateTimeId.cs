@@ -536,11 +536,12 @@ namespace EncosyTower.Common
 
 namespace EncosyTower.Common
 {
+    using System;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial record struct DateTimeId : IToFixedString<FixedString128Bytes>
+    partial record struct DateTimeId : IToFixedString, IToFixedString<FixedString128Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
@@ -566,6 +567,16 @@ namespace EncosyTower.Common
             if (_second < 10) fs.Append('0');
             fs.Append(_second);
             return fs;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TFixedString ToFixedString<TFixedString>()
+            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+        {
+            TFixedString result = default;
+            result.Append(ToFixedString());
+            return result;
         }
     }
 }

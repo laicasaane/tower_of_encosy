@@ -203,7 +203,7 @@ namespace EncosyTower.Common
     using Unity.Collections;
     using UnityEngine;
 
-    partial struct SerializableGuid : IToFixedString<FixedString128Bytes>
+    partial struct SerializableGuid : IToFixedString, IToFixedString<FixedString128Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SerializableGuid(in FixedString128Bytes guidString)
@@ -278,6 +278,16 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString128Bytes ToFixedString(ReadOnlySpan<char> format)
             => this.AsGuid().ToFixedString(format);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly TFixedString ToFixedString<TFixedString>()
+            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+        {
+            TFixedString result = default;
+            result.Append(ToFixedString());
+            return result;
+        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden, DoesNotReturn]
