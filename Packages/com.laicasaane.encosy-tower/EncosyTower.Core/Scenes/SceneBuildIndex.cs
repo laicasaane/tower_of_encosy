@@ -118,11 +118,12 @@ namespace EncosyTower.Scenes
 
 namespace EncosyTower.Scenes
 {
+    using System;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial struct SceneBuildIndex : IToFixedString<FixedString128Bytes>
+    partial struct SceneBuildIndex : IToFixedString, IToFixedString<FixedString128Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString128Bytes ToFixedString()
@@ -130,6 +131,16 @@ namespace EncosyTower.Scenes
             var fs = new FixedString128Bytes();
             fs.Append(ToString());
             return fs;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly TFixedString ToFixedString<TFixedString>()
+            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+        {
+            TFixedString result = default;
+            result.Append(ToFixedString());
+            return result;
         }
     }
 }
