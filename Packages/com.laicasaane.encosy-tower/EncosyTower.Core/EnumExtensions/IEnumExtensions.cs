@@ -5,12 +5,14 @@ using EncosyTower.Conversion;
 
 namespace EncosyTower.EnumExtensions
 {
-    public interface IEnumUnderlying<out TUnderlyingValue> : IToUnderlyingValue<TUnderlyingValue>
-        where TUnderlyingValue : unmanaged
+    public interface IEnumUnderlying<TUnderlying>
+        where TUnderlying : unmanaged, IComparable, IComparable<TUnderlying>
+            , IConvertible, IEquatable<TUnderlying>, IFormattable
     {
+        TUnderlying UnderlyingValue { get; }
     }
 
-    public interface IEnumExtensions<TEnum, out TUnderlyingValue> : IEnumUnderlying<TUnderlyingValue>
+    public interface IEnumExtensions<TEnum, TUnderlying> : IEnumUnderlying<TUnderlying>
         , IHasLength
         , IToDisplayString
         , IToStringFast
@@ -19,17 +21,22 @@ namespace EncosyTower.EnumExtensions
         , ISpanFormattable
         , IIsDefined
         , IIsNameDefined
-        where TEnum : struct, Enum
-        where TUnderlyingValue : unmanaged
+        where TEnum : unmanaged, Enum
+        where TUnderlying : unmanaged, IComparable, IComparable<TUnderlying>
+            , IConvertible, IEquatable<TUnderlying>, IFormattable
     {
+        TEnum Value { get; }
     }
 
-    public interface IEnumExtensions<TEnumEx, TEnum, out TUnderlyingValue> : IEnumExtensions<TEnum, TUnderlyingValue>
-        where TEnumEx : IEnumExtensions<TEnum, TUnderlyingValue>
-        where TEnum : struct, Enum
-        where TUnderlyingValue : unmanaged
+    public interface IEnumExtensions<TEnumEx, TEnum, TUnderlying> : IEnumExtensions<TEnum, TUnderlying>
+        where TEnumEx : IEnumExtensions<TEnum, TUnderlying>
+        where TEnum : unmanaged, Enum
+        where TUnderlying : unmanaged, IComparable, IComparable<TUnderlying>
+            , IConvertible, IEquatable<TUnderlying>, IFormattable
     {
         TEnumEx Create(TEnum value);
+
+        TEnumEx CreateFromUnderlyingValue(TUnderlying value);
 
         bool TryParse(string name, out TEnumEx value);
 

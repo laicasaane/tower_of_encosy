@@ -100,11 +100,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p.OpenScope();
             {
                 p.PrintLine("[SRIS.FieldOffset(0)]");
-                p.PrintBeginLine("public readonly ").Print(FullyQualifiedName).PrintEndLine(" Value;");
+                p.PrintBeginLine("private readonly ").Print(FullyQualifiedName).PrintEndLine(" _value;");
                 p.PrintEndLine();
 
                 p.PrintLine("[SRIS.FieldOffset(0)]");
-                p.PrintBeginLine("public readonly ").Print(UnderlyingTypeName).PrintEndLine(" UnderlyingValue;");
+                p.PrintBeginLine("private readonly ").Print(UnderlyingTypeName).PrintEndLine(" _underlyingValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -112,7 +112,25 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     .Print(FullyQualifiedName).PrintEndLine(" value) : this()");
                 p.OpenScope();
                 {
-                    p.PrintLine("this.Value = value;");
+                    p.PrintLine("_value = value;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public ").Print(FullyQualifiedName).PrintEndLine(" Value");
+                p.OpenScope();
+                {
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("get => _value;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public ").Print(UnderlyingTypeName).PrintEndLine(" UnderlyingValue");
+                p.OpenScope();
+                {
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("get => _underlyingValue;");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -130,7 +148,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.OpenScope();
                 {
                     p.PrintLine(AggressiveInlining);
-                    p.PrintBeginLine("get => ").Print(ExtensionsName).PrintEndLine(".IsDefined(this.Value);");
+                    p.PrintBeginLine("get => ").Print(ExtensionsName).PrintEndLine(".IsDefined(_value);");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
@@ -141,12 +159,18 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public ").Print(StructName)
+                    .Print(" CreateFromUnderlyingValue(").Print(UnderlyingTypeName).Print(" value) => new ")
+                    .Print(StructName).Print("((").Print(FullyQualifiedName).PrintEndLine(")value);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public string ToStringFast() => ToStringFast(true);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToStringFast(bool emptyIfUndefined) => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(this.Value, emptyIfUndefined);");
+                    .Print(ExtensionsName).PrintEndLine(".ToStringFast(_value, emptyIfUndefined);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -155,7 +179,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToDisplayString(bool emptyIfUndefined) => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value, emptyIfUndefined);");
+                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(_value, emptyIfUndefined);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -164,7 +188,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public string ToDisplayStringFast(bool emptyIfUndefined) => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value, emptyIfUndefined);");
+                    .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(_value, emptyIfUndefined);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -227,7 +251,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(PrintFixedStringTypeName)
                         .Print(" ToFixedString(bool emptyIfUndefined) => ")
-                        .Print(ExtensionsName).PrintEndLine(".ToFixedString(this.Value, emptyIfUndefined);");
+                        .Print(ExtensionsName).PrintEndLine(".ToFixedString(_value, emptyIfUndefined);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
@@ -238,7 +262,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(PrintFixedStringTypeName)
                         .Print(" ToDisplayFixedString(bool emptyIfUndefined) => ")
-                        .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(this.Value, emptyIfUndefined);");
+                        .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(_value, emptyIfUndefined);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
@@ -273,11 +297,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintBeginLine("public ").Print(UnderlyingTypeName).Print(" ToUnderlyingValue() => ")
-                    .Print(ExtensionsName).PrintEndLine(".ToUnderlyingValue(this.Value);");
-                p.PrintEndLine();
-
-                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public bool TryFormat(");
                 p = p.IncreasedIndent();
                 {
@@ -288,7 +307,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
                 p = p.DecreasedIndent();
                 p.PrintBeginLine(") => ").Print(ExtensionsName)
-                    .PrintEndLine(".TryFormat(this.Value, destination, out charsWritten, format, provider);");
+                    .PrintEndLine(".TryFormat(_value, destination, out charsWritten, format, provider);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -305,29 +324,29 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public int ToIndex() => ")
-                    .Print(ExtensionsName).PrintEndLine(".FindIndex(this.Value);");
+                    .Print(ExtensionsName).PrintEndLine(".FindIndex(_value);");
                 p.PrintEndLine();
 
                 if (HasFlags)
                 {
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public bool Contains(").Print(FullyQualifiedName).Print(" flags) => ")
-                        .Print(ExtensionsName).PrintEndLine(".Contains(this.Value, flags);");
+                        .Print(ExtensionsName).PrintEndLine(".Contains(_value, flags);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public bool Any(").Print(FullyQualifiedName).Print(" flags) => ")
-                        .Print(ExtensionsName).PrintEndLine(".Any(this.Value, flags);");
+                        .Print(ExtensionsName).PrintEndLine(".Any(_value, flags);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Unset(").Print(FullyQualifiedName).Print(" flags) => ")
-                        .Print(ExtensionsName).PrintEndLine(".Unset(this.Value, flags);");
+                        .Print(ExtensionsName).PrintEndLine(".Unset(_value, flags);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public ").Print(FullyQualifiedName).Print(" Set(").Print(FullyQualifiedName).Print(" flags) => ")
-                        .Print(ExtensionsName).PrintEndLine(".Set(this.Value, flags);");
+                        .Print(ExtensionsName).PrintEndLine(".Set(_value, flags);");
                     p.PrintEndLine();
                 }
 
@@ -341,22 +360,22 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
-                p.PrintLine("public override int GetHashCode() => this.UnderlyingValue.GetHashCode();");
+                p.PrintLine("public override int GetHashCode() => _underlyingValue.GetHashCode();");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public int CompareTo(").Print(StructName)
-                    .PrintEndLine(" other) => this.UnderlyingValue.CompareTo(other.UnderlyingValue);");
+                    .PrintEndLine(" other) => this._underlyingValue.CompareTo(other._underlyingValue);");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public bool Equals(").Print(StructName)
-                    .PrintEndLine(" other) => this.UnderlyingValue == other.UnderlyingValue;");
+                    .PrintEndLine(" other) => this._underlyingValue == other._underlyingValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public override bool Equals(object obj) => obj is ").Print(StructName)
-                    .PrintEndLine(" other && this.UnderlyingValue == other.UnderlyingValue;");
+                    .PrintEndLine(" other && this._underlyingValue == other._underlyingValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
@@ -368,25 +387,25 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator ==(")
                     .Print(StructName).Print(" left, ")
-                    .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue == right.UnderlyingValue;");
+                    .Print(StructName).PrintEndLine(" right) => left._underlyingValue == right._underlyingValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator !=(")
                     .Print(StructName).Print(" left, ")
-                    .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue != right.UnderlyingValue;");
+                    .Print(StructName).PrintEndLine(" right) => left._underlyingValue != right._underlyingValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator <(")
                     .Print(StructName).Print(" left, ")
-                    .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue < right.UnderlyingValue;");
+                    .Print(StructName).PrintEndLine(" right) => left._underlyingValue < right._underlyingValue;");
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintBeginLine("public static bool operator >(")
                     .Print(StructName).Print(" left, ")
-                    .Print(StructName).PrintEndLine(" right) => left.UnderlyingValue > right.UnderlyingValue;");
+                    .Print(StructName).PrintEndLine(" right) => left._underlyingValue > right._underlyingValue;");
                 p.PrintEndLine();
 
                 if (HasFlags)
@@ -394,42 +413,42 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator ~(")
                         .Print(StructName).Print(" value) => new ")
-                        .Print(StructName).PrintEndLine("(~value.Value);");
+                        .Print(StructName).PrintEndLine("(~value._value);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator <<(")
                         .Print(StructName).Print(" value, int bits) => new ")
                         .Print(StructName).Print("((").Print(FullyQualifiedName)
-                        .PrintEndLine(")(value.UnderlyingValue << bits));");
+                        .PrintEndLine(")(value._underlyingValue << bits));");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator >>(")
                         .Print(StructName).Print(" value, int bits) => new ")
                         .Print(StructName).Print("((").Print(FullyQualifiedName)
-                        .PrintEndLine(")(value.UnderlyingValue >> bits));");
+                        .PrintEndLine(")(value._underlyingValue >> bits));");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator &(")
                         .Print(StructName).Print(" left, ")
                         .Print(StructName).Print(" right) => new ")
-                        .Print(StructName).PrintEndLine("(left.Value & right.Value);");
+                        .Print(StructName).PrintEndLine("(left._value & right._value);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator |(")
                         .Print(StructName).Print(" left, ")
                         .Print(StructName).Print(" right) => new ")
-                        .Print(StructName).PrintEndLine("(left.Value | right.Value);");
+                        .Print(StructName).PrintEndLine("(left._value | right._value);");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintBeginLine("public static ").Print(StructName).Print(" operator ^(")
                         .Print(StructName).Print(" left, ")
                         .Print(StructName).Print(" right) => new ")
-                        .Print(StructName).PrintEndLine("(left.Value ^ right.Value);");
+                        .Print(StructName).PrintEndLine("(left._value ^ right._value);");
                     p.PrintEndLine();
                 }
             }
