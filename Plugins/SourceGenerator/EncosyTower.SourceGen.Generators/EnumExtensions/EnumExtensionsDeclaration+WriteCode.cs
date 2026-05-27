@@ -59,7 +59,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine(": ETEE.IEnumExtensions<")
-                    .Print(FullyQualifiedName).Print(", ").Print(UnderlyingTypeName)
+                    .Print(StructName).Print(", ").Print(FullyQualifiedName).Print(", ").Print(UnderlyingTypeName)
                     .PrintEndLine(">");
 
                 if (HasFlags)
@@ -69,6 +69,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 if (ReferenceUnityCollections)
                 {
+                    p.PrintLine(", ETCon.IToFixedString");
+                    p.PrintLine(", ETCon.IToDisplayFixedString");
                     p.PrintBeginLine(", ETCon.IToFixedString<").Print(PrintFixedStringTypeName).PrintEndLine(">");
                     p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(PrintFixedStringTypeName).PrintEndLine(">");
                 }
@@ -134,6 +136,11 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintEndLine();
 
                 p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public ").Print(StructName).Print(" Create(")
+                    .Print(FullyQualifiedName).Print(" value) => new ").Print(StructName).PrintEndLine("(value);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
                 p.PrintLine("public string ToStringFast() => ToStringFast(true);");
                 p.PrintEndLine();
 
@@ -160,6 +167,56 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     .Print(ExtensionsName).PrintEndLine(".ToDisplayStringFast(this.Value, emptyIfUndefined);");
                 p.PrintEndLine();
 
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public bool TryParse(string name, out ").Print(StructName)
+                    .Print(" value) => ")
+                    .PrintEndLine("TryParse(name, out value, false, false);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public bool TryParse(string name, out ").Print(StructName)
+                    .Print(" value, bool ignoreCase) => ")
+                    .PrintEndLine("TryParse(name, out value, ignoreCase, false);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public bool TryParse(string name, out ").Print(StructName)
+                    .PrintEndLine(" value, bool ignoreCase, bool allowMatchingMetadataAttribute)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("var result = ").Print(ExtensionsName)
+                        .PrintEndLine(".TryParse(name, out var enumValue, ignoreCase, allowMatchingMetadataAttribute);");
+                    p.PrintBeginLine("value = new ").Print(StructName).PrintEndLine("(enumValue);");
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> name, out ").Print(StructName)
+                    .Print(" value) => ")
+                    .PrintEndLine("TryParse(name, out value, false, false);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> name, out ").Print(StructName)
+                    .Print(" value, bool ignoreCase) => ")
+                    .PrintEndLine("TryParse(name, out value, ignoreCase, false);");
+                p.PrintEndLine();
+
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public bool TryParse(S.ReadOnlySpan<char> name, out ").Print(StructName)
+                    .PrintEndLine(" value, bool ignoreCase, bool allowMatchingMetadataAttribute)");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("var result = ").Print(ExtensionsName)
+                        .PrintEndLine(".TryParse(name, out var enumValue, ignoreCase, allowMatchingMetadataAttribute);");
+                    p.PrintBeginLine("value = new ").Print(StructName).PrintEndLine("(enumValue);");
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
                 if (ReferenceUnityCollections)
                 {
                     p.PrintLine(AggressiveInlining);
@@ -182,6 +239,36 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintBeginLine("public ").Print(PrintFixedStringTypeName)
                         .Print(" ToDisplayFixedString(bool emptyIfUndefined) => ")
                         .Print(ExtensionsName).PrintEndLine(".ToDisplayFixedString(this.Value, emptyIfUndefined);");
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("public TFixedString ToFixedString<TFixedString>()");
+                    p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                        .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                        .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                            .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("TFixedString result = default;");
+                        p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
+                        p.PrintLine("return result;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("public TFixedString ToDisplayFixedString<TFixedString>()");
+                    p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                        .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                        .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                            .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("TFixedString result = default;");
+                        p.PrintLine("UC.FixedStringMethods.Append(ref result, ToDisplayFixedString());");
+                        p.PrintLine("return result;");
+                    }
+                    p.CloseScope();
                     p.PrintEndLine();
                 }
 
