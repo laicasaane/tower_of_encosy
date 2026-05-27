@@ -538,7 +538,9 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintBeginLine("/// ").PrintEndLine("</remarks>");
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("[S.Serializable]");
-            p.PrintLine("public partial struct Index : S.IEquatable<Index>, ETCon.IToFixedString<UC.FixedString32Bytes>");
+            p.PrintBeginLine("public partial struct Index : S.IEquatable<Index>")
+                .Print(", ETCon.IToFixedString, ETCon.IToFixedString<UC.FixedString32Bytes>")
+                .PrintEndLine();
             p.OpenScope();
             {
                 p.PrintLine("public static readonly Index Null = default;");
@@ -614,6 +616,21 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintEndLine();
 
                 p.PrintLine(PR_AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
+                p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                    .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                    .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                        .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                p.OpenScope();
+                {
+                    p.PrintLine("TFixedString result = default;");
+                    p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly ETES.StatHandle ToStatHandle(UECS.Entity entity)");
                 p.WithIncreasedIndent().PrintLine("=> new(entity, this);");
                 p.PrintEndLine();
@@ -636,7 +653,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
             p.PrintLine("[S.Serializable]");
             p.PrintBeginLine("public partial struct Index<TStatData> : S.IEquatable<Index<TStatData>>")
-                .PrintEndLine(", ETCon.IToFixedString<UC.FixedString32Bytes>");
+                .PrintEndLine(", ETCon.IToFixedString, ETCon.IToFixedString<UC.FixedString32Bytes>");
             p.WithIncreasedIndent().PrintLine("where TStatData : unmanaged, ETES.IStatData");
             p.OpenScope();
             {
@@ -725,6 +742,21 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine(PR_AGGRESSIVE_INLINING);
                 p.PrintLine("public readonly UC.FixedString32Bytes ToFixedString()");
                 p.WithIncreasedIndent().PrintLine("=> ETCol.EncosyFixedStringExtensions.ToFixedString(value);");
+                p.PrintEndLine();
+
+                p.PrintLine(PR_AGGRESSIVE_INLINING);
+                p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
+                p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                    .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                    .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                        .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                p.OpenScope();
+                {
+                    p.PrintLine("TFixedString result = default;");
+                    p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
+                    p.PrintLine("return result;");
+                }
+                p.CloseScope();
                 p.PrintEndLine();
 
                 p.PrintLine(PR_AGGRESSIVE_INLINING);
