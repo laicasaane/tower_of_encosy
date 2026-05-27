@@ -155,7 +155,19 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 var param = typeParameters[i];
 
-                if (param.HasReferenceTypeConstraint)
+                if (param.HasUnmanagedTypeConstraint)
+                {
+                    constraints.Add("unmanaged");
+                }
+                else if (param.HasValueTypeConstraint)
+                {
+                    constraints.Add("struct");
+                }
+                else if (param.HasNotNullConstraint)
+                {
+                    constraints.Add("notnull");
+                }
+                else if (param.HasReferenceTypeConstraint)
                 {
                     if (param.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated)
                     {
@@ -165,21 +177,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                     {
                         constraints.Add("class");
                     }
-                }
-
-                if (param.HasValueTypeConstraint)
-                {
-                    constraints.Add("struct");
-                }
-
-                if (param.HasUnmanagedTypeConstraint)
-                {
-                    constraints.Add("unmanaged");
-                }
-
-                if (param.HasNotNullConstraint)
-                {
-                    constraints.Add("notnull");
                 }
 
                 var constraintTypes = param.ConstraintTypes;
