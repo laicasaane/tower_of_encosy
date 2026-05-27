@@ -170,11 +170,12 @@ namespace EncosyTower.Ids
 
 namespace EncosyTower.Ids
 {
+    using System;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial struct Id : IToFixedString<FixedString32Bytes>
+    partial struct Id : IToFixedString, IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly FixedString32Bytes ToFixedString()
@@ -182,6 +183,16 @@ namespace EncosyTower.Ids
             var fs = new FixedString32Bytes();
             fs.Append(_value);
             return fs;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly TFixedString ToFixedString<TFixedString>()
+            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+        {
+            TFixedString result = default;
+            result.Append(ToFixedString());
+            return result;
         }
     }
 }

@@ -232,11 +232,12 @@ namespace EncosyTower.Ids
 
 namespace EncosyTower.Ids
 {
+    using System;
     using System.Runtime.CompilerServices;
     using EncosyTower.Conversion;
     using Unity.Collections;
 
-    partial struct Id2 : IToFixedString<FixedString32Bytes>
+    partial struct Id2 : IToFixedString, IToFixedString<FixedString32Bytes>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()
@@ -249,6 +250,16 @@ namespace EncosyTower.Ids
             fs.Append('-');
             fs.Append(_y);
             return fs;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly TFixedString ToFixedString<TFixedString>()
+            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
+                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+        {
+            TFixedString result = default;
+            result.Append(ToFixedString());
+            return result;
         }
     }
 }
