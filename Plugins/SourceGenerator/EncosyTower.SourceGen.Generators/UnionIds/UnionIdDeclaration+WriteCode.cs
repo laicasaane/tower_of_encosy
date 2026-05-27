@@ -48,6 +48,8 @@
             {
                 if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
                 {
+                    p.PrintBeginLine(", ETCon.IToFixedString");
+                    p.PrintBeginLine(", ETCon.IToDisplayFixedString");
                     p.PrintBeginLine(", ETCon.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
                     p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
                 }
@@ -1634,6 +1636,21 @@
                 return;
             }
 
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
+            p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+            p.OpenScope();
+            {
+                p.PrintLine("TFixedString result = default;");
+                p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
+                p.PrintLine("return result;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" ToFixedString()");
             p.OpenScope();
             {
@@ -1717,6 +1734,21 @@
             {
                 return;
             }
+
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("public TFixedString ToDisplayFixedString<TFixedString>()");
+            p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+            p.OpenScope();
+            {
+                p.PrintLine("TFixedString result = default;");
+                p.PrintLine("UC.FixedStringMethods.Append(ref result, ToDisplayFixedString());");
+                p.PrintLine("return result;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
 
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" ToDisplayFixedString()");
             p.OpenScope();
@@ -2482,6 +2514,8 @@
 
             if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
             {
+                p.PrintBeginLine(", ETCon.IToFixedString");
+                p.PrintBeginLine(", ETCon.IToDisplayFixedString");
                 p.PrintBeginLine(", ETCon.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
                 p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
             }
