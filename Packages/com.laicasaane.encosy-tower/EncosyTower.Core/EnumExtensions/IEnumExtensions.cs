@@ -23,5 +23,25 @@ namespace EncosyTower.EnumExtensions
         where TUnderlyingValue : unmanaged
     {
     }
+
+    public interface IEnumExtensions<TEnumEx, TEnum, out TUnderlyingValue> : IEnumExtensions<TEnum, TUnderlyingValue>
+        where TEnumEx : IEnumExtensions<TEnum, TUnderlyingValue>
+        where TEnum : struct, Enum
+        where TUnderlyingValue : unmanaged
+    {
+        TEnumEx Create(TEnum value);
+
+        bool TryParse(string name, out TEnumEx value);
+
+        bool TryParse(string name, out TEnumEx value, bool ignoreCase);
+
+        bool TryParse(string name, out TEnumEx value, bool ignoreCase, bool allowMatchingMetadataAttribute);
+
+        bool TryParse(ReadOnlySpan<char> name, out TEnumEx value);
+
+        bool TryParse(ReadOnlySpan<char> name, out TEnumEx value, bool ignoreCase);
+
+        bool TryParse(ReadOnlySpan<char> name, out TEnumEx value, bool ignoreCase, bool allowMatchingMetadataAttribute);
+    }
 }
 
