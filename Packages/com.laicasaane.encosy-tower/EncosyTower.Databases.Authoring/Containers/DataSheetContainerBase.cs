@@ -1,8 +1,9 @@
-﻿// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
+// BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
 using System;
 using System.Collections.Generic;
 using Cathei.BakingSheet;
+using EncosyTower.Collections;
 using Microsoft.Extensions.Logging;
 
 namespace EncosyTower.Databases.Authoring
@@ -17,6 +18,10 @@ namespace EncosyTower.Databases.Authoring
             _logger = logger;
             _ignoredSheetProperties = new();
         }
+
+        public ILogger Logger => _logger;
+
+        public HashSetReadOnly<string> IgnoredSheetProperties => _ignoredSheetProperties;
 
         public void IgnoreSheetProperties(IEnumerable<string> properties)
         {
@@ -45,6 +50,7 @@ namespace EncosyTower.Databases.Authoring
 
             var properties = GetSheetProperties();
             var rowTypeToSheet = new Dictionary<Type, ISheet>(properties.Count);
+            var dataSheets = new List<IDataSheet>(properties.Count);
 
             foreach (var pair in properties)
             {
@@ -61,11 +67,25 @@ namespace EncosyTower.Databases.Authoring
 
                 sheet.Name = pair.Key;
 
-                if (rowTypeToSheet.TryAdd(sheet.RowType, sheet) == false)
+                if (rowTypeToSheet.TryAdd(sheet.RowType, sheet))
+                {
+                    if (sheet is IDataSheet dataSheet)
+                    {
+                        dataSheets.Add(dataSheet);
+                    }
+                }
+                else
                 {
                     // row type must be unique in a sheet container
                     context.Logger.LogError("Duplicated Row type is used for {SheetName}", pair.Key);
                 }
+            }
+
+            OnBeforePostLoad(context);
+
+            foreach (var sheet in dataSheets)
+            {
+                sheet.Initialize(context);
             }
 
             // making sure all references are mapped before calling PostLoad
@@ -78,6 +98,12 @@ namespace EncosyTower.Databases.Authoring
             {
                 sheet.PostLoad(context);
             }
+
+            OnAfterPostLoad(context);
         }
+
+        protected virtual void OnBeforePostLoad(SheetConvertingContext context) { }
+
+        protected virtual void OnAfterPostLoad(SheetConvertingContext context) { }
     }
 }

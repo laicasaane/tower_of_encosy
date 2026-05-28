@@ -65,6 +65,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, propRefs);
                 WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, fieldRefs);
 
+                p.PrintLine("partial void OnConstructor();");
+                p.PrintEndLine();
+
                 WriteConvertMethod(ref p, dataMap);
 
                 foreach (var layer in baseTypeLayers)
@@ -101,6 +104,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 WriteCtorMembers(ref p, dataMap, horizontalListMap, propRefs, fullName, containingTypeFullName);
                 WriteCtorMembers(ref p, dataMap, horizontalListMap, fieldRefs, fullName, containingTypeFullName);
+                p.PrintEndLine();
+
+                p.PrintLine("OnConstructor();");
             }
             p.CloseScope();
             p.PrintEndLine();

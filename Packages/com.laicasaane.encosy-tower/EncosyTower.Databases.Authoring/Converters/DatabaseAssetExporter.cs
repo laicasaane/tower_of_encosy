@@ -172,6 +172,15 @@ namespace EncosyTower.Databases.Authoring
             }
 
             databaseAsset.AddRange(dataTableAssetList.ToArray(), redundantAssets.ToArray());
+
+            if (context.Container is IPostExportDatabase postExport)
+            {
+                postExport.PostExport(new DatabaseExportingContext(
+                      databaseAsset
+                    , context.Container
+                    , context.Logger
+                ));
+            }
         }
 
         private static bool TryGetGeneratedSheetAttribute(

@@ -25,7 +25,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintLine(PR_SERIALIZABLE).PrintLine(PR_GENERATED_SHEET_CONTAINER);
                 p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public partial class SheetContainer")
-                    .Print(" : ").PrintEndLine(PR_DATA_SHEET_CONTAINER_BASE);
+                    .Print(" : ").Print(PR_DATA_SHEET_CONTAINER_BASE)
+                    .Print(", ETDBA.IPostExportDatabase")
+                    .PrintEndLine();
                 p.OpenScope();
                 {
                     foreach (var typeName in typeNames)
@@ -41,12 +43,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         var fieldNames = assetRefList.fieldNames;
                         var count = fieldNames.Count;
 
-                        p.PrintBeginLine("public RefList<").Print(baseTypeName).Print("> ")
+                        p.PrintBeginLine("public SCG.List<").Print(baseTypeName).Print("> ")
                             .Print(baseTypeName).PrintEndLine("s");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("get => new RefList<").Print(baseTypeName).PrintEndLine(">(");
-                            p = p.IncreasedIndent();
+                            p.PrintBeginLine("get => new SCG.List<").Print(baseTypeName)
+                                .Print(">(").Print(count).PrintEndLine(")");
+                            p.OpenScope();
                             {
                                 var lastIndex = count - 1;
                                 for (var i = 0; i < count; i++)
@@ -64,8 +67,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                     }
                                 }
                             }
-                            p = p.DecreasedIndent();
-                            p.PrintLine(");");
+                            p.CloseScope("};");
                         }
                         p.CloseScope();
                         p.PrintEndLine();
@@ -87,11 +89,20 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                     p.CloseScope();
                     p.PrintEndLine();
+
+                    p.PrintLine("public void PostExport(ETDBA.DatabaseExportingContext context)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("OnPostExport(context);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("partial void OnPostExport(ETDBA.DatabaseExportingContext context);");
+                    p.PrintEndLine();
                 }
                 p.CloseScope();
                 p.PrintEndLine();
-
-                WriteRefList(ref p, maxFieldOfSameTable);
 
                 p.Print("#else").PrintEndLine().PrintEndLine();
 
@@ -129,91 +140,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     .Print(" : ").Print(baseSheetName).PrintEndLine(" { }");
                 p.PrintEndLine();
             }
-        }
-
-        private static void WriteRefList(ref Printer p, int count)
-        {
-            if (count < 1)
-            {
-                return;
-            }
-
-            const string PR_STRUCT_LAYOUT = "SRIS.StructLayout";
-            const string PR_EXPLICIT = "SRIS.LayoutKind.Explicit";
-            const string PR_FIXED_ARRAY = "ETC.FixedArray";
-            const string PR_GC_HANDLE = "SRIS.GCHandle";
-            const string PR_GC_HANDLE_WEAK = "SRIS.GCHandleType.Weak";
-
-            p.PrintLine("public readonly struct RefList<T> where T : class");
-            p.OpenScope();
-            {
-                p.PrintBeginLine("private readonly ").Print(PR_FIXED_ARRAY)
-                    .Print("<").Print(PR_GC_HANDLE).PrintEndLine(", RefListCapacity> _array;");
-                p.PrintEndLine();
-
-                p.PrintLine("private readonly int _length;");
-                p.PrintEndLine();
-
-                for (var c = 1; c <= count; c++)
-                {
-                    p.PrintLine(PR_AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public RefList(");
-
-                    for (var i = 0; i < c; i++)
-                    {
-                        p.PrintIf(i > 0, ", ").Print("T p").Print(i);
-                    }
-
-                    p.PrintEndLine(")");
-                    p.OpenScope();
-                    {
-                        p.PrintBeginLine("_array = new ").Print(PR_FIXED_ARRAY)
-                            .Print("<").Print(PR_GC_HANDLE).PrintEndLine(", RefListCapacity>(default);");
-                        p.PrintEndLine();
-
-                        p.PrintBeginLine("_length = ").Print(c).PrintEndLine(";");
-                        p.PrintEndLine();
-
-                        for (var i = 0; i < c; i++)
-                        {
-                            p.PrintBeginLine("_array[").Print(i).Print("] = ").Print(PR_GC_HANDLE)
-                                .Print(".Alloc(p").Print(i).Print(", ").Print(PR_GC_HANDLE_WEAK).PrintEndLine(");");
-                        }
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-                }
-
-                p.PrintLine("public readonly int Length");
-                p.OpenScope();
-                {
-                    p.PrintLine(PR_AGGRESSIVE_INLINING);
-                    p.PrintLine("get => _length;");
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintLine("public readonly T this[int index]");
-                p.OpenScope();
-                {
-                    p.PrintLine(PR_AGGRESSIVE_INLINING);
-                    p.PrintLine("get");
-                    p.OpenScope();
-                    {
-                        p.PrintBeginLine(PR_GC_HANDLE).PrintEndLine(" item = _array[index];");
-                        p.PrintLine("return item.IsAllocated ? (T)item.Target : default;");
-                    }
-                    p.CloseScope();
-                }
-                p.CloseScope();
-                p.PrintEndLine();
-
-                p.PrintBeginLine("[").Print(PR_STRUCT_LAYOUT).Print("(")
-                    .Print(PR_EXPLICIT).Print(", Size = ").Print(count).PrintEndLine(" * 8)]");
-                p.PrintLine("private readonly struct RefListCapacity { }");
-            }
-            p.CloseScope();
-            p.PrintEndLine();
         }
     }
 }

@@ -70,9 +70,21 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintBeginLine()
                     .Print("public abstract partial class ").Print(sheetName)
                     .Print(" : CBS.Sheet<").Print(sheetIdTypeName).Print(", ").Print(sheetDataTypeName).Print(">")
+                    .Print(", ETDBA.IDataSheet")
                     .PrintEndLine();
                 p.OpenScope();
                 {
+                    p.PrintLine("public void Initialize(CBS.SheetConvertingContext context)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("OnInitialize(context);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("partial void OnInitialize(CBS.SheetConvertingContext context);");
+                    p.PrintEndLine();
+
                     p.PrintBeginLine("public ").Print(dataTypeFullName).Print("[] To")
                         .Print(dataTypeSimpleName).PrintEndLine("Array()");
                     p.OpenScope();
