@@ -17,11 +17,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var typeName = simpleName;
             var typeFullName = fullName;
-            var hasIdType = string.IsNullOrEmpty(idTypeFullName) == false;
+            var isRowData = string.IsNullOrEmpty(idTypeFullName) == false;
 
             p.PrintLine(PR_SERIALIZABLE);
 
-            if (hasIdType)
+            if (isRowData)
             {
                 p.PrintLine(string.Format(PR_GENERATED_SHEET_ROW, idTypeFullName, typeFullName));
             }
@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
             p.PrintBeginLine("public partial class __").Print(typeName);
 
-            if (hasIdType)
+            if (isRowData)
             {
                 p.Print(" : CBS.SheetRow");
 
@@ -58,12 +58,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 foreach (var baseType in baseTypeRefs)
                 {
-                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, baseType.propRefs);
-                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, baseType.fieldRefs);
+                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, baseType.propRefs);
+                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, baseType.fieldRefs);
                 }
 
-                WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, propRefs);
-                WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, fieldRefs);
+                WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, propRefs);
+                WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, fieldRefs);
 
                 p.PrintLine("partial void OnConstructor();");
                 p.PrintEndLine();
@@ -229,15 +229,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
             , string containingTypeFullName
-            , string idTypeFullName
+            , bool isRowData
             , EquatableArray<MemberSpec> memberModels
         )
         {
-            var hasIdType = string.IsNullOrEmpty(idTypeFullName) == false;
-
             foreach (var member in memberModels)
             {
-                if (hasIdType && member.propertyName == "Id")
+                if (isRowData && member.propertyName == "Id")
                 {
                     continue;
                 }

@@ -114,16 +114,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    if (hasIdTypeDeclaration && dataMap.TryGetValue(idTypeFullName, out var idDataModel))
-                    {
-                        idDataModel.WriteCode(
-                              ref p
-                            , dataMap
-                            , horizontalListMap
-                            , tableTypeFullName
-                        );
-                    }
-
                     if (dataMap.TryGetValue(dataTypeFullName, out var dataModel))
                     {
                         dataModel.WriteCode(
@@ -132,6 +122,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                             , horizontalListMap
                             , tableTypeFullName
                             , idTypeFullName
+                        );
+                    }
+
+                    if (hasIdTypeDeclaration && dataMap.TryGetValue(idTypeFullName, out var idDataModel))
+                    {
+                        idDataModel.WriteCode(
+                              ref p
+                            , dataMap
+                            , horizontalListMap
+                            , tableTypeFullName
                         );
                     }
 
