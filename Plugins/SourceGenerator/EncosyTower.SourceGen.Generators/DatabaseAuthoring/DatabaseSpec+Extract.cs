@@ -460,7 +460,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     if (dataModel.propRefs.Count < 1
                         && dataModel.fieldRefs.Count < 1
-                        && dataModel.baseTypeLayers.Count < 1
+                        && dataModel.baseTypeRefs.Count < 1
                     )
                     {
                         continue;
@@ -493,7 +493,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , out var fieldRefs
             );
 
-            using var baseLayerBuilder = ImmutableArrayBuilder<DataLayerSpec>.Rent();
+            using var baseBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
 
             var baseType = (type as INamedTypeSymbol)?.BaseType;
 
@@ -515,7 +515,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , out var baseFieldRefs
                 );
 
-                baseLayerBuilder.Add(new DataLayerSpec {
+                baseBuilder.Add(new BaseDataSpec {
                     fullName = baseType.ToFullName(),
                     simpleName = baseType.Name,
                     validIdentifier = baseType.ToValidIdentifier(),
@@ -527,12 +527,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 baseType = baseType.BaseType;
             }
 
-            var rawLayers = baseLayerBuilder.ToImmutable();
-            using var reversedLayers = ImmutableArrayBuilder<DataLayerSpec>.Rent();
+            var baseTypes = baseBuilder.ToImmutable();
+            using var reversedBaseBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
 
-            for (var i = rawLayers.Length - 1; i >= 0; i--)
+            for (var i = baseTypes.Length - 1; i >= 0; i--)
             {
-                reversedLayers.Add(rawLayers[i]);
+                reversedBaseBuilder.Add(baseTypes[i]);
             }
 
             return new DataSpec {
@@ -542,7 +542,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 isValueType = type.IsValueType,
                 propRefs = propRefs,
                 fieldRefs = fieldRefs,
-                baseTypeLayers = reversedLayers.ToImmutable().AsEquatableArray(),
+                baseTypeRefs = reversedBaseBuilder.ToImmutable().AsEquatableArray(),
             };
         }
 
@@ -1285,10 +1285,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 TryEnqueueMembers(dm.propRefs, dataMap, uniqueTypes, typeQueue);
                 TryEnqueueMembers(dm.fieldRefs, dataMap, uniqueTypes, typeQueue);
 
-                foreach (var layer in dm.baseTypeLayers)
+                foreach (var baseType in dm.baseTypeRefs)
                 {
-                    TryEnqueueMembers(layer.propRefs, dataMap, uniqueTypes, typeQueue);
-                    TryEnqueueMembers(layer.fieldRefs, dataMap, uniqueTypes, typeQueue);
+                    TryEnqueueMembers(baseType.propRefs, dataMap, uniqueTypes, typeQueue);
+                    TryEnqueueMembers(baseType.fieldRefs, dataMap, uniqueTypes, typeQueue);
                 }
             }
 

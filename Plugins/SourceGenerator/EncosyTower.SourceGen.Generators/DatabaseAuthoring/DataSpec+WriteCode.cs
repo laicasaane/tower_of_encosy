@@ -56,10 +56,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 WriteConstructor(ref p, dataMap, horizontalListMap, typeName, containingTypeFullName);
 
-                foreach (var layer in baseTypeLayers)
+                foreach (var baseType in baseTypeRefs)
                 {
-                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, layer.propRefs);
-                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, layer.fieldRefs);
+                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, baseType.propRefs);
+                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, baseType.fieldRefs);
                 }
 
                 WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, idTypeFullName, propRefs);
@@ -70,10 +70,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 WriteConvertMethod(ref p, dataMap);
 
-                foreach (var layer in baseTypeLayers)
+                foreach (var baseType in baseTypeRefs)
                 {
-                    WriteToCollectionMethod(ref p, dataMap, layer.propRefs);
-                    WriteToCollectionMethod(ref p, dataMap, layer.fieldRefs);
+                    WriteToCollectionMethod(ref p, dataMap, baseType.propRefs);
+                    WriteToCollectionMethod(ref p, dataMap, baseType.fieldRefs);
                 }
 
                 WriteToCollectionMethod(ref p, dataMap, propRefs);
@@ -96,10 +96,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             p.PrintBeginLine("public __").Print(typeName).PrintEndLine("()");
             p.OpenScope();
             {
-                foreach (var layer in baseTypeLayers)
+                foreach (var baseType in baseTypeRefs)
                 {
-                    WriteCtorMembers(ref p, dataMap, horizontalListMap, layer.propRefs, fullName, containingTypeFullName);
-                    WriteCtorMembers(ref p, dataMap, horizontalListMap, layer.fieldRefs, fullName, containingTypeFullName);
+                    WriteCtorMembers(ref p, dataMap, horizontalListMap, baseType.propRefs, fullName, containingTypeFullName);
+                    WriteCtorMembers(ref p, dataMap, horizontalListMap, baseType.fieldRefs, fullName, containingTypeFullName);
                 }
 
                 WriteCtorMembers(ref p, dataMap, horizontalListMap, propRefs, fullName, containingTypeFullName);
@@ -345,10 +345,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var hashes = new HashSet<ulong>();
 
-            foreach (var layer in baseTypeLayers)
+            foreach (var baseType in baseTypeRefs)
             {
-                WriteSheetValueConverter(ref p, layer.propRefs, hashes);
-                WriteSheetValueConverter(ref p, layer.fieldRefs, hashes);
+                WriteSheetValueConverter(ref p, baseType.propRefs, hashes);
+                WriteSheetValueConverter(ref p, baseType.fieldRefs, hashes);
             }
 
             WriteSheetValueConverter(ref p, propRefs, hashes);
@@ -418,21 +418,21 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintBeginLine("var result = new ").Print(typeFullName).PrintEndLine("();");
                 p.PrintEndLine();
 
-                foreach (var layer in baseTypeLayers)
+                foreach (var baseType in baseTypeRefs)
                 {
                     p.OpenScope();
                     {
-                        p.PrintBeginLine("var resultBase = result as ").Print(layer.fullName).PrintEndLine(";");
+                        p.PrintBeginLine("var resultBase = result as ").Print(baseType.fullName).PrintEndLine(";");
 
                         WriteConvertType(
                               ref p
-                            , layer.fullName
-                            , layer.isValueType
+                            , baseType.fullName
+                            , baseType.isValueType
                             , "resultBase"
                             , dataMap
-                            , layer.validIdentifier
-                            , layer.propRefs
-                            , layer.fieldRefs
+                            , baseType.validIdentifier
+                            , baseType.propRefs
+                            , baseType.fieldRefs
                         );
                     }
                     p.CloseScope();

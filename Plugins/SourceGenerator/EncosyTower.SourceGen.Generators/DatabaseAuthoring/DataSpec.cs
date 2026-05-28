@@ -10,7 +10,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public bool isValueType;
         public EquatableArray<MemberSpec> propRefs;
         public EquatableArray<MemberSpec> fieldRefs;
-        public EquatableArray<DataLayerSpec> baseTypeLayers;
+        public EquatableArray<BaseDataSpec> baseTypeRefs;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(fullName) == false;
@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && isValueType == other.isValueType
             && propRefs.Equals(other.propRefs)
             && fieldRefs.Equals(other.fieldRefs)
-            && baseTypeLayers.Equals(other.baseTypeLayers)
+            && baseTypeRefs.Equals(other.baseTypeRefs)
             ;
 
         public readonly override bool Equals(object obj)
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , isValueType
                 , propRefs
                 , fieldRefs
-                , baseTypeLayers
+                , baseTypeRefs
             );
     }
 }
