@@ -81,6 +81,7 @@ namespace EncosyTower.SourceGen
         private static string ToValidIdentifier_Internal(string value, StringBuilder sb)
         {
             sb.Clear().Append(value)
+                .Replace("global::", "")
                 .Replace(' ', '_')
                 .Replace(':', '_')
                 .Replace('.', '_')
@@ -96,6 +97,7 @@ namespace EncosyTower.SourceGen
         private static string ToFileName_Internal(string value, StringBuilder sb)
         {
             sb.Clear().Append(value)
+                .Replace("global::", "")
                 .Replace('\\', '-')
                 .Replace('/', '-')
                 .Replace(':', '-')

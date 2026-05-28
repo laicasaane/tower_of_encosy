@@ -14,9 +14,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public EquatableArray<DataSpec> allDataModels;
         public EquatableArray<HorizontalListSpec> horizontalListEntries;
         public EquatableArray<TableSpec> tables;
-        public EquatableArray<AssetRefListSpec> assetRefLists;
+        public EquatableArray<SheetGroupSpec> sheetGroups;
         public EquatableArray<string> typeNames;
-        public int maxFieldOfSameTable;
         public EquatableArray<SheetSpec> sheets;
 
         public readonly bool IsValid
@@ -35,9 +34,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && allDataModels.Equals(other.allDataModels)
             && horizontalListEntries.Equals(other.horizontalListEntries)
             && tables.Equals(other.tables)
-            && assetRefLists.Equals(other.assetRefLists)
+            && sheetGroups.Equals(other.sheetGroups)
             && typeNames.Equals(other.typeNames)
-            && maxFieldOfSameTable == other.maxFieldOfSameTable
             && sheets.Equals(other.sheets)
             ;
 
@@ -53,12 +51,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , closingSource
                 , containerHintName
             )
-            .Add(allDataModels.GetHashCode())
-            .Add(horizontalListEntries.GetHashCode())
-            .Add(tables.GetHashCode())
-            .Add(assetRefLists.GetHashCode())
-            .Add(typeNames.GetHashCode())
-            .Add(maxFieldOfSameTable)
-            .Add(sheets.GetHashCode());
+            .Add(allDataModels)
+            .Add(horizontalListEntries)
+            .Add(tables)
+            .Add(sheetGroups)
+            .Add(typeNames)
+            .Add(sheets);
     }
 }

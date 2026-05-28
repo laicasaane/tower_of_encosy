@@ -11,9 +11,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string dataTypeFullName;
         public string propertyName;
         public NamingStrategy namingStrategy;
-        public string assetName;
-        public string uniqueSheetName;
+        public bool deduplicateAssetName;
+
+        // Pre-composed names, do not participate in Equals and GetHashCode
         public string baseSheetName;
+        public string uniqueSheetName;
 
         public readonly bool Equals(TableSpec other)
             => string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
@@ -22,9 +24,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && string.Equals(dataTypeFullName, other.dataTypeFullName, StringComparison.Ordinal)
             && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
             && namingStrategy == other.namingStrategy
-            && string.Equals(assetName, other.assetName, StringComparison.Ordinal)
-            && string.Equals(uniqueSheetName, other.uniqueSheetName, StringComparison.Ordinal)
-            && string.Equals(baseSheetName, other.baseSheetName, StringComparison.Ordinal)
+            && deduplicateAssetName == other.deduplicateAssetName
             ;
 
         public readonly override bool Equals(object obj)
@@ -37,10 +37,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , idTypeFullName
                 , dataTypeFullName
                 , propertyName
-                , assetName
-                , uniqueSheetName
-                , baseSheetName
-            )
-            .Add((byte)namingStrategy);
+                , namingStrategy
+                , deduplicateAssetName
+            );
     }
 }

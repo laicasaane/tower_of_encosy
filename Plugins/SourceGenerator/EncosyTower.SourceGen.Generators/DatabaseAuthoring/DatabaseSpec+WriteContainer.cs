@@ -1,5 +1,6 @@
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
+    using Newtonsoft.Json.Utilities;
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
     partial struct DatabaseSpec
@@ -30,49 +31,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     .PrintEndLine();
                 p.OpenScope();
                 {
-                    foreach (var typeName in typeNames)
-                    {
-                        p.PrintBeginLine("public ").Print(typeName).Print(" ")
-                            .Print(typeName).PrintEndLine(" { get; set; }");
-                        p.PrintEndLine();
-                    }
-
-                    foreach (var assetRefList in assetRefLists)
-                    {
-                        var baseTypeName = $"{assetRefList.tableTypeSimpleName}_{assetRefList.dataTypeSimpleName}Sheet";
-                        var fieldNames = assetRefList.fieldNames;
-                        var count = fieldNames.Count;
-
-                        p.PrintBeginLine("public SCG.List<").Print(baseTypeName).Print("> ")
-                            .Print(baseTypeName).PrintEndLine("s");
-                        p.OpenScope();
-                        {
-                            p.PrintBeginLine("get => new SCG.List<").Print(baseTypeName)
-                                .Print(">(").Print(count).PrintEndLine(")");
-                            p.OpenScope();
-                            {
-                                var lastIndex = count - 1;
-                                for (var i = 0; i < count; i++)
-                                {
-                                    var uniqueSheet = $"{baseTypeName}__{fieldNames[i]}";
-                                    p.PrintBeginLine("this.").Print(uniqueSheet);
-
-                                    if (i < lastIndex)
-                                    {
-                                        p.PrintEndLine(",");
-                                    }
-                                    else
-                                    {
-                                        p.PrintEndLine();
-                                    }
-                                }
-                            }
-                            p.CloseScope("};");
-                        }
-                        p.CloseScope();
-                        p.PrintEndLine();
-                    }
-;
                     p.PrintBeginLine("public SheetContainer()")
                         .PrintEndLine(" : this(CBSU.UnityLogger.Default)");
                     p.PrintLine("{ }");
@@ -90,6 +48,52 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     p.CloseScope();
                     p.PrintEndLine();
 
+                    foreach (var typeName in typeNames)
+                    {
+                        p.PrintBeginLine("public ").Print(typeName).Print(" ")
+                            .Print(typeName).PrintEndLine(" { get; set; }");
+                        p.PrintEndLine();
+                    }
+
+                    foreach (var sheetGroup in sheetGroups)
+                    {
+                        var baseSheetName = sheetGroup.baseSheetName;
+                        var sheets = sheetGroup.sheets;
+                        var count = sheets.Count;
+
+                        p.PrintBeginLine("public SCG.List<").Print(baseSheetName).Print("> ")
+                            .Print(baseSheetName).PrintEndLine("s");
+                        p.OpenScope();
+                        {
+                            p.PrintBeginLine("get => new SCG.List<").Print(baseSheetName)
+                                .Print(">(").Print(count).PrintEndLine(")");
+                            p.OpenScope();
+                            {
+                                var lastIndex = count - 1;
+
+                                for (var i = 0; i < count; i++)
+                                {
+                                    var asset = sheets[i];
+
+                                    p.PrintBeginLine("this.").Print(asset.tableName).Print("_")
+                                        .Print(baseSheetName).Print("_").Print(asset.propertyName);
+
+                                    if (i < lastIndex)
+                                    {
+                                        p.PrintEndLine(",");
+                                    }
+                                    else
+                                    {
+                                        p.PrintEndLine();
+                                    }
+                                }
+                            }
+                            p.CloseScope("};");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+                    }
+;
                     p.PrintLine("public void PostExport(ETDBA.DatabaseExportingContext context)");
                     p.OpenScope();
                     {
@@ -125,19 +129,22 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             foreach (var table in tables)
             {
-                var uniqueSheetName = table.uniqueSheetName;
-                var baseSheetName = table.baseSheetName;
+                var tableTypeName = table.typeSimpleName;
+                var propertyName = table.propertyName;
+                var namingStrategy = table.namingStrategy;
                 var idTypeFullName = table.idTypeFullName;
                 var dataTypeFullName = table.dataTypeFullName;
                 var tableTypeFullName = table.typeFullName;
-                var assetName = table.assetName;
+                var assetName = table.deduplicateAssetName
+                    ? $"{tableTypeName}_{propertyName}".ToNamingCase(namingStrategy)
+                    : tableTypeName.ToNamingCase(namingStrategy);
 
                 p.PrintLine(PR_SERIALIZABLE);
                 p.PrintLine(string.Format(PR_TABLE_NAMING, table.propertyName, table.namingStrategy));
                 p.PrintLine(string.Format(PR_GENERATED_SHEET_ATTRIBUTE, idTypeFullName, dataTypeFullName, tableTypeFullName, assetName));
                 p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
-                p.PrintBeginLine("public partial class ").Print(uniqueSheetName)
-                    .Print(" : ").Print(baseSheetName).PrintEndLine(" { }");
+                p.PrintBeginLine("public partial class ").Print(table.uniqueSheetName)
+                    .Print(" : ").Print(table.baseSheetName).PrintEndLine(" { }");
                 p.PrintEndLine();
             }
         }

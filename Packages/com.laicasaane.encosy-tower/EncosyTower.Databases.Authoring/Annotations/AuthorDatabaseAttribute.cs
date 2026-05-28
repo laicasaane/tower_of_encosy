@@ -42,6 +42,14 @@ namespace EncosyTower.Databases.Authoring
         public Type[] Converters { get; }
 
         /// <summary>
+        /// When set to <c>true</c>, source generator will output sheet names based on
+        /// fully qualified data type.
+        /// <br/>
+        /// Default to <c>false</c>.
+        /// </summary>
+        public bool FullyQualifiedSheetNames { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AuthorDatabaseAttribute"/> class.
         /// </summary>
         /// <param name="databaseType">The runtime database type to bind to this authoring type.</param>

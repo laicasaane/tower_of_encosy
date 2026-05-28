@@ -54,11 +54,137 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                   syntaxTree
                 , GENERATOR_NAME
                 , typeSyntax
-                , $"{databaseIdentifier}__SheetContainer"
+                , $"{databaseIdentifier}_SheetContainer"
             );
 
+            var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
+            var ignoredTypes = new IgnoredTypes();
+            var resultTypes = new ResultTypes();
             var namingStrategy = NamingStrategy.PascalCase;
+            var fullyQualifiedSheetNames = false;
 
+            ProcessAttributes(
+                  authorAttrib
+                , databaseAttrib
+                , dbConverterMap
+                , ignoredTypes
+                , resultTypes
+                , ref namingStrategy
+                , ref fullyQualifiedSheetNames
+            );
+
+            var tableInfoList = new List<TableInfo>();
+            var hlBuilder = ImmutableArrayBuilder<HorizontalListSpec>.Rent();
+
+            ProcessDatabaseSymbol(
+                  databaseSymbol
+                , ignoredTypes
+                , resultTypes
+                , namingStrategy
+                , tableInfoList
+                , ref hlBuilder
+            );
+
+            if (tableInfoList.Count < 1)
+            {
+                return default;
+            }
+
+            var dataMap = BuildDataMap(tableInfoList, dbConverterMap, ignoredTypes, resultTypes);
+            var sheetGroupMap = new Dictionary<string, SheetGroupInfo>(StringComparer.Ordinal);
+            var sheetGroupListOrder = new List<string>();
+            var typeNameList = new List<string>();
+            var sheetList = new List<SheetSpec>();
+            var tableSpecList = new List<TableSpec>();
+
+            ProcessTableInfoList(
+                  tableInfoList
+                , dataMap
+                , sheetGroupMap
+                , sheetGroupListOrder
+                , typeNameList
+                , sheetList
+                , tableSpecList
+                , syntaxTree
+                , typeSyntax
+                , databaseIdentifier
+                , fullyQualifiedSheetNames
+            );
+
+            if (sheetList.Count < 1)
+            {
+                return default;
+            }
+
+            using var dataSpecListBuilder = ImmutableArrayBuilder<DataSpec>.Rent();
+
+            foreach (var dm in dataMap.Values)
+            {
+                dataSpecListBuilder.Add(dm);
+            }
+
+            using var tableSpecListBuilder = ImmutableArrayBuilder<TableSpec>.Rent();
+
+            foreach (var tm in tableSpecList)
+            {
+                tableSpecListBuilder.Add(tm);
+            }
+
+            using var sheetGroupListBuilder = ImmutableArrayBuilder<SheetGroupSpec>.Rent();
+
+            foreach (var key in sheetGroupListOrder)
+            {
+                var assetInfo = sheetGroupMap[key];
+                sheetGroupListBuilder.Add(new SheetGroupSpec {
+                    baseSheetName = assetInfo.baseSheetName,
+                    sheets = assetInfo.sheets.ToImmutableArray().AsEquatableArray(),
+                });
+            }
+
+            using var typeNamesBuilder = ImmutableArrayBuilder<string>.Rent();
+
+            foreach (var tn in typeNameList)
+            {
+                typeNamesBuilder.Add(tn);
+            }
+
+            using var sheetListBuilder = ImmutableArrayBuilder<SheetSpec>.Rent();
+
+            foreach (var s in sheetList)
+            {
+                sheetListBuilder.Add(s);
+            }
+
+            var horizontalListEntries = hlBuilder.ToImmutable().AsEquatableArray();
+            hlBuilder.Dispose();
+
+            return new DatabaseSpec {
+                location = LocationInfo.From(typeSyntax.GetLocation()),
+                databaseTypeName = databaseTypeName,
+                databaseTypeKeyword = databaseTypeKeyword,
+                databaseIdentifier = databaseIdentifier,
+                openingSource = openingSource,
+                closingSource = closingSource,
+                containerHintName = containerHintName,
+                allDataModels = dataSpecListBuilder.ToImmutable().AsEquatableArray(),
+                horizontalListEntries = horizontalListEntries,
+                tables = tableSpecListBuilder.ToImmutable().AsEquatableArray(),
+                sheetGroups = sheetGroupListBuilder.ToImmutable().AsEquatableArray(),
+                typeNames = typeNamesBuilder.ToImmutable().AsEquatableArray(),
+                sheets = sheetListBuilder.ToImmutable().AsEquatableArray(),
+            };
+        }
+
+        private static void ProcessAttributes(
+              AttributeData authorAttrib
+            , AttributeData databaseAttrib
+            , Dictionary<string, ConverterSpec> dbConverterMap
+            , IgnoredTypes ignoredTypes
+            , ResultTypes resultTypes
+            , ref NamingStrategy namingStrategy
+            , ref bool fullyQualifiedSheetNames
+        )
+        {
             foreach (var arg in databaseAttrib.ConstructorArguments)
             {
                 if (arg.Kind != TypedConstantKind.Array && arg.Value != null)
@@ -67,10 +193,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     break;
                 }
             }
-
-            var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
-            var ignoredTypes = new IgnoredTypes();
-            var resultTypes = new ResultTypes();
 
             foreach (var arg in authorAttrib.ConstructorArguments)
             {
@@ -90,11 +212,29 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            var tableModelList = new List<TableSpec>();
-            var tableInfoList = new List<TableInfo>();
+            foreach (var arg in authorAttrib.NamedArguments)
+            {
+                if (arg.Key == "FullyQualifiedSheetNames"
+                    && arg.Value.Kind == TypedConstantKind.Primitive
+                    && arg.Value.Value is bool fullyQualified
+                )
+                {
+                    fullyQualifiedSheetNames = fullyQualified;
+                }
+            }
+        }
+
+        private static void ProcessDatabaseSymbol(
+              INamedTypeSymbol databaseSymbol
+            , IgnoredTypes ignoredTypes
+            , ResultTypes resultTypes
+            , NamingStrategy namingStrategy
+            , List<TableInfo> tableInfoList
+            , ref ImmutableArrayBuilder<HorizontalListSpec> hlBuilder
+        )
+        {
             // HorizontalListMap: targetTypeFullName -> containingTypeFullName -> HashSet<propertyName>
             var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(StringComparer.Ordinal);
-
             var dbMembers = databaseSymbol.GetMembers();
 
             foreach (var member in dbMembers)
@@ -143,22 +283,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 var idTypeFullName = idType.ToFullName();
                 var dataTypeFullName = dataType.ToFullName();
                 var tableTypeName = tableType.Name;
-                var dataTypeSimpleName = dataType is INamedTypeSymbol ndt ? ndt.Name : dataType.Name;
-                var baseSheetName = $"{tableTypeName}_{dataTypeSimpleName}Sheet";
-                var uniqueSheetName = $"{baseSheetName}__{property.Name}";
-                var assetName = $"{tableTypeName}_{property.Name}".ToNamingCase(tableNamingStrategy);
-
-                tableModelList.Add(new TableSpec {
-                    typeFullName = tableType.ToFullName(),
-                    typeSimpleName = tableTypeName,
-                    idTypeFullName = idTypeFullName,
-                    dataTypeFullName = dataTypeFullName,
-                    propertyName = property.Name,
-                    namingStrategy = tableNamingStrategy,
-                    assetName = assetName,
-                    uniqueSheetName = uniqueSheetName,
-                    baseSheetName = baseSheetName,
-                });
+                var tableTypeFullName = tableType.ToFullName();
+                var dataTypeSimpleName = dataType.Name;
 
                 tableInfoList.Add(new TableInfo {
                     tableType = tableType,
@@ -166,7 +292,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     dataType = dataType,
                     idTypeFullName = idTypeFullName,
                     dataTypeFullName = dataTypeFullName,
-                    tableTypeFullName = tableType.ToFullName(),
+                    tableTypeFullName = tableTypeFullName,
                     tableTypeSimpleName = tableTypeName,
                     dataTypeSimpleName = dataTypeSimpleName,
                     propertyName = property.Name,
@@ -176,66 +302,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 CollectHorizontalLists(member, tableType, horizontalListMap);
             }
-
-            if (tableModelList.Count < 1)
-            {
-                return default;
-            }
-
-            var dataMap = BuildDataMap(tableInfoList, dbConverterMap, ignoredTypes, resultTypes);
-            var assetRefListDict = new Dictionary<string, AssetRefListSpec>(StringComparer.Ordinal);
-            var assetRefListOrder = new List<string>();
-            var typeNameList = new List<string>();
-            var maxFieldOfSameTable = 0;
-
-            foreach (var tableInfo in tableInfoList)
-            {
-                var dataTypeFullName = tableInfo.dataTypeFullName;
-
-                if (dataMap.ContainsKey(dataTypeFullName) == false)
-                {
-                    continue;
-                }
-
-                var uniqueSheetNameForType = $"{tableInfo.tableTypeSimpleName}_{tableInfo.dataTypeSimpleName}Sheet__{tableInfo.propertyName}";
-                typeNameList.Add(uniqueSheetNameForType);
-
-                var tableTypeKey = tableInfo.tableTypeFullName;
-
-                if (assetRefListDict.TryGetValue(tableTypeKey, out var existing) == false)
-                {
-                    var newRef = new AssetRefListSpec {
-                        tableTypeFullName = tableInfo.tableTypeFullName,
-                        tableTypeSimpleName = tableInfo.tableTypeSimpleName,
-                        dataTypeFullName = tableInfo.dataTypeFullName,
-                        dataTypeSimpleName = tableInfo.dataTypeSimpleName,
-                        fieldNames = default,
-                    };
-
-                    assetRefListDict[tableTypeKey] = newRef;
-                    assetRefListOrder.Add(tableTypeKey);
-                    existing = newRef;
-                }
-
-                var currentFieldNames = new List<string>();
-
-                if (existing.fieldNames.Count > 0)
-                {
-                    foreach (var fn in existing.fieldNames)
-                    {
-                        currentFieldNames.Add(fn);
-                    }
-                }
-
-                currentFieldNames.Add(tableInfo.propertyName);
-
-                existing.fieldNames = currentFieldNames.ToImmutableArray().AsEquatableArray();
-                assetRefListDict[tableTypeKey] = existing;
-
-                maxFieldOfSameTable = Math.Max(maxFieldOfSameTable, currentFieldNames.Count);
-            }
-
-            using var hlBuilder = ImmutableArrayBuilder<HorizontalListSpec>.Rent();
 
             foreach (var targetKv in horizontalListMap)
             {
@@ -255,13 +321,29 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     });
                 }
             }
+        }
 
+        private static void ProcessTableInfoList(
+              List<TableInfo> tableInfoList
+            , Dictionary<string, DataSpec> dataMap
+            , Dictionary<string, SheetGroupInfo> sheetGroupMap
+            , List<string> sheetGroupListOrder
+            , List<string> typeNameList
+            , List<SheetSpec> sheetList
+            , List<TableSpec> tableSpecList
+            , SyntaxTree syntaxTree
+            , TypeDeclarationSyntax typeSyntax
+            , string databaseIdentifier
+            , bool fullyQualifiedSheetNames
+        )
+        {
+            // baseSheetName -> dataTypeFullName -> TableInfo list
+            var dedupTableInfoMap = new Dictionary<string, Dictionary<string, List<TableInfo>>>(StringComparer.Ordinal);
+            var dedupTableAssetMap = new Dictionary<string, bool>(StringComparer.Ordinal);
             var processedTableTypes = new HashSet<string>(StringComparer.Ordinal);
-            var sheetList = new List<SheetSpec>();
 
             foreach (var tableInfo in tableInfoList)
             {
-                var tableTypeKey = tableInfo.tableTypeFullName;
                 var dataTypeFullName = tableInfo.dataTypeFullName;
 
                 if (dataMap.ContainsKey(dataTypeFullName) == false)
@@ -269,94 +351,107 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     continue;
                 }
 
-                if (processedTableTypes.Contains(tableTypeKey))
+                var baseSheetName = fullyQualifiedSheetNames
+                    ? $"{dataTypeFullName.ToValidIdentifier()}Sheet"
+                    : $"{tableInfo.dataTypeSimpleName}Sheet";
+
+                if (dedupTableInfoMap.TryGetValue(baseSheetName, out var infoListMap) == false)
                 {
-                    continue;
+                    infoListMap = new Dictionary<string, List<TableInfo>>(1);
+                    dedupTableInfoMap[baseSheetName] = infoListMap;
                 }
 
-                processedTableTypes.Add(tableTypeKey);
+                if (infoListMap.TryGetValue(dataTypeFullName, out var infoList) == false)
+                {
+                    infoList = new List<TableInfo>(1);
+                    infoListMap[dataTypeFullName] = infoList;
+                }
 
-                var sheetName = $"{tableInfo.tableTypeSimpleName}_{tableInfo.dataTypeSimpleName}Sheet";
+                infoList.Add(tableInfo);
 
-                var sheetHintName = GetHintName(
-                      syntaxTree
-                    , GENERATOR_NAME
-                    , typeSyntax
-                    , $"{databaseIdentifier}__{tableInfo.tableTypeSimpleName}__{tableInfo.dataTypeSimpleName}Sheet"
-                );
-
-                var nestedFullNames = BuildNestedDataTypeFullNames(tableInfo, dataMap);
-
-                sheetList.Add(new SheetSpec {
-                    hintName = sheetHintName,
-                    idTypeFullName = tableInfo.idTypeFullName,
-                    idTypeSimpleName = tableInfo.idType is INamedTypeSymbol nid ? nid.Name : tableInfo.idType.Name,
-                    dataTypeFullName = dataTypeFullName,
-                    dataTypeSimpleName = tableInfo.dataTypeSimpleName,
-                    tableTypeFullName = tableInfo.tableTypeFullName,
-                    sheetName = sheetName,
-                    nestedDataTypeFullNames = nestedFullNames,
-                });
+                var tableTypeSimpleName = tableInfo.tableTypeSimpleName;
+                var existingTableAsset = dedupTableAssetMap.ContainsKey(tableTypeSimpleName);
+                dedupTableAssetMap[tableTypeSimpleName] = existingTableAsset;
             }
 
-            if (sheetList.Count < 1)
+            foreach (var pair in dedupTableInfoMap)
             {
-                return default;
+                var infoListMap = pair.Value;
+                var fullyQualified = infoListMap.Count > 1 || fullyQualifiedSheetNames;
+
+                foreach (var infoList in infoListMap.Values)
+                {
+                    foreach (var tableInfo in infoList)
+                    {
+                        var tableTypeSimpleName = tableInfo.tableTypeSimpleName;
+                        var baseSheetNamePerInfo = fullyQualified
+                        ? $"{tableInfo.dataTypeFullName.ToValidIdentifier()}Sheet"
+                        : pair.Key;
+
+                        var uniqueSheetName = $"{tableTypeSimpleName}_{baseSheetNamePerInfo}_{tableInfo.propertyName}";
+                        typeNameList.Add(uniqueSheetName);
+
+                        if (sheetGroupMap.TryGetValue(baseSheetNamePerInfo, out var existing) == false)
+                        {
+                            var newRef = new SheetGroupInfo {
+                                baseSheetName = baseSheetNamePerInfo,
+                                sheets = new List<SheetInfoSpec>(),
+                            };
+
+                            sheetGroupMap[baseSheetNamePerInfo] = newRef;
+                            sheetGroupListOrder.Add(baseSheetNamePerInfo);
+                            existing = newRef;
+                        }
+
+                        existing.sheets.Add(new SheetInfoSpec {
+                            tableName = tableTypeSimpleName,
+                            propertyName = tableInfo.propertyName,
+                        });
+
+                        dedupTableAssetMap.TryGetValue(tableTypeSimpleName, out var deduplicateAssetName);
+
+                        tableSpecList.Add(new TableSpec {
+                            typeFullName = tableInfo.tableTypeFullName,
+                            typeSimpleName = tableTypeSimpleName,
+                            idTypeFullName = tableInfo.idTypeFullName,
+                            dataTypeFullName = tableInfo.dataTypeFullName,
+                            propertyName = tableInfo.propertyName,
+                            namingStrategy = tableInfo.namingStrategy,
+                            baseSheetName = baseSheetNamePerInfo,
+                            uniqueSheetName = uniqueSheetName,
+                            deduplicateAssetName = deduplicateAssetName,
+                        });
+
+                        if (processedTableTypes.Contains(baseSheetNamePerInfo))
+                        {
+                            continue;
+                        }
+
+                        processedTableTypes.Add(baseSheetNamePerInfo);
+
+                        var sheetHintName = GetHintName(
+                          syntaxTree
+                        , GENERATOR_NAME
+                        , typeSyntax
+                        , $"{databaseIdentifier}_{baseSheetNamePerInfo}"
+                    );
+
+                        var nestedFullNames = BuildNestedDataTypeFullNames(tableInfo, dataMap);
+
+                        sheetList.Add(new SheetSpec {
+                            hintName = sheetHintName,
+                            idTypeFullName = tableInfo.idTypeFullName,
+                            idTypeSimpleName = tableInfo.idType.Name,
+                            dataTypeFullName = tableInfo.dataTypeFullName,
+                            dataTypeSimpleName = tableInfo.dataTypeSimpleName,
+                            tableTypeFullName = tableInfo.tableTypeFullName,
+                            sheetName = baseSheetNamePerInfo,
+                            nestedDataTypeFullNames = nestedFullNames,
+                        });
+                    }
+                }
             }
-
-            using var dataModelsBuilder = ImmutableArrayBuilder<DataSpec>.Rent();
-
-            foreach (var dm in dataMap.Values)
-            {
-                dataModelsBuilder.Add(dm);
-            }
-
-            using var tableModelsBuilder = ImmutableArrayBuilder<TableSpec>.Rent();
-
-            foreach (var tm in tableModelList)
-            {
-                tableModelsBuilder.Add(tm);
-            }
-
-            using var assetRefListBuilder = ImmutableArrayBuilder<AssetRefListSpec>.Rent();
-
-            foreach (var key in assetRefListOrder)
-            {
-                assetRefListBuilder.Add(assetRefListDict[key]);
-            }
-
-            using var typeNamesBuilder = ImmutableArrayBuilder<string>.Rent();
-
-            foreach (var tn in typeNameList)
-            {
-                typeNamesBuilder.Add(tn);
-            }
-
-            using var sheetsBuilder = ImmutableArrayBuilder<SheetSpec>.Rent();
-
-            foreach (var s in sheetList)
-            {
-                sheetsBuilder.Add(s);
-            }
-
-            return new DatabaseSpec {
-                location = LocationInfo.From(typeSyntax.GetLocation()),
-                databaseTypeName = databaseTypeName,
-                databaseTypeKeyword = databaseTypeKeyword,
-                databaseIdentifier = databaseIdentifier,
-                openingSource = openingSource,
-                closingSource = closingSource,
-                containerHintName = containerHintName,
-                allDataModels = dataModelsBuilder.ToImmutable().AsEquatableArray(),
-                horizontalListEntries = hlBuilder.ToImmutable().AsEquatableArray(),
-                tables = tableModelsBuilder.ToImmutable().AsEquatableArray(),
-                assetRefLists = assetRefListBuilder.ToImmutable().AsEquatableArray(),
-                typeNames = typeNamesBuilder.ToImmutable().AsEquatableArray(),
-                maxFieldOfSameTable = maxFieldOfSameTable,
-                sheets = sheetsBuilder.ToImmutable().AsEquatableArray(),
-            };
         }
-
 
         private static bool IsSupportedTypeSyntax(TypeDeclarationSyntax syntax)
             => syntax.IsKind(SyntaxKind.ClassDeclaration) || syntax.IsKind(SyntaxKind.StructDeclaration);
@@ -493,7 +588,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , out var fieldRefs
             );
 
-            using var baseBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
+            using var baseTypeBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
 
             var baseType = (type as INamedTypeSymbol)?.BaseType;
 
@@ -515,7 +610,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , out var baseFieldRefs
                 );
 
-                baseBuilder.Add(new BaseDataSpec {
+                baseTypeBuilder.Add(new BaseDataSpec {
                     fullName = baseType.ToFullName(),
                     simpleName = baseType.Name,
                     validIdentifier = baseType.ToValidIdentifier(),
@@ -527,12 +622,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 baseType = baseType.BaseType;
             }
 
-            var baseTypes = baseBuilder.ToImmutable();
-            using var reversedBaseBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
+            var rawLayers = baseTypeBuilder.ToImmutable();
+            using var reversedBaseTypeBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
 
-            for (var i = baseTypes.Length - 1; i >= 0; i--)
+            for (var i = rawLayers.Length - 1; i >= 0; i--)
             {
-                reversedBaseBuilder.Add(baseTypes[i]);
+                reversedBaseTypeBuilder.Add(rawLayers[i]);
             }
 
             return new DataSpec {
@@ -542,7 +637,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 isValueType = type.IsValueType,
                 propRefs = propRefs,
                 fieldRefs = fieldRefs,
-                baseTypeRefs = reversedBaseBuilder.ToImmutable().AsEquatableArray(),
+                baseTypeRefs = reversedBaseTypeBuilder.ToImmutable().AsEquatableArray(),
             };
         }
 
@@ -667,18 +762,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     continue;
                 }
 
-                ISymbol generatedFromMember = null;
+                ISymbol sourceMemberSymbol = null;
 
                 if (member.isGenerated && fieldMap.TryGetValue(member.fieldName, out var field))
                 {
-                    generatedFromMember = field;
+                    sourceMemberSymbol = field;
                 }
 
                 uniqueFieldNames.Add(member.fieldName);
                 propBuilder.Add(BuildMemberModel(
                       member.propertyName
                     , member.member
-                    , generatedFromMember
+                    , sourceMemberSymbol
                     , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
@@ -723,7 +818,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static MemberSpec BuildMemberModel(
               string propertyName
             , ISymbol memberSymbol
-            , ISymbol generatedFromMember
+            , ISymbol sourceMemberSymbol
             , ITypeSymbol fieldType
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
@@ -738,9 +833,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var collection = MakeCollectionModel(fieldType, ignoredTypes, resultTypes);
             var converter = TryMakeConverterModel(memberSymbol, fieldType, ignoredTypes, resultTypes);
 
-            if (converter.kind == ConverterKind.None && generatedFromMember != null)
+            if (converter.kind == ConverterKind.None && sourceMemberSymbol != null)
             {
-                converter = TryMakeConverterModel(generatedFromMember, fieldType, ignoredTypes, resultTypes);
+                converter = TryMakeConverterModel(sourceMemberSymbol, fieldType, ignoredTypes, resultTypes);
             }
 
             if (converter.kind == ConverterKind.None)
@@ -1052,9 +1147,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static bool IsPostLoadMember(ISymbol memberSymbol)
-            => memberSymbol.HasAttribute(DATA_POST_LOAD_ATTRIBUTE);
-
         private static ConverterSpec TryMakeConverterModel(
               ISymbol memberSymbol
             , ITypeSymbol targetType
@@ -1285,10 +1377,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 TryEnqueueMembers(dm.propRefs, dataMap, uniqueTypes, typeQueue);
                 TryEnqueueMembers(dm.fieldRefs, dataMap, uniqueTypes, typeQueue);
 
-                foreach (var baseType in dm.baseTypeRefs)
+                foreach (var layer in dm.baseTypeRefs)
                 {
-                    TryEnqueueMembers(baseType.propRefs, dataMap, uniqueTypes, typeQueue);
-                    TryEnqueueMembers(baseType.fieldRefs, dataMap, uniqueTypes, typeQueue);
+                    TryEnqueueMembers(layer.propRefs, dataMap, uniqueTypes, typeQueue);
+                    TryEnqueueMembers(layer.fieldRefs, dataMap, uniqueTypes, typeQueue);
                 }
             }
 
@@ -1409,8 +1501,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             public string tableTypeSimpleName;
             public string dataTypeSimpleName;
             public string propertyName;
-            public NamingStrategy namingStrategy;
             public Dictionary<string, ConverterSpec> tableConverterMap;
+            public NamingStrategy namingStrategy;
+        }
+
+        private struct SheetGroupInfo
+        {
+            public string baseSheetName;
+            public List<SheetInfoSpec> sheets;
         }
 
         private struct MemberInfo
