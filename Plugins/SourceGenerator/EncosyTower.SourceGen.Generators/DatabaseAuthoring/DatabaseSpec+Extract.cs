@@ -1090,14 +1090,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var sourceType = convertMethod.Parameters[0].Type;
             var sourceCollection = MakeCollectionModel(sourceType, ignoredTypes, resultTypes);
+            var destType = convertMethod.ReturnType;
+            MakeCollectionModel(destType, ignoredTypes, resultTypes);
 
             TryAddToResultTypes(sourceType, ignoredTypes, resultTypes);
+            TryAddToResultTypes(destType, ignoredTypes, resultTypes);
 
             return new ConverterSpec {
                 kind = convertMethod.IsStatic ? ConverterKind.Static : ConverterKind.Instance,
                 converterTypeFullName = converterType.ToFullName(),
                 sourceCollection = sourceCollection,
                 sourceType = MakeTypeModel(sourceType),
+                destType = MakeTypeModel(destType),
             };
         }
 

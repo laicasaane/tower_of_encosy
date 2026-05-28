@@ -8,6 +8,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string converterTypeFullName;
         public CollectionSpec sourceCollection;
         public TypeSpec sourceType;
+        public TypeSpec destType;
 
         public readonly string Convert(string expression)
         {
@@ -34,12 +35,19 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && string.Equals(converterTypeFullName, other.converterTypeFullName, StringComparison.Ordinal)
             && sourceCollection.Equals(other.sourceCollection)
             && sourceType.Equals(other.sourceType)
+            && destType.Equals(other.destType)
             ;
 
         public readonly override bool Equals(object obj)
             => obj is ConverterSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(kind, converterTypeFullName, sourceCollection, sourceType);
+            => HashValue.Combine(
+                  kind
+                , converterTypeFullName
+                , sourceCollection
+                , sourceType
+                , destType
+            );
     }
 }

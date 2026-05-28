@@ -325,7 +325,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     var hash = HashValue64.FNV1a(converter.converterTypeFullName);
 
                     p.PrintBeginLine("[CBS.SheetValueConverter(typeof(__SheetValueConverter_")
-                        .Print(member.type.simpleName.ToValidIdentifier()).Print('_').Print(hash)
+                        .Print(converter.destType.simpleName.ToValidIdentifier()).Print('_').Print(hash)
                         .PrintEndLine("))]");
                 }
 
@@ -374,7 +374,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
                     p.PrintBeginLine("public sealed class ").Print("__SheetValueConverter_")
-                        .Print(member.type.simpleName.ToValidIdentifier()).Print('_').Print(hash)
+                        .Print(converter.destType.simpleName.ToValidIdentifier()).Print('_').Print(hash)
                         .Print(" : CBS.SheetValueConverter<").Print(targetType).PrintEndLine(">");
                     p.OpenScope();
                     {
