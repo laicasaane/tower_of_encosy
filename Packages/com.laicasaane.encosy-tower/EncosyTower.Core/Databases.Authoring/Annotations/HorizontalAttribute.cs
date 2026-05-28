@@ -1,4 +1,5 @@
 using System;
+using EncosyTower.Core;
 using EncosyTower.Data;
 
 namespace EncosyTower.Databases.Authoring
@@ -12,6 +13,7 @@ namespace EncosyTower.Databases.Authoring
     /// This is typically applied within types that participate in the authoring pipeline through
     /// <c>AuthorDatabaseAttribute</c>.
     /// </remarks>
+    [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
     public sealed class HorizontalAttribute : Attribute
     {

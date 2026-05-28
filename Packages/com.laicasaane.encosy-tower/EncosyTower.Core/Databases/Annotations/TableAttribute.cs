@@ -11,6 +11,16 @@ namespace EncosyTower.Databases
         /// </summary>
         public NamingStrategy NamingStrategy { get; }
 
+        /// <remarks>
+        /// Converter precedences (smaller index means higher precedence):
+        /// <list type="number">
+        /// <item><see cref="EncosyTower.Data.Authoring.DataConverterAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.TableAttribute"/></item>
+        /// <item>Local <c>Convert</c> method within IData type</item>
+        /// </list>
+        /// </remarks>
         public Type[] Converters { get; }
 
         public TableAttribute(params Type[] converters)

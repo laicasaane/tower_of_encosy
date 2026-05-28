@@ -22,7 +22,7 @@
         public const string IDATA = $"global::{DATA_NAMESPACE}.IData";
         public const string DATA_ATTRIBUTE = $"{DATA_NAMESPACE}.DataAttribute";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataPropertyAttribute";
-        public const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataConverterAttribute";
+        public const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataConverterAttribute";
 
         public const string SERIALIZE_FIELD_ATTRIBUTE = "global::UnityEngine.SerializeField";
 

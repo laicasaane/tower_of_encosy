@@ -46,6 +46,7 @@ namespace Samples.Data.Data
     using Samples.Data.DataConverters;
     using Newtonsoft.Json;
     using UnityEngine;
+    using EncosyTower.Data.Authoring;
 
     public enum EntityKind
     {
@@ -201,6 +202,7 @@ namespace Samples.Data.Enemies
     using System.Collections.Generic;
     using System.ComponentModel;
     using EncosyTower.Data;
+    using EncosyTower.Data.Authoring;
     using EncosyTower.Databases;
     using EncosyTower.Initialization;
     using Samples.Data.Data;
@@ -211,7 +213,7 @@ namespace Samples.Data.Enemies
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
-        [property: DataConverter(typeof(EnemyTypeExConverter))]
+        [DataConverter(typeof(EnemyTypeExConverter))]
         [SerializeField] private EnemyTypeEx _type;
         [SerializeField] private StatData _stat;
         [SerializeField] private HashSet<int> _intSet;

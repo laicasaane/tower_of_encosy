@@ -15,11 +15,11 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         private const string DATABASES_AUTHORING_NAMESPACE = DATABASES_NAMESPACE + ".Authoring";
         private const string DATA_NAMESPACE = "EncosyTower.Data";
 
-        private const string AUTHOR_DATABASE_ATTRIBUTE = "global::" + DATABASES_AUTHORING_NAMESPACE + ".AuthorDatabaseAttribute";
-        private const string DATABASE_ATTRIBUTE = "global::" + DATABASES_NAMESPACE + ".DatabaseAttribute";
-        private const string TABLE_ATTRIBUTE = "global::" + DATABASES_NAMESPACE + ".TableAttribute";
-        private const string DATA_CONVERTER_ATTRIBUTE = "global::" + DATA_NAMESPACE + ".DataConverterAttribute";
-        private const string IDATA = "global::" + DATA_NAMESPACE + ".IData";
+        private const string AUTHOR_DATABASE_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.AuthorDatabaseAttribute";
+        private const string DATABASE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.DatabaseAttribute";
+        private const string TABLE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.TableAttribute";
+        private const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataConverterAttribute";
+        private const string IDATA = $"global::{DATA_NAMESPACE}.IData";
 
         public static readonly DiagnosticDescriptor MissingDefaultConstructor = new DiagnosticDescriptor(
               id: "SG_AUTHOR_DATABASE_0010"
