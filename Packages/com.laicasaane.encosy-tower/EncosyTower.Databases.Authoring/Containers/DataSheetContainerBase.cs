@@ -83,11 +83,6 @@ namespace EncosyTower.Databases.Authoring
 
             OnBeforePostLoad(context);
 
-            foreach (var sheet in dataSheets)
-            {
-                sheet.Initialize(context);
-            }
-
             // making sure all references are mapped before calling PostLoad
             foreach (var sheet in rowTypeToSheet.Values)
             {
@@ -97,6 +92,16 @@ namespace EncosyTower.Databases.Authoring
             foreach (var sheet in rowTypeToSheet.Values)
             {
                 sheet.PostLoad(context);
+            }
+
+            foreach (var sheet in dataSheets)
+            {
+                sheet.Initialize(context);
+            }
+
+            foreach (var sheet in dataSheets)
+            {
+                sheet.PostConvert(context);
             }
 
             OnAfterPostLoad(context);

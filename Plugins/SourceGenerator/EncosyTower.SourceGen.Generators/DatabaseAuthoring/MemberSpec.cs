@@ -5,6 +5,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     public struct MemberSpec : IEquatable<MemberSpec>
     {
         public string propertyName;
+        public bool isPostConvert;
         public TypeSpec type;
         public CollectionSpec collection;
         public ConverterSpec converter;
@@ -18,6 +19,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public readonly bool Equals(MemberSpec other)
             => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
+            && isPostConvert == other.isPostConvert
             && type.Equals(other.type)
             && collection.Equals(other.collection)
             && converter.Equals(other.converter)
@@ -28,6 +30,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => obj is MemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(propertyName, type, collection, converter, sheetConverter);
+            => HashValue.Combine(propertyName, isPostConvert, type, collection, converter, sheetConverter);
     }
 }

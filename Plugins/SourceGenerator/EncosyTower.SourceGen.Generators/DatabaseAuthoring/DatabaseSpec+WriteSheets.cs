@@ -85,6 +85,17 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     p.PrintLine("partial void OnInitialize(CBS.SheetConvertingContext context);");
                     p.PrintEndLine();
 
+                    p.PrintLine("public void PostConvert(CBS.SheetConvertingContext context)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("OnPostConvert(context);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("partial void OnPostConvert(CBS.SheetConvertingContext context);");
+                    p.PrintEndLine();
+
                     p.PrintBeginLine("public ").Print(dataTypeFullName).Print("[] To")
                         .Print(dataTypeSimpleName).PrintEndLine("Array()");
                     p.OpenScope();

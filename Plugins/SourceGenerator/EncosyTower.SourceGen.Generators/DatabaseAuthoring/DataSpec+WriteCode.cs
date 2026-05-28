@@ -65,9 +65,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, propRefs);
                 WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, fieldRefs);
 
-                p.PrintLine("partial void OnConstructor();");
-                p.PrintEndLine();
-
                 WriteConvertMethod(ref p, dataMap);
 
                 foreach (var baseType in baseTypeRefs)
@@ -109,6 +106,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintLine("OnConstructor();");
             }
             p.CloseScope();
+            p.PrintEndLine();
+
+            p.PrintLine("partial void OnConstructor();");
             p.PrintEndLine();
         }
 
@@ -219,7 +219,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
+                if (member.isPostConvert)
+                {
+                    p.PrintBeginLine("this.").Print(member.propertyName)
+                        .PrintEndLine(" = string.Empty;");
+                }
+
                 p.PrintBeginLine("this.").Print(member.propertyName)
+                    .PrintIf(member.isPostConvert, "_PostConvert")
                     .Print(" = ").Print(newExpression).PrintEndLine(";");
             }
         }
@@ -237,6 +244,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 if (isRowData && member.propertyName == "Id")
                 {
+                    // Property `Id` has been defined in CBS.Sheet<TKey>
                     continue;
                 }
 
@@ -323,7 +331,15 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                if (member.sheetConverter.kind != ConverterKind.None)
+                if (member.isPostConvert)
+                {
+                    p.PrintBeginLine("public string ").Print(member.propertyName)
+                        .PrintEndLine(" { get; private set; }");
+                    p.PrintEndLine();
+
+                    p.PrintLine("[CBS.NonSerialized]");
+                }
+                else if (member.sheetConverter.kind != ConverterKind.None)
                 {
                     var converter = member.sheetConverter;
                     var hash = HashValue64.FNV1a(converter.converterTypeFullName);
@@ -334,6 +350,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
 
                 p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(member.propertyName)
+                    .PrintIf(member.isPostConvert, "_PostConvert")
                     .PrintEndLine(" { get; private set; }");
                 p.PrintEndLine();
             }
@@ -360,6 +377,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 foreach (var member in members)
                 {
+                    if (member.isPostConvert)
+                    {
+                        continue;
+                    }
+
                     var converter = member.sheetConverter;
 
                     if (converter.kind == ConverterKind.None)
@@ -490,8 +512,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var type = member.SelectType();
             var coll = member.SelectCollection();
-            var memberPropName = member.propertyName;
-
+            var memberPropName = GetMemberPropName(member);
             string expression;
 
             switch (coll.kind)
@@ -665,10 +686,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            var memberPropName = member.propertyName;
+            var memberPropName = GetMemberPropName(member);
             var elemSimpleName = coll.elementType.simpleName;
             var elemFullName = coll.elementType.fullName;
-            var methodName = GetToCollectionMethodName(memberPropName, elemSimpleName, "Array");
+            var methodName = GetToCollectionMethodName(member.propertyName, elemSimpleName, "Array");
 
             p.PrintBeginLine("private ").Print(elemFullName).Print("[] ").Print(methodName).PrintEndLine("()");
             p.OpenScope();
@@ -711,10 +732,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            var memberPropName = member.propertyName;
+            var memberPropName = GetMemberPropName(member);
             var elemSimpleName = coll.elementType.simpleName;
             var elemFullName = coll.elementType.fullName;
-            var methodName = GetToCollectionMethodName(memberPropName, elemSimpleName, "List");
+            var methodName = GetToCollectionMethodName(member.propertyName, elemSimpleName, "List");
 
             p.PrintBeginLine("private ").Print(PR_LIST_T).Print("<").Print(elemFullName).Print("> ")
                 .Print(methodName).PrintEndLine("()");
@@ -763,12 +784,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            var memberPropName = member.propertyName;
+            var memberPropName = GetMemberPropName(member);
             var keySimple = coll.keyType.simpleName;
             var keyFull = coll.keyType.fullName;
             var elemSimple = coll.elementType.simpleName;
             var elemFull = coll.elementType.fullName;
-            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "Dictionary");
+            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Dictionary");
 
             p.PrintBeginLine("private ").Print(PR_DICTIONARY_T).Print("<").Print(keyFull)
                 .Print(", ").Print(elemFull).Print("> ").Print(methodName).PrintEndLine("()");
@@ -835,10 +856,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            var memberPropName = member.propertyName;
+            var memberPropName = GetMemberPropName(member);
             var elemSimple = coll.elementType.simpleName;
             var elemFull = coll.elementType.fullName;
-            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "HashSet");
+            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "HashSet");
 
             p.PrintBeginLine("private ").Print(PR_HASH_SET_T).Print("<").Print(elemFull).Print("> ")
                 .Print(methodName).PrintEndLine("()");
@@ -885,10 +906,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            var memberPropName = member.propertyName;
+            var memberPropName = GetMemberPropName(member);
             var elemSimple = coll.elementType.simpleName;
             var elemFull = coll.elementType.fullName;
-            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "Queue");
+            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Queue");
 
             p.PrintBeginLine("private ").Print(PR_QUEUE_T).Print("<").Print(elemFull).Print("> ")
                 .Print(methodName).PrintEndLine("()");
@@ -935,10 +956,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return;
             }
 
-            var memberPropName = member.propertyName;
+            var memberPropName = GetMemberPropName(member);
             var elemSimple = coll.elementType.simpleName;
             var elemFull = coll.elementType.fullName;
-            var methodName = GetToCollectionMethodName(memberPropName, elemSimple, "Stack");
+            var methodName = GetToCollectionMethodName(member.propertyName, elemSimple, "Stack");
 
             p.PrintBeginLine("private ").Print(PR_STACK_T).Print("<").Print(elemFull).Print("> ")
                 .Print(methodName).PrintEndLine("()");
@@ -985,6 +1006,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             var dot = fullName.LastIndexOf('.');
             return dot >= 0 ? fullName.Substring(dot + 1) : fullName;
+        }
+
+        private static string GetMemberPropName(MemberSpec member)
+        {
+            var result = member.propertyName;
+
+            if (member.isPostConvert)
+            {
+                result = $"{result}_PostConvert";
+            }
+
+            return result;
         }
     }
 }

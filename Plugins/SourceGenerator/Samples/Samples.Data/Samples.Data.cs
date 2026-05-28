@@ -219,10 +219,17 @@ namespace Samples.Data.Enemies
         [SerializeField] private HashSet<int> _intSet;
         [SerializeField] private Queue<float> _floatQueue;
         [SerializeField] private Stack<float> _floatStack;
+        [SerializeField] private Modifier _modifier;
 
         public void Initialize()
         {
         }
+    }
+
+    [Data]
+    public partial struct Modifier
+    {
+        [SerializeField, DataPostConvert] private float _hp;
     }
 
     public struct EnemyTypeExConverter

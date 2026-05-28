@@ -882,8 +882,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             EnqueueTypes(queue, resultTypes);
             resultTypes.Clear();
 
+            var isPostConvert = IsPostConvertMember(memberSymbol);
+
+            if (isPostConvert == false && sourceMemberSymbol != null)
+            {
+                isPostConvert = IsPostConvertMember(sourceMemberSymbol);
+            }
+
             return new MemberSpec {
                 propertyName = propertyName,
+                isPostConvert = isPostConvert,
                 type = MakeTypeModel(fieldType),
                 collection = collection,
                 converter = converter,
@@ -1146,6 +1154,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 };
             }
         }
+
+        private static bool IsPostConvertMember(ISymbol memberSymbol)
+            => memberSymbol.HasAttribute(DATA_POST_CONVERT_ATTRIBUTE);
 
         private static ConverterSpec TryMakeConverterModel(
               ISymbol memberSymbol

@@ -11,7 +11,6 @@
     [AuthorDatabase(typeof(SampleDatabase), typeof(StringToEnemyTypeConverter))]
     public partial struct SampleDatabaseAuthoring
     {
-
     }
 
     public readonly struct StringToEnemyTypeConverter
