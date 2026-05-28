@@ -82,6 +82,7 @@ namespace EncosyTower.SourceGen
         {
             sb.Clear().Append(value)
                 .Replace(' ', '_')
+                .Replace(':', '_')
                 .Replace('.', '_')
                 .Replace("-", "__")
                 .Replace('<', 'ᐸ')
