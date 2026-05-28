@@ -159,25 +159,6 @@ public class DataDiagnosticAnalyzerTests
         );
 
     [TestMethod]
-    public Task DataConverterOnSerializedField_ReportsIgnoredByBakingSheet()
-        => RunAsync(
-              """
-                  [EncosyTower.Data.Data]
-                  public partial class Foo
-                  {
-                      [UnityEngine.SerializeField]
-                      [{|#0:EncosyTower.Data.DataConverter(typeof(IntConverter))|}]
-                      private int _value;
-                  }
-
-                  public sealed class IntConverter { }
-              """
-            , new DiagnosticResult(DataDiagnosticAnalyzer.DataConverterOnFieldWillBeIgnoredByBakingSheet)
-                .WithLocation(0)
-                .WithArguments("_value")
-        );
-
-    [TestMethod]
     public Task CollectionIdProperty_ReportsCollectionIsNotApplicableForProperty()
         => RunAsync(
               """

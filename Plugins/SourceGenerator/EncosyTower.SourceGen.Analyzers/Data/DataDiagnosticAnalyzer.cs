@@ -50,23 +50,12 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             , description: "Collection type is not applicable for the property."
         );
 
-        public static readonly DiagnosticDescriptor DataConverterOnFieldWillBeIgnoredByBakingSheet = new(
-              id: "SG_DATA_0005"
-            , title: "[DataConverter] on a serialized field will be ignored by the BakingSheet authoring pipeline"
-            , messageFormat: "[DataConverter] on field \"{0}\" will be ignored by the BakingSheet authoring pipeline; use [property: DataConverter(...)] instead"
-            , category: "DataGenerator"
-            , defaultSeverity: DiagnosticSeverity.Warning
-            , isEnabledByDefault: true
-            , description: "Data converters for serialized fields must target the generated property to be used by the BakingSheet authoring pipeline."
-        );
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
                   CannotDecorateImmutableDataWithFieldPolicyAttribute
                 , ImmutableDataFieldMustBePrivate
                 , OnlyPrivateOrInitOnlySetterIsAllowed
                 , CollectionIsNotApplicableForProperty
-                , DataConverterOnFieldWillBeIgnoredByBakingSheet
             );
 
         public override void Initialize(AnalysisContext context)
@@ -186,21 +175,6 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
             {
                 return;
-            }
-
-            if (field.GetAttribute(DATA_CONVERTER_ATTRIBUTE) is { } converterAttrib)
-            {
-                var converterLocation = converterAttrib.ApplicationSyntaxReference != null
-                    ? converterAttrib.ApplicationSyntaxReference.GetSyntax(context.CancellationToken).GetLocation()
-                    : field.Locations.Length > 0
-                        ? field.Locations[0]
-                        : Location.None;
-
-                context.ReportDiagnostic(Diagnostic.Create(
-                      DataConverterOnFieldWillBeIgnoredByBakingSheet
-                    , converterLocation
-                    , field.Name
-                ));
             }
 
             if (isMutable == false
