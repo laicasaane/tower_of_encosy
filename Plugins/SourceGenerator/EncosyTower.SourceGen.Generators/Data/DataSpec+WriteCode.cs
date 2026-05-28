@@ -253,7 +253,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             var mustCast = field.typesAreDifferent;
             var propTypeName = isMutable ? mutableTypeName : immutableTypeName;
 
-            p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(field.propertyName);
+            p.PrintBeginLine("public ").Print(propTypeName).Print(" ").PrintEndLine(field.propertyName);
             p.OpenScope();
             {
                 // getter
@@ -329,12 +329,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                     else if (mustCast)
                     {
                         p.PrintBeginLine("init => this.").Print(fieldName)
-                            .Print(" = ").Print(casting).Print("(value);");
+                            .Print(" = ").Print(casting).PrintEndLine("(value);");
                     }
                     else
                     {
                         p.PrintBeginLine("init => this.").Print(fieldName)
-                            .Print(" = (").Print(mutableTypeName).Print(")(value);");
+                            .Print(" = (").Print(mutableTypeName).PrintEndLine(")(value);");
                     }
                 }
             }
