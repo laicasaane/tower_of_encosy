@@ -404,6 +404,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var typeName = simpleName;
             var typeFullName = fullName;
+            var isValueType = this.isValueType;
 
             p.PrintBeginLine("public ").Print(typeFullName).Print(" To").Print(typeName).PrintEndLine("()");
             p.OpenScope();
@@ -420,6 +421,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         WriteConvertType(
                               ref p
                             , layer.fullName
+                            , layer.isValueType
                             , "resultBase"
                             , dataMap
                             , layer.validIdentifier
@@ -434,6 +436,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 WriteConvertType(
                       ref p
                     , typeFullName
+                    , isValueType
                     , "result"
                     , dataMap
                     , validIdentifier
@@ -452,6 +455,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static void WriteConvertType(
               ref Printer p
             , string typeFullName
+            , bool isValueType
             , string resultName
             , Dictionary<string, DataSpec> dataMap
             , string typeValidIdentifier
@@ -461,18 +465,19 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             foreach (var member in fields)
             {
-                WriteConvertMember(ref p, typeFullName, resultName, dataMap, typeValidIdentifier, member);
+                WriteConvertMember(ref p, typeFullName, isValueType, resultName, dataMap, typeValidIdentifier, member);
             }
 
             foreach (var member in props)
             {
-                WriteConvertMember(ref p, typeFullName, resultName, dataMap, typeValidIdentifier, member);
+                WriteConvertMember(ref p, typeFullName, isValueType, resultName, dataMap, typeValidIdentifier, member);
             }
         }
 
         private static void WriteConvertMember(
               ref Printer p
             , string typeFullName
+            , bool isValueType
             , string resultName
             , Dictionary<string, DataSpec> dataMap
             , string typeValidIdentifier
@@ -618,7 +623,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
 
             p.PrintBeginLine(typeFullName).Print(".").Print(typeValidIdentifier).Print("_ValueSetter.Set_")
-                .Print(member.propertyName).Print("(ref ").Print(resultName)
+                .Print(member.propertyName).Print("(").PrintIf(isValueType, "ref ").Print(resultName)
                 .Print(", ").Print(expression).PrintEndLine(");");
         }
 

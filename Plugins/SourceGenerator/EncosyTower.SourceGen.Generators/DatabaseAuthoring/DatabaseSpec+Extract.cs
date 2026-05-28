@@ -539,6 +539,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 fullName = type.ToFullName(),
                 simpleName = type.Name,
                 validIdentifier = type.ToValidIdentifier(),
+                isValueType = type.IsValueType,
                 propRefs = propRefs,
                 fieldRefs = fieldRefs,
                 baseTypeLayers = reversedLayers.ToImmutable().AsEquatableArray(),

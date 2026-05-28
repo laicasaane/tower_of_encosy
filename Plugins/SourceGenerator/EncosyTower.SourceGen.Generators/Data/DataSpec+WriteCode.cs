@@ -977,7 +977,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var pn = fieldRef.propertyName;
 
                     p.PrintLine(PR_AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public static void Set_").Print(pn).Print("(ref ")
+                    p.PrintBeginLine("public static void Set_").Print(pn).Print("(").PrintIf(isValueType, "ref ")
                         .Print(typeName).Print(" @ref")
                         .Print(", ").Print(fieldRef.fieldTypeName).Print(" value_").Print(pn).PrintEndLine(")");
                     p.WithIncreasedIndent()
@@ -991,7 +991,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var pn = propRef.propertyName;
 
                     p.PrintLine(PR_AGGRESSIVE_INLINING);
-                    p.PrintBeginLine("public static void Set_").Print(pn).Print("(ref ")
+                    p.PrintBeginLine("public static void Set_").Print(pn).Print("(").PrintIf(isValueType, "ref ")
                         .Print(typeName).Print(" @ref")
                         .Print(", ").Print(propRef.fieldTypeName).Print(" value_").Print(pn).PrintEndLine(")");
                     p.WithIncreasedIndent()

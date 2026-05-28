@@ -7,6 +7,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string fullName;
         public string simpleName;
         public string validIdentifier;
+        public bool isValueType;
         public EquatableArray<MemberSpec> propRefs;
         public EquatableArray<MemberSpec> fieldRefs;
         public EquatableArray<DataLayerSpec> baseTypeLayers;
@@ -18,6 +19,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
             && string.Equals(validIdentifier, other.validIdentifier, StringComparison.Ordinal)
+            && isValueType == other.isValueType
             && propRefs.Equals(other.propRefs)
             && fieldRefs.Equals(other.fieldRefs)
             && baseTypeLayers.Equals(other.baseTypeLayers)
@@ -27,9 +29,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => obj is DataSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(fullName, simpleName, validIdentifier)
-            .Add(propRefs.GetHashCode())
-            .Add(fieldRefs.GetHashCode())
-            .Add(baseTypeLayers.GetHashCode());
+            => HashValue.Combine(
+                  fullName
+                , simpleName
+                , validIdentifier
+                , isValueType
+                , propRefs
+                , fieldRefs
+                , baseTypeLayers
+            );
     }
 }
