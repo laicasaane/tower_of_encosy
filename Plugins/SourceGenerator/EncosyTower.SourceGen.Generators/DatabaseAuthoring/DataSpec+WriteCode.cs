@@ -219,14 +219,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                if (member.isPostConvert)
+                if (member.postConvertFlags.DefineEmitRawStringProperty)
                 {
                     p.PrintBeginLine("this.").Print(member.propertyName)
                         .PrintEndLine(" = string.Empty;");
                 }
 
                 p.PrintBeginLine("this.").Print(member.propertyName)
-                    .PrintIf(member.isPostConvert, "_PostConvert")
+                    .PrintIf(member.postConvertFlags.defined, "_PostConvert")
                     .Print(" = ").Print(newExpression).PrintEndLine(";");
             }
         }
@@ -331,11 +331,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                if (member.isPostConvert)
+                if (member.postConvertFlags.defined)
                 {
-                    p.PrintBeginLine("public string ").Print(member.propertyName)
-                        .PrintEndLine(" { get; private set; }");
-                    p.PrintEndLine();
+                    if (member.postConvertFlags.DefineEmitRawStringProperty)
+                    {
+                        p.PrintBeginLine("public string ").Print(member.propertyName)
+                            .PrintEndLine(" { get; private set; }");
+                        p.PrintEndLine();
+                    }
 
                     p.PrintLine("[CBS.NonSerialized]");
                 }
@@ -350,7 +353,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
 
                 p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(member.propertyName)
-                    .PrintIf(member.isPostConvert, "_PostConvert")
+                    .PrintIf(member.postConvertFlags.defined, "_PostConvert")
                     .PrintEndLine(" { get; private set; }");
                 p.PrintEndLine();
             }
@@ -377,7 +380,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 foreach (var member in members)
                 {
-                    if (member.isPostConvert)
+                    if (member.postConvertFlags.defined)
                     {
                         continue;
                     }
@@ -1012,7 +1015,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var result = member.propertyName;
 
-            if (member.isPostConvert)
+            if (member.postConvertFlags.defined)
             {
                 result = $"{result}_PostConvert";
             }

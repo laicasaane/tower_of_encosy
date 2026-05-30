@@ -25,5 +25,11 @@ namespace EncosyTower.Data.Authoring
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class DataPostConvertAttribute : Attribute
     {
+        public DataPostConvertAttribute(bool emiRawStringProperty = true)
+        {
+            EmitRawStringProperty = emiRawStringProperty;
+        }
+
+        public bool EmitRawStringProperty { get; }
     }
 }

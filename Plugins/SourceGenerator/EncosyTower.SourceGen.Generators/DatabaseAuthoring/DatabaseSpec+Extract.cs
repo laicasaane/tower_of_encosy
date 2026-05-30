@@ -882,16 +882,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             EnqueueTypes(queue, resultTypes);
             resultTypes.Clear();
 
-            var isPostConvert = IsPostConvertMember(memberSymbol);
+            var postConvertFlags = ExtractPostConvertFlags(memberSymbol);
 
-            if (isPostConvert == false && sourceMemberSymbol != null)
+            if (postConvertFlags.defined == false && sourceMemberSymbol != null)
             {
-                isPostConvert = IsPostConvertMember(sourceMemberSymbol);
+                postConvertFlags = ExtractPostConvertFlags(sourceMemberSymbol);
             }
 
             return new MemberSpec {
                 propertyName = propertyName,
-                isPostConvert = isPostConvert,
+                postConvertFlags = postConvertFlags,
                 type = MakeTypeModel(fieldType),
                 collection = collection,
                 converter = converter,
@@ -1155,8 +1155,27 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static bool IsPostConvertMember(ISymbol memberSymbol)
-            => memberSymbol.HasAttribute(DATA_POST_CONVERT_ATTRIBUTE);
+        private static MemberPostConvertFlags ExtractPostConvertFlags(ISymbol memberSymbol)
+        {
+            var attrib = memberSymbol.GetAttribute(DATA_POST_CONVERT_ATTRIBUTE);
+
+            if (attrib == null)
+            {
+                return default;
+            }
+
+            var result = new MemberPostConvertFlags() { defined = true };
+
+            if (attrib.ConstructorArguments.Length > 0)
+            {
+                if (attrib.ConstructorArguments[0].Value is bool value)
+                {
+                    result.emitRawStringProperty = value;
+                }
+            }
+
+            return result;
+        }
 
         private static ConverterSpec TryMakeConverterModel(
               ISymbol memberSymbol

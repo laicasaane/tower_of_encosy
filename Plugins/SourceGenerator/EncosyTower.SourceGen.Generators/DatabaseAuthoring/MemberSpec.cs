@@ -5,7 +5,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     public struct MemberSpec : IEquatable<MemberSpec>
     {
         public string propertyName;
-        public bool isPostConvert;
+        public MemberPostConvertFlags postConvertFlags;
         public TypeSpec type;
         public CollectionSpec collection;
         public ConverterSpec converter;
@@ -19,7 +19,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public readonly bool Equals(MemberSpec other)
             => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
-            && isPostConvert == other.isPostConvert
+            && postConvertFlags.Equals(other.postConvertFlags)
             && type.Equals(other.type)
             && collection.Equals(other.collection)
             && converter.Equals(other.converter)
@@ -30,6 +30,23 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => obj is MemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(propertyName, isPostConvert, type, collection, converter, sheetConverter);
+            => HashValue.Combine(propertyName, postConvertFlags, type, collection, converter, sheetConverter);
+    }
+
+    public struct MemberPostConvertFlags : IEquatable<MemberPostConvertFlags>
+    {
+        public bool defined;
+        public bool emitRawStringProperty;
+
+        public readonly bool DefineEmitRawStringProperty => defined && emitRawStringProperty;
+
+        public readonly bool Equals(MemberPostConvertFlags other)
+            => defined == other.defined && emitRawStringProperty == other.emitRawStringProperty;
+
+        public readonly override bool Equals(object obj)
+            => obj is MemberPostConvertFlags other && Equals(other);
+
+        public readonly override int GetHashCode()
+            => HashValue.Combine(defined, emitRawStringProperty);
     }
 }
