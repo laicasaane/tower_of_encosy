@@ -11,7 +11,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
               ref Printer p
             , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
-            , string containingTypeFullName
+            , string tableTypeFullName
             , string idTypeFullName = null
         )
         {
@@ -54,16 +54,46 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     .Print(" Default = new __").Print(typeName).PrintEndLine("();");
                 p.PrintEndLine();
 
-                WriteConstructor(ref p, dataMap, horizontalListMap, typeName, containingTypeFullName);
+                WriteConstructor(ref p, dataMap, horizontalListMap, typeName, tableTypeFullName);
 
                 foreach (var baseType in baseTypeRefs)
                 {
-                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, baseType.propRefs);
-                    WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, baseType.fieldRefs);
+                    WriteProperties(
+                          ref p
+                        , dataMap
+                        , horizontalListMap
+                        , tableTypeFullName
+                        , isRowData
+                        , baseType.propRefs
+                    );
+
+                    WriteProperties(
+                          ref p
+                        , dataMap
+                        , horizontalListMap
+                        , tableTypeFullName
+                        , isRowData
+                        , baseType.fieldRefs
+                    );
                 }
 
-                WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, propRefs);
-                WriteProperties(ref p, dataMap, horizontalListMap, containingTypeFullName, isRowData, fieldRefs);
+                WriteProperties(
+                      ref p
+                    , dataMap
+                    , horizontalListMap
+                    , tableTypeFullName
+                    , isRowData
+                    , propRefs
+                );
+
+                WriteProperties(
+                      ref p
+                    , dataMap
+                    , horizontalListMap
+                    , tableTypeFullName
+                    , isRowData
+                    , fieldRefs
+                );
 
                 WriteConvertMethod(ref p, dataMap);
 
@@ -95,12 +125,43 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 foreach (var baseType in baseTypeRefs)
                 {
-                    WriteCtorMembers(ref p, dataMap, horizontalListMap, baseType.propRefs, fullName, containingTypeFullName);
-                    WriteCtorMembers(ref p, dataMap, horizontalListMap, baseType.fieldRefs, fullName, containingTypeFullName);
+                    WriteCtorMembers(
+                          ref p
+                        , dataMap
+                        , horizontalListMap
+                        , baseType.propRefs
+                        , fullName
+                        , containingTypeFullName
+                    );
+
+                    WriteCtorMembers(
+                          ref p
+                        , dataMap
+                        , horizontalListMap
+                        , baseType.fieldRefs
+                        , fullName
+                        , containingTypeFullName
+                    );
                 }
 
-                WriteCtorMembers(ref p, dataMap, horizontalListMap, propRefs, fullName, containingTypeFullName);
-                WriteCtorMembers(ref p, dataMap, horizontalListMap, fieldRefs, fullName, containingTypeFullName);
+                WriteCtorMembers(
+                      ref p
+                    , dataMap
+                    , horizontalListMap
+                    , propRefs
+                    , fullName
+                    , containingTypeFullName
+                );
+
+                WriteCtorMembers(
+                      ref p
+                    , dataMap
+                    , horizontalListMap
+                    , fieldRefs
+                    , fullName
+                    , containingTypeFullName
+                );
+
                 p.PrintEndLine();
 
                 p.PrintLine("OnConstructor();");
@@ -235,7 +296,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
               ref Printer p
             , Dictionary<string, DataSpec> dataMap
             , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
-            , string containingTypeFullName
+            , string tableTypeFullName
             , bool isRowData
             , EquatableArray<MemberSpec> memberModels
         )
@@ -262,10 +323,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         var collectionTypeName = PR_VERTICAL_LIST_T;
 
                         if (coll.kind == CollectionKind.Array
-                            && horizontalListMap.TryGetValue(containingTypeFullName, out var innerMap)
+                            && horizontalListMap.TryGetValue(tableTypeFullName, out var innerMap)
                         )
                         {
-                            if (innerMap.TryGetValue(containingTypeFullName, out var propertyNames)
+                            if (innerMap.TryGetValue(tableTypeFullName, out var propertyNames)
                                 && propertyNames.Contains(member.propertyName)
                             )
                             {

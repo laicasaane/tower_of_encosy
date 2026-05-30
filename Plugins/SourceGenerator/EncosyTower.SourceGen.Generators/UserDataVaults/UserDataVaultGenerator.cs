@@ -77,7 +77,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             return new UserDataVaultSpec {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
-                metadataName = symbol.ToSimpleName(),
+                metadataName = symbol.ToFullNameNoGlobal(),
                 className = symbol.Name,
                 isStatic = symbol.IsStatic,
                 namespaceName = containingNs is { IsGlobalNamespace: false }
@@ -111,7 +111,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 && attribute.ConstructorArguments[0].Value is INamedTypeSymbol vaultType
             )
             {
-                vaultMetadataName = vaultType.ToSimpleName();
+                vaultMetadataName = vaultType.ToFullNameNoGlobal();
             }
 
             var fieldName = string.Empty;
@@ -224,7 +224,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             return new UserDataAccessorSpec {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
-                metadataName = symbol.ToSimpleName(),
+                metadataName = symbol.ToFullNameNoGlobal(),
                 vaultMetadataName = vaultMetadataName,
                 fieldName = fieldName,
                 symbolName = symbol.Name,

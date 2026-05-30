@@ -130,7 +130,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     return default;
                 }
 
-                var underlyingType = enumType.EnumUnderlyingType.ToSimpleName();
+                var underlyingType = enumType.EnumUnderlyingType.ToFullNameNoGlobal();
 
                 if (StatGeneratorAPI.EnumTypeMap.TryGetValue(underlyingType, out var valueTypeName) == false)
                 {

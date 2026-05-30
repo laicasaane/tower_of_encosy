@@ -50,12 +50,13 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , openingSource
                 , closingSource
                 , containerHintName
+                , allDataModels
+                , horizontalListEntries
             )
-            .Add(allDataModels)
-            .Add(horizontalListEntries)
             .Add(tables)
             .Add(sheetGroups)
             .Add(typeNames)
-            .Add(sheets);
+            .Add(sheets)
+            ;
     }
 }

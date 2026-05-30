@@ -315,7 +315,7 @@ namespace EncosyTower.SourceGen
         public static string ToFullName(this ITypeSymbol symbol)
             => symbol.ToDisplayString(QualifiedFormat);
 
-        public static string ToSimpleName(this ITypeSymbol symbol)
+        public static string ToFullNameNoGlobal(this ITypeSymbol symbol)
             => symbol.ToDisplayString(QualifiedFormatWithoutGlobalPrefix);
 
         public static string ToValidIdentifier(this ITypeSymbol symbol)

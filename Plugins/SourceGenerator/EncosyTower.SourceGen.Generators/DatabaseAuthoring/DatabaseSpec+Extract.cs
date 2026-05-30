@@ -18,9 +18,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public static DatabaseSpec Extract(GeneratorAttributeSyntaxContext context, CancellationToken token)
         {
-            if (context.TargetNode is not TypeDeclarationSyntax typeSyntax
-                || IsSupportedTypeSyntax(typeSyntax) == false
-                || context.TargetSymbol is not INamedTypeSymbol authoringSymbol
+            if (context.TargetNode is not TypeDeclarationSyntax authoringTypeSyntax
+                || IsSupportedTypeSyntax(authoringTypeSyntax) == false
+                || context.TargetSymbol is not INamedTypeSymbol authoringTypeSymbol
             )
             {
                 return default;
@@ -37,23 +37,23 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 return default;
             }
 
-            var databaseTypeName = typeSyntax.Identifier.Text;
-            var databaseTypeKeyword = authoringSymbol.IsValueType ? "struct" : "class";
-            var databaseIdentifier = authoringSymbol.ToValidIdentifier();
+            var databaseTypeName = authoringTypeSyntax.Identifier.Text;
+            var databaseTypeKeyword = authoringTypeSymbol.IsValueType ? "struct" : "class";
+            var databaseIdentifier = authoringTypeSymbol.ToValidIdentifier();
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
-                  typeSyntax
+                  authoringTypeSyntax
                 , token
                 , out var openingSource
                 , out var closingSource
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var syntaxTree = typeSyntax.SyntaxTree;
+            var syntaxTree = authoringTypeSyntax.SyntaxTree;
             var containerHintName = GetHintName(
                   syntaxTree
                 , GENERATOR_NAME
-                , typeSyntax
+                , authoringTypeSyntax
                 , $"{databaseIdentifier}_SheetContainer"
             );
 
@@ -106,7 +106,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , sheetList
                 , tableSpecList
                 , syntaxTree
-                , typeSyntax
+                , authoringTypeSyntax
                 , databaseIdentifier
                 , fullyQualifiedSheetNames
             );
@@ -159,7 +159,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             hlBuilder.Dispose();
 
             return new DatabaseSpec {
-                location = LocationInfo.From(typeSyntax.GetLocation()),
+                location = LocationInfo.From(authoringTypeSyntax.GetLocation()),
                 databaseTypeName = databaseTypeName,
                 databaseTypeKeyword = databaseTypeKeyword,
                 databaseIdentifier = databaseIdentifier,

@@ -118,7 +118,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             return new VariantSpec {
                 location = location,
                 fullTypeName = fullTypeName,
-                typeName = typeArg.ToSimpleName(),
+                typeName = typeArg.ToFullNameNoGlobal(),
                 converterDefault = converterDefault,
                 unmanagedSize = unmanagedSize,
                 isValueType = isValueType,

@@ -132,7 +132,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             return new InternalVariantSpec {
                 location = location,
                 fullTypeName = fullTypeName,
-                simpleTypeName = typeArg.ToSimpleName(),
+                simpleTypeName = typeArg.ToFullNameNoGlobal(),
                 structName = $"Variant__{identifier}",
                 converterDefault = $"Variant__{identifier}.Converter.Default",
                 fileHintName = typeArg.ToFileName(),
