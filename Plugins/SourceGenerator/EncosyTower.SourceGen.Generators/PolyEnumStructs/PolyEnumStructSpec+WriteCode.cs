@@ -631,7 +631,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         var def = structRef.Value;
 
                         p.PrintBeginLine("EnumCase.").Print(def.identifier)
-                            .Print(" => GetValueOrDefault(default(ET.T<").Print(def.name).PrintEndLine(">)),");
+                            .Print(" => GetValueOrDefault(ET.GenericT.T<").Print(def.name).PrintEndLine(">()),");
                     }
 
                     p.PrintBeginLine("_ => null").PrintEndLine(",");
@@ -689,7 +689,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     .PrintEndLine(" @enum)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("return @enum.GetValueOrThrow(default(ET.T<").Print(def.name).PrintEndLine(">));");
+                    p.PrintBeginLine("return @enum.GetValueOrThrow(ET.GenericT.T<").Print(def.name).PrintEndLine(">());");
                 }
                 p.CloseScope();
                 p.PrintEndLine();

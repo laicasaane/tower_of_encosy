@@ -739,8 +739,8 @@
                     .Print("(").Print(typeName).PrintEndLine(" value)");
                 p.OpenScope();
                 {
-                    p.PrintBeginLine("return value.GetValueOrThrow(default(ET.T<")
-                        .Print(fullName).PrintEndLine(">));");
+                    p.PrintBeginLine("return value.GetValueOrThrow(ET.GenericT.T<")
+                        .Print(fullName).PrintEndLine(">());");
                 }
                 p.CloseScope();
                 p.PrintEndLine();
