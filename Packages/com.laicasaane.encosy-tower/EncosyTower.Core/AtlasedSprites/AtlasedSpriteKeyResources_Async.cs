@@ -19,14 +19,14 @@ namespace EncosyTower.AtlasedSprites
     partial struct AtlasedSpriteKeyResources : ILoadAsync<Sprite>, ITryLoadAsync<Sprite>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTask LoadAsync(CancellationToken token = default)
+        public readonly async UnityTask LoadAsync(CancellationToken token = default)
         {
             var result = await TryLoadAsync(token);
             return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UnityTaskOpt TryLoadAsync(CancellationToken token = default)
+        public readonly async UnityTaskOpt TryLoadAsync(CancellationToken token = default)
         {
             if (_atlas.IsValid == false || _sprite.IsValid == false)
             {

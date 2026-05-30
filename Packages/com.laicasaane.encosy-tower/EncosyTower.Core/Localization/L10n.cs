@@ -164,8 +164,7 @@ namespace EncosyTower.Localization
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Option<Locale> FindLocale(string localeCode)
-            => (s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale.IsValid())
-                ? locale : Option.None;
+            => Option.SomeIf(s_codeToLocaleMap.TryGetValue(localeCode, out var locale) && locale.IsValid(), locale);
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorNotReady()

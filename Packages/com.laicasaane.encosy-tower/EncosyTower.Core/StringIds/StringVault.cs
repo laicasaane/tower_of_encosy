@@ -273,7 +273,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<StringId> TryGetId(string str)
-            => Option.Some(TryGetId(str, out var result), result);
+            => Option.SomeIf(TryGetId(str, out var result), result);
 
         public bool TryGetId(string str, out StringId result)
         {

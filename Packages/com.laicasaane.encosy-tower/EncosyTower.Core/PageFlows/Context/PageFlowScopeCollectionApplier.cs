@@ -73,16 +73,8 @@ namespace EncosyTower.PageFlows
 
         bool ITrySet<IPageFlowScopeCollection>.TrySet(IPageFlowScopeCollection value)
         {
-            if (value is TCollection flowScopes)
-            {
-                _value = Option.Some(flowScopes);
-                return true;
-            }
-            else
-            {
-                _value = Option.None;
-                return false;
-            }
+            _value = value.TryCastTo(GenericT.T<TCollection>());
+            return _value.HasValue;
         }
     }
 }

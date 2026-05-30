@@ -20,8 +20,7 @@ namespace EncosyTower.AddressableKeys
             var handle = Addressables.LoadAssetAsync<T>(Value.Value);
             var asset = handle.WaitForCompletion();
 
-            return (asset is UnityEngine.Object obj && obj) || asset != null
-                ? asset : Option.None;
+            return Option.SomeIf((asset is UnityEngine.Object obj && obj) || asset != null, asset);
         }
     }
 }

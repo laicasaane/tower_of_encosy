@@ -114,8 +114,7 @@ namespace EncosyTower.AddressableKeys
                 return Option.None;
             }
 
-            return result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp)
-                ? comp : Option.None;
+            return Option.SomeIf(result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp), comp);
         }
 
         private static async

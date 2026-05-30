@@ -70,8 +70,7 @@ namespace EncosyTower.AddressableKeys
 
             var asset = handle.Result;
 
-            return (asset is UnityEngine.Object obj && obj) || asset != null
-                ? asset : Option.None;
+            return Option.SomeIf((asset is UnityEngine.Object obj && obj) || asset != null, asset);
         }
     }
 }

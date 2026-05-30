@@ -39,7 +39,7 @@ namespace EncosyTower.AtlasedSprites
             if (atlas == false || name.IsValid == false) return Option.None;
 
             var sprite = atlas.GetSprite(name.Value);
-            return sprite ? (Option<Sprite>)sprite : Option.None;
+            return Option.SomeIf(sprite, sprite);
         }
     }
 }

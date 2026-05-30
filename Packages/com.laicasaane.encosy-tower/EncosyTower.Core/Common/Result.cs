@@ -104,7 +104,7 @@ namespace EncosyTower.Common
         public Option<TValue> Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _hasValue ? Option.Some(_value) : Option.None;
+            get => Option.SomeIf(_hasValue, _value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -311,7 +311,7 @@ namespace EncosyTower.Common
         public Option<TValue> Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _hasValue ? Option.Some(_value) : Option.None;
+            get => Option.SomeIf(_hasValue, _value);
         }
 
         public Error<TError> Error

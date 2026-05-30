@@ -70,7 +70,7 @@ namespace EncosyTower.Editor
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> FindFirstObject<T>(string filter)
             where T : UnityEngine.Object
-            => FindFirstObject<T>(filter, out var obj) ? obj : Option.None;
+            => Option.SomeIf(FindFirstObject<T>(filter, out var obj), obj);
 
         /// <summary>
         /// Find first object by a filter.
@@ -107,7 +107,7 @@ namespace EncosyTower.Editor
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> FindFirstObjectByGlobalQualifiedTypeName<T>()
             where T : UnityEngine.Object
-            => FindFirstObjectByGlobalQualifiedTypeName<T>(out var obj) ? obj : Option.None;
+            => Option.SomeIf(FindFirstObjectByGlobalQualifiedTypeName<T>(out var obj), obj);
 
         /// <summary>
         /// Find first object by global qualified type name (i.e. with `global::` prefix).
