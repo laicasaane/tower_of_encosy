@@ -30,11 +30,29 @@ namespace EncosyTower.Common
         /// <summary>
         /// Returns a <see cref="Success{TFailure}"/> containing <paramref name="trueValue"/>
         /// if <paramref name="condition"/> is true;
+        /// otherwise, returns <see cref="Success.Yes"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Success<TFailure> NoIf<TFailure>(bool condition, Success<TFailure> trueValue)
+            => condition ? trueValue : Yes;
+
+        /// <summary>
+        /// Returns a <see cref="Success{TFailure}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
         /// otherwise, returns a <see cref="Success{TFailure}"/> containing <paramref name="falseValue"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Success<TFailure> NoIf<TFailure>(bool condition, TFailure trueValue, TFailure falseValue)
             => condition ? No(trueValue) : No(falseValue);
+
+        /// <summary>
+        /// Returns a <see cref="Success{TFailure}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
+        /// otherwise, returns a <see cref="Success{TFailure}"/> containing <paramref name="falseValue"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Success<TFailure> NoIf<TFailure>(bool condition, Success<TFailure> trueValue, Success<TFailure> falseValue)
+            => condition ? trueValue : falseValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Equals<T>(in Success<T> a, in Success<T> b)
