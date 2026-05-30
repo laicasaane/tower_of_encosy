@@ -27,11 +27,29 @@ namespace EncosyTower.Common
         /// <summary>
         /// Returns an <see cref="Option{T}"/> containing <paramref name="trueValue"/>
         /// if <paramref name="condition"/> is true;
+        /// otherwise, returns <see cref="Option{T}.None"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> SomeIf<T>(bool condition, Option<T> trueValue)
+            => condition ? trueValue : Option<T>.None;
+
+        /// <summary>
+        /// Returns an <see cref="Option{T}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
         /// otherwise, returns an <see cref="Option{T}"/> containing <paramref name="falseValue"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> SomeIf<T>(bool condition, T trueValue, T falseValue)
             => condition ? Some(trueValue) : Some(falseValue);
+
+        /// <summary>
+        /// Returns an <see cref="Option{T}"/> containing <paramref name="trueValue"/>
+        /// if <paramref name="condition"/> is true;
+        /// otherwise, returns an <see cref="Option{T}"/> containing <paramref name="falseValue"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<T> SomeIf<T>(bool condition, Option<T> trueValue, Option<T> falseValue)
+            => condition ? trueValue : falseValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Equals<T>(in Option<T> a, in Option<T> b)
