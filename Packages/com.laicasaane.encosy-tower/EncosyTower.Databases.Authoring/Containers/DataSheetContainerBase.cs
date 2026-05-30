@@ -81,7 +81,7 @@ namespace EncosyTower.Databases.Authoring
                 }
             }
 
-            OnBeforePostLoad(context);
+            OnBeforeMapReferences(context);
 
             // making sure all references are mapped before calling PostLoad
             foreach (var sheet in rowTypeToSheet.Values)
@@ -89,26 +89,89 @@ namespace EncosyTower.Databases.Authoring
                 sheet.MapReferences(context, rowTypeToSheet);
             }
 
+            OnAfterMapReferences(context);
+            OnBeforePostLoad(context);
+
             foreach (var sheet in rowTypeToSheet.Values)
             {
                 sheet.PostLoad(context);
             }
 
-            foreach (var sheet in dataSheets)
-            {
-                sheet.Initialize(context);
-            }
-
-            foreach (var sheet in dataSheets)
-            {
-                sheet.PostConvert(context);
-            }
-
             OnAfterPostLoad(context);
+            OnBeforePreprocess(context);
+
+            foreach (var sheet in dataSheets)
+            {
+                sheet.Preprocess(context);
+            }
+
+            OnAfterPreprocess(context);
+            OnBeforeProcess(context);
+
+            foreach (var sheet in dataSheets)
+            {
+                sheet.Process(context);
+            }
+
+            OnAfterProcess(context);
+            OnBeforePostprocess(context);
+
+            foreach (var sheet in dataSheets)
+            {
+                sheet.Postprocess(context);
+            }
+
+            OnAfterPostprocess(context);
         }
 
+        /// <summary>
+        /// Callback invoked before all <c>sheet.MapReferences</c>.
+        /// </summary>
+        protected virtual void OnBeforeMapReferences(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked after all <c>sheet.MapReferences</c>.
+        /// </summary>
+        protected virtual void OnAfterMapReferences(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked before all <c>sheet.PostLoad</c>.
+        /// </summary>
         protected virtual void OnBeforePostLoad(SheetConvertingContext context) { }
 
+        /// <summary>
+        /// Callback invoked after all <c>sheet.PostLoad</c>.
+        /// </summary>
         protected virtual void OnAfterPostLoad(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked before all <c>sheet.Preprocess</c>.
+        /// </summary>
+        protected virtual void OnBeforePreprocess(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked after all <c>sheet.Preprocess</c>.
+        /// </summary>
+        protected virtual void OnAfterPreprocess(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked before all <c>sheet.Process</c>.
+        /// </summary>
+        protected virtual void OnBeforeProcess(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked after all <c>sheet.Process</c>.
+        /// </summary>
+        protected virtual void OnAfterProcess(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked before all <c>sheet.Postprocess</c>.
+        /// </summary>
+        protected virtual void OnBeforePostprocess(SheetConvertingContext context) { }
+
+        /// <summary>
+        /// Callback invoked after all <c>sheet.Postprocess</c>.
+        /// </summary>
+        protected virtual void OnAfterPostprocess(SheetConvertingContext context) { }
     }
 }

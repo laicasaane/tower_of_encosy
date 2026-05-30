@@ -8,13 +8,18 @@ namespace EncosyTower.Databases.Authoring
     public interface IDataSheet : ISheet
     {
         /// <summary>
-        /// Prepare every authoring sheet before subsequent mechanism.
+        /// Entry point for the pre-processing step by user code.
         /// </summary>
-        void Initialize(SheetConvertingContext context);
+        void Preprocess(SheetConvertingContext context);
 
         /// <summary>
-        /// Entry point for manual conversion by user code.
+        /// Entry point for the processing step by user code.
         /// </summary>
-        void PostConvert(SheetConvertingContext context);
+        void Process(SheetConvertingContext context);
+
+        /// <summary>
+        /// Entry point for the post=processing step by user code.
+        /// </summary>
+        void Postprocess(SheetConvertingContext context);
     }
 }
