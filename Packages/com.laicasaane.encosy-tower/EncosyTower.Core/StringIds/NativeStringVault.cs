@@ -27,18 +27,29 @@ namespace EncosyTower.StringIds
         internal readonly NativeList<Option<StringHash>> _hashes;
         internal readonly NativeReference<int> _count;
 
-        public NativeStringVault(int initialCapacity, AllocatorManager.AllocatorHandle allocator)
+        public NativeStringVault(
+              int initialCapacity
+            , AllocatorManager.AllocatorHandle allocator
+            , bool allowEmptyString = false
+        )
         {
             _map = new(initialCapacity, allocator);
             _stringRanges = new(initialCapacity, allocator);
             _stringBuffer = new(initialCapacity * 512, allocator);
             _hashes = new(initialCapacity, allocator);
             _count = new(allocator);
+
+            AllowEmptyString = allowEmptyString;
+
             Clear();
         }
 
-        public NativeStringVault(ReadOnlySpan<UnmanagedString> strings, AllocatorManager.AllocatorHandle allocator)
-            : this(strings.Length, allocator)
+        public NativeStringVault(
+              ReadOnlySpan<UnmanagedString> strings
+            , AllocatorManager.AllocatorHandle allocator
+            , bool allowEmptyString = false
+        )
+            : this(strings.Length, allocator, allowEmptyString)
         {
             foreach (var str in strings)
             {
@@ -64,6 +75,8 @@ namespace EncosyTower.StringIds
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _count.Value;
         }
+
+        public bool AllowEmptyString { get; }
 
         public UnmanagedString this[int index]
         {
@@ -107,6 +120,11 @@ namespace EncosyTower.StringIds
         /// </remarks>
         public StringId GetOrMakeId(in UnmanagedString str)
         {
+            if (AllowEmptyString == false && str.IsEmpty)
+            {
+                return default;
+            }
+
             var hash = str.GetHashCode64();
             var registered = _map.TryGetValue(hash, out var id);
 
@@ -155,6 +173,31 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Option<StringId> TryGetId(in UnmanagedString str)
+            => Option.SomeIf(TryGetId(str, out var result), result);
+
+        public bool TryGetId(in UnmanagedString str, out StringId result)
+        {
+            if (AllowEmptyString == false && str.IsEmpty)
+            {
+                result = default;
+                return false;
+            }
+
+            var hash = str.GetHashCode64();
+            var registered = _map.TryGetValue(hash, out var id);
+
+            if (registered && TryGetString(id, out var registeredString) && str == registeredString)
+            {
+                result = id;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<UnmanagedString> TryGetString(StringId id)
             => TryGetString(id, out var result) ? Option.Some(result) : Option.None;
 
@@ -165,8 +208,8 @@ namespace EncosyTower.StringIds
             var validIndex = indexUnsigned < (uint)_hashes.Length;
 
             var resultOpt = validIndex
-                    ? UnmanagedString.FromBufferAt(_stringRanges.AsReadOnly()[index], _stringBuffer.AsReadOnly())
-                    : Option.None;
+                ? UnmanagedString.FromBufferAt(_stringRanges.AsReadOnly()[index], _stringBuffer.AsReadOnly())
+                : Option.None;
 
             result = resultOpt.GetValueOrDefault();
             return resultOpt.HasValue;
@@ -178,7 +221,7 @@ namespace EncosyTower.StringIds
             var indexUnsigned = (uint)id.Id;
             var index = (int)indexUnsigned;
             var validIndex = indexUnsigned < (uint)_hashes.Length;
-            return validIndex ? _hashes[index].HasValue : false;
+            return validIndex && _hashes[index].HasValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
