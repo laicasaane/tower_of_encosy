@@ -93,7 +93,7 @@ namespace EncosyTower.StringIds
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Option<UnmanagedString> TryGetString(StringId id)
-                => TryGetString(id, out var result) ? Option.Some(result) : Option.None;
+                => Option.SomeIf(TryGetString(id, out var result), result);
 
             public bool TryGetString(StringId id, out UnmanagedString result)
             {

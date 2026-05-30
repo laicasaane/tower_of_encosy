@@ -131,7 +131,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Option<T>(Error<T> error)
-            => error.TryGetValue(out var value) ? Option.Some(value) : Option.None;
+            => Option.SomeIf(error.TryGetValue(out var value), value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in Error<T> left, in Bool<T> right)

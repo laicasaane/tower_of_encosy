@@ -49,7 +49,7 @@ namespace EncosyTower.Pooling.Native
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                return _hasRentScene ? _rentScene : Option.None;
+                return Option.SomeIf(_hasRentScene, _rentScene);
             }
 
             set
@@ -64,7 +64,7 @@ namespace EncosyTower.Pooling.Native
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             readonly get
             {
-                return _hasReturnScene ? _returnScene : Option.None;
+                return Option.SomeIf(_hasReturnScene, _returnScene);
             }
 
             set

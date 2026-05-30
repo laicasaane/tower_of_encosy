@@ -298,7 +298,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<UnmanagedString> TryGetUnmanagedString(StringId id)
-            => TryGetUnmanagedString(id, out var result) ? Option.Some(result) : Option.None;
+            => Option.SomeIf(TryGetUnmanagedString(id, out var result), result);
 
         public bool TryGetUnmanagedString(StringId id, out UnmanagedString result)
         {
@@ -316,7 +316,7 @@ namespace EncosyTower.StringIds
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Option<string> TryGetManagedString(StringId id)
-            => TryGetManagedString(id, out var result) ? Option.Some(result) : Option.None;
+            => Option.SomeIf(TryGetManagedString(id, out var result), result);
 
         public bool TryGetManagedString(StringId id, out string result)
         {

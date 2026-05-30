@@ -13,7 +13,7 @@ namespace EncosyTower.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<TypeId> FindId([NotNull] this Type type)
-            => TypeIdVault.TryGetId(type, out var id) ? id : Option.None;
+            => Option.SomeIf(TypeIdVault.TryGetId(type, out var id), id);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TypeId GetOrRegisterId([NotNull] this Type type)

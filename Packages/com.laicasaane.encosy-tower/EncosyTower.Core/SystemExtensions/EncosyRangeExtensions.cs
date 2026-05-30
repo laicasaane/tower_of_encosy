@@ -11,13 +11,7 @@ namespace EncosyTower.SystemExtensions
         {
             int start = range.Start.GetOffset(length);
             int end = range.End.GetOffset(length);
-
-            if ((uint)end > (uint)length || (uint)start > (uint)end)
-            {
-                return Option.None;
-            }
-
-            return Option.Some((start, end - start));
+            return Option.SomeIf((uint)end > (uint)length || (uint)start > (uint)end, (start, end - start));
         }
     }
 }

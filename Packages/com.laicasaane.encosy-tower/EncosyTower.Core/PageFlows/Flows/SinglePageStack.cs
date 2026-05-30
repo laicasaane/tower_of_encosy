@@ -36,7 +36,7 @@ namespace EncosyTower.PageFlows
             );
         }
 
-        public Option<TPage> CurrentPage => _pages.TryPeek(out var page) ? page : Option.None;
+        public Option<TPage> CurrentPage => Option.SomeIf(_pages.TryPeek(out var page), page);
 
         public bool IsInTransition { get; private set; }
 
