@@ -5,7 +5,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     public struct MemberSpec : IEquatable<MemberSpec>
     {
         public string propertyName;
-        public MemberPostConvertFlags postConvertFlags;
+        public MemberManualAuthoring manualAuthoring;
         public TypeSpec type;
         public CollectionSpec collection;
         public ConverterSpec converter;
@@ -19,7 +19,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public readonly bool Equals(MemberSpec other)
             => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
-            && postConvertFlags.Equals(other.postConvertFlags)
+            && manualAuthoring.Equals(other.manualAuthoring)
             && type.Equals(other.type)
             && collection.Equals(other.collection)
             && converter.Equals(other.converter)
@@ -30,21 +30,23 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => obj is MemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(propertyName, postConvertFlags, type, collection, converter, sheetConverter);
+            => HashValue.Combine(propertyName, manualAuthoring, type, collection, converter, sheetConverter);
     }
 
-    public struct MemberPostConvertFlags : IEquatable<MemberPostConvertFlags>
+    public struct MemberManualAuthoring : IEquatable<MemberManualAuthoring>
     {
+        public const string SUFFIX = "_Manual";
+
         public bool defined;
         public bool emitRawStringProperty;
 
         public readonly bool DefineEmitRawStringProperty => defined && emitRawStringProperty;
 
-        public readonly bool Equals(MemberPostConvertFlags other)
+        public readonly bool Equals(MemberManualAuthoring other)
             => defined == other.defined && emitRawStringProperty == other.emitRawStringProperty;
 
         public readonly override bool Equals(object obj)
-            => obj is MemberPostConvertFlags other && Equals(other);
+            => obj is MemberManualAuthoring other && Equals(other);
 
         public readonly override int GetHashCode()
             => HashValue.Combine(defined, emitRawStringProperty);

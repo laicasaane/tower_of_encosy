@@ -93,7 +93,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         p.CloseScope();
                         p.PrintEndLine();
                     }
-;
+
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IPostExportDatabase.PostExport(ETDBA.DatabaseExportingContext)")
+                        .PrintEndLine("\"/>");
                     p.PrintLine("public void PostExport(ETDBA.DatabaseExportingContext context)");
                     p.OpenScope();
                     {
@@ -102,6 +105,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     p.CloseScope();
                     p.PrintEndLine();
 
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IPostExportDatabase.PostExport(ETDBA.DatabaseExportingContext)")
+                        .PrintEndLine("\"/>");
                     p.PrintLine("partial void OnPostExport(ETDBA.DatabaseExportingContext context);");
                     p.PrintEndLine();
                 }

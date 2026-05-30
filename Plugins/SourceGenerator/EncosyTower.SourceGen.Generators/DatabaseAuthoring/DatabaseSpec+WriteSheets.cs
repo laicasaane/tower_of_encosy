@@ -74,26 +74,55 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     .PrintEndLine();
                 p.OpenScope();
                 {
-                    p.PrintLine("public void Initialize(CBS.SheetConvertingContext context)");
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IDataSheet.Preprocess(CBS.SheetConvertingContext)")
+                        .PrintEndLine("\"/>");
+                    p.PrintLine("public void Preprocess(CBS.SheetConvertingContext context)");
                     p.OpenScope();
                     {
-                        p.PrintLine("OnInitialize(context);");
+                        p.PrintLine("OnPreprocess(context);");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("partial void OnInitialize(CBS.SheetConvertingContext context);");
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IDataSheet.Preprocess(CBS.SheetConvertingContext)")
+                        .PrintEndLine("\"/>");
+                    p.PrintLine("partial void OnPreprocess(CBS.SheetConvertingContext context);");
                     p.PrintEndLine();
 
-                    p.PrintLine("public void PostConvert(CBS.SheetConvertingContext context)");
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IDataSheet.Process(CBS.SheetConvertingContext)")
+                        .PrintEndLine("\"/>");
+                    p.PrintLine("public void Process(CBS.SheetConvertingContext context)");
                     p.OpenScope();
                     {
-                        p.PrintLine("OnPostConvert(context);");
+                        p.PrintLine("OnProcess(context);");
                     }
                     p.CloseScope();
                     p.PrintEndLine();
 
-                    p.PrintLine("partial void OnPostConvert(CBS.SheetConvertingContext context);");
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IDataSheet.Process(CBS.SheetConvertingContext)")
+                        .PrintEndLine("\"/>");
+                    p.PrintLine("partial void OnProcess(CBS.SheetConvertingContext context);");
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IDataSheet.Postprocess(CBS.SheetConvertingContext)")
+                        .PrintEndLine("\"/>");
+                    p.PrintLine("public void Postprocess(CBS.SheetConvertingContext context)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("OnPostprocess(context);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("/// <inheritdoc cref=\"")
+                        .Print("ETDBA.IDataSheet.Postprocess(CBS.SheetConvertingContext)")
+                        .PrintEndLine("\"/>");
+                    p.PrintLine("partial void OnPostprocess(CBS.SheetConvertingContext context);");
                     p.PrintEndLine();
 
                     p.PrintBeginLine("public ").Print(dataTypeFullName).Print("[] To")

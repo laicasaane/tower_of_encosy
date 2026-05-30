@@ -882,16 +882,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             EnqueueTypes(queue, resultTypes);
             resultTypes.Clear();
 
-            var postConvertFlags = ExtractPostConvertFlags(memberSymbol);
+            var manualAuthoring = ExtractManualAuthoring(memberSymbol);
 
-            if (postConvertFlags.defined == false && sourceMemberSymbol != null)
+            if (manualAuthoring.defined == false && sourceMemberSymbol != null)
             {
-                postConvertFlags = ExtractPostConvertFlags(sourceMemberSymbol);
+                manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol);
             }
 
             return new MemberSpec {
                 propertyName = propertyName,
-                postConvertFlags = postConvertFlags,
+                manualAuthoring = manualAuthoring,
                 type = MakeTypeModel(fieldType),
                 collection = collection,
                 converter = converter,
@@ -1155,16 +1155,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static MemberPostConvertFlags ExtractPostConvertFlags(ISymbol memberSymbol)
+        private static MemberManualAuthoring ExtractManualAuthoring(ISymbol memberSymbol)
         {
-            var attrib = memberSymbol.GetAttribute(DATA_POST_CONVERT_ATTRIBUTE);
+            var attrib = memberSymbol.GetAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE);
 
             if (attrib == null)
             {
                 return default;
             }
 
-            var result = new MemberPostConvertFlags() { defined = true };
+            var result = new MemberManualAuthoring() { defined = true };
 
             if (attrib.ConstructorArguments.Length > 0)
             {

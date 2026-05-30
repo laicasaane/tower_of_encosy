@@ -219,14 +219,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                if (member.postConvertFlags.DefineEmitRawStringProperty)
+                if (member.manualAuthoring.DefineEmitRawStringProperty)
                 {
                     p.PrintBeginLine("this.").Print(member.propertyName)
                         .PrintEndLine(" = string.Empty;");
                 }
 
                 p.PrintBeginLine("this.").Print(member.propertyName)
-                    .PrintIf(member.postConvertFlags.defined, "_PostConvert")
+                    .PrintIf(member.manualAuthoring.defined, MemberManualAuthoring.SUFFIX)
                     .Print(" = ").Print(newExpression).PrintEndLine(";");
             }
         }
@@ -331,12 +331,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                if (member.postConvertFlags.defined)
+                if (member.manualAuthoring.defined)
                 {
-                    if (member.postConvertFlags.DefineEmitRawStringProperty)
+                    if (member.manualAuthoring.DefineEmitRawStringProperty)
                     {
                         p.PrintBeginLine("public string ").Print(member.propertyName)
-                            .PrintEndLine(" { get; private set; }");
+                            .PrintEndLine(" { get; set; }");
                         p.PrintEndLine();
                     }
 
@@ -353,8 +353,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
 
                 p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(member.propertyName)
-                    .PrintIf(member.postConvertFlags.defined, "_PostConvert")
-                    .PrintEndLine(" { get; private set; }");
+                    .PrintIf(member.manualAuthoring.defined, MemberManualAuthoring.SUFFIX)
+                    .PrintEndLine(" { get; set; }");
                 p.PrintEndLine();
             }
         }
@@ -380,7 +380,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 foreach (var member in members)
                 {
-                    if (member.postConvertFlags.defined)
+                    if (member.manualAuthoring.defined)
                     {
                         continue;
                     }
@@ -1015,9 +1015,9 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             var result = member.propertyName;
 
-            if (member.postConvertFlags.defined)
+            if (member.manualAuthoring.defined)
             {
-                result = $"{result}_PostConvert";
+                result = $"{result}{MemberManualAuthoring.SUFFIX}";
             }
 
             return result;
