@@ -97,7 +97,7 @@ namespace EncosyTower.Types
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Common.T<T>(TypeId<T> _)
-            => default;
+            => new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(TypeId<T> lhs, TypeId<T> rhs)
