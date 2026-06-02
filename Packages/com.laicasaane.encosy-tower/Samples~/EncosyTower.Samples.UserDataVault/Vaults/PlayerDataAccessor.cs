@@ -1,32 +1,21 @@
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections.Unsafe;
 using EncosyTower.Common;
-using EncosyTower.Data;
 using EncosyTower.Samples.UserDataVault.Shared;
-using EncosyTower.Serialization.NewtonsoftJson.Collections;
+using EncosyTower.Serialization.Collections;
 using EncosyTower.UserDataVaults;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace EncosyTower.Samples.UserDataVault.Vaults;
 
 using Error = PlayerDataError;
 
-[Data, DataMutable, DataWithoutId]
-internal partial class PlayerData : IUserData
+[Serializable, UserData]
+internal partial class PlayerData
 {
-    [SerializeField, JsonProperty]
-    [property: JsonIgnore]
-    internal string _id;
-
-    [SerializeField, JsonProperty]
-    [property: JsonIgnore]
-    internal string _version;
-
-    [SerializeField, JsonProperty]
-    [property: JsonIgnore]
-    internal JsonArrayMap<ItemId, int> _itemAmounts = new();
+    public JsonArrayMap<ItemId, int> ItemAmounts { get; set; } = new();
 }
 
 [DisplayName("Player")]
@@ -49,13 +38,13 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     public string Id
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Data._id;
+        get => Data.Id;
     }
 
     public JsonArrayMap<ItemId, int>.ReadOnly ItemAmounts
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Data._itemAmounts;
+        get => Data.ItemAmounts;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -67,7 +56,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     public Result<OnItemAmountUpdatedMsg, Error> AddSingletonItem(ItemId id)
     {
         var error = Error.ItemAlreadyAcquired(id).Prefix(nameof(AddSingletonItem));
-        var result = Add(Data._itemAmounts, id, true, error);
+        var result = Add(Data.ItemAmounts, id, true, error);
         MarkDirtyIfSuccess(result);
 
         return result.TryGetValue(out var changed)
@@ -78,7 +67,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     public Result<OnItemAmountUpdatedMsg, Error> RemoveSingletonItem(ItemId id)
     {
         var error = Error.ItemNotYetAcquired(id).Prefix(nameof(RemoveSingletonItem));
-        var result = Remove(Data._itemAmounts, id, true, error);
+        var result = Remove(Data.ItemAmounts, id, true, error);
         MarkDirtyIfSuccess(result);
 
         return result.TryGetValue(out var changed)
@@ -89,21 +78,21 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsItemEnough(ItemId id, int requiredAmount)
     {
-        return Data._itemAmounts.TryGetValue(id, out var currentAmount)
+        return Data.ItemAmounts.TryGetValue(id, out var currentAmount)
             && currentAmount >= requiredAmount;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Result<int, Error> GetItemAmount(ItemId id)
     {
-        return Data._itemAmounts.TryGetValue(id, out var amount)
+        return Data.ItemAmounts.TryGetValue(id, out var amount)
             ? amount
             : Error.ItemNotYetAcquired(id).Prefix(nameof(GetItemAmount));
     }
 
     public Result<OnItemAmountUpdatedMsg, Error> SetItemAmount(ItemId id, int amount)
     {
-        var result = SetAmount(Data._itemAmounts, id, amount);
+        var result = SetAmount(Data.ItemAmounts, id, amount);
         MarkDirtyIfSuccess(result);
 
         return result.TryGetValue(out var changed)
@@ -113,7 +102,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
 
     public Result<OnItemAmountUpdatedMsg, Error> AddItemAmount(ItemId id, int amount)
     {
-        var result = AddAmount(Data._itemAmounts, id, amount);
+        var result = AddAmount(Data.ItemAmounts, id, amount);
         MarkDirtyIfSuccess(result);
 
         return result.TryGetValue(out var changed)
@@ -123,7 +112,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
 
     public Result<OnItemAmountUpdatedMsg, Error> ReduceItemAmount(ItemId id, int amount)
     {
-        var result = ReduceAmount(Data._itemAmounts, id, amount, Error.ItemNotYetAcquired(id));
+        var result = ReduceAmount(Data.ItemAmounts, id, amount, Error.ItemNotYetAcquired(id));
         MarkDirtyIfSuccess(result);
 
         return result.TryGetValue(out var changed)
@@ -134,7 +123,7 @@ public sealed class PlayerDataAccessor : IUserDataAccessor
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsItemAcquired(ItemId itemId)
     {
-        return Data._itemAmounts.ContainsKey(itemId);
+        return Data.ItemAmounts.ContainsKey(itemId);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

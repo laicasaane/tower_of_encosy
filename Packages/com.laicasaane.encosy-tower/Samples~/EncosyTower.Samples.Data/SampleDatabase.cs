@@ -3,7 +3,7 @@ namespace EncosyTower.Samples.Data
     using EncosyTower.Databases;
     using EncosyTower.Naming;
 
-    [Database(NamingStrategy.SnakeCase, AssetName = $"{nameof(SampleDatabase)}Asset")]
+    [Database(NameCasing.SnakeLower, AssetName = $"{nameof(SampleDatabase)}Asset")]
     public readonly partial struct SampleDatabase
     {
         [Table] public readonly HeroTableAsset Heroes => Get_Heroes();
