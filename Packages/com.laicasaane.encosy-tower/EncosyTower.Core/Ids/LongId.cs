@@ -69,8 +69,8 @@ namespace EncosyTower.Ids
         public readonly bool TryParse(
               string str
             , out LongId result
-            , bool ignoreCase
-            , bool allowMatchingMetadataAttribute
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
         )
         {
             return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
@@ -79,8 +79,8 @@ namespace EncosyTower.Ids
         public readonly bool TryParse(
               ReadOnlySpan<char> str
             , out LongId result
-            , bool ignoreCase
-            , bool allowMatchingMetadataAttribute
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
         )
         {
             if (str.IsEmpty)

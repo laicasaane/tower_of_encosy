@@ -241,8 +241,8 @@ namespace EncosyTower.Common
         public bool TryParse(
               string str
             , out DateTimeId result
-            , bool ignoreCase
-            , bool allowMatchingMetadataAttribute
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
         )
         {
             return TryParse(str.AsSpan(), out result, ignoreCase, allowMatchingMetadataAttribute);
@@ -251,8 +251,8 @@ namespace EncosyTower.Common
         public bool TryParse(
               ReadOnlySpan<char> str
             , out DateTimeId result
-            , bool ignoreCase
-            , bool allowMatchingMetadataAttribute
+            , bool ignoreCase = true
+            , bool allowMatchingMetadataAttribute = false
         )
         {
             if (str.IsEmpty)
@@ -260,7 +260,8 @@ namespace EncosyTower.Common
                 goto FAILED;
             }
 
-            var datetimeRanges = str.Split('T');
+            ReadOnlySpan<char> separators = stackalloc char[2] { 'T', 't' };
+            var datetimeRanges = ignoreCase ? str.SplitAny(separators) : str.Split('T');
             Range? dateRange = default;
             Range? timeRange = default;
 
