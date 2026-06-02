@@ -1641,9 +1641,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
             p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
-                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
-                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
-                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                .PrintEndLine("UC.IUTF8Bytes");
             p.OpenScope();
             {
                 p.PrintLine("TFixedString result = default;");
@@ -1740,9 +1738,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public TFixedString ToDisplayFixedString<TFixedString>()");
             p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
-                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
-                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
-                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                .PrintEndLine("UC.IUTF8Bytes");
             p.OpenScope();
             {
                 p.PrintLine("TFixedString result = default;");
@@ -1929,9 +1925,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public readonly TFixedString GetIdFixedString<TFixedString>()");
             p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
-                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
-                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
-                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                .PrintEndLine("UC.IUTF8Bytes");
             p.OpenScope();
             {
                 p.PrintLine("TFixedString result = default;");
@@ -2025,9 +2019,7 @@
             p.PrintLine(AGGRESSIVE_INLINING);
             p.PrintLine("public readonly TFixedString GetIdDisplayFixedString<TFixedString>()");
             p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
-                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
-                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
-                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                .PrintEndLine("UC.IUTF8Bytes");
             p.OpenScope();
             {
                 p.PrintLine("TFixedString result = default;");

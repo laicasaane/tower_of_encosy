@@ -268,9 +268,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine(AggressiveInlining);
                     p.PrintLine("public TFixedString ToFixedString<TFixedString>()");
                     p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
-                        .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
-                        .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
-                            .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                        .PrintEndLine("UC.IUTF8Bytes");
                     p.OpenScope();
                     {
                         p.PrintLine("TFixedString result = default;");
@@ -283,9 +281,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine(AggressiveInlining);
                     p.PrintLine("public TFixedString ToDisplayFixedString<TFixedString>()");
                     p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
-                        .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
-                        .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
-                            .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+                        .PrintEndLine("UC.IUTF8Bytes");
                     p.OpenScope();
                     {
                         p.PrintLine("TFixedString result = default;");

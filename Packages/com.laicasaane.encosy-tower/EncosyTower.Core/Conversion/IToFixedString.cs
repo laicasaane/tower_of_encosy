@@ -1,22 +1,17 @@
 #if UNITY_COLLECTIONS
 
-using System;
 using Unity.Collections;
 
 namespace EncosyTower.Conversion
 {
     public interface IToFixedString<out T>
-        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>
-                , IComparable<T>, IEquatable<T>
+        where T : unmanaged, INativeList<byte>, IUTF8Bytes
     {
         T ToFixedString();
     }
 
     public interface IToDisplayFixedString<out T>
-        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>
-                , IComparable<T>, IEquatable<T>
+        where T : unmanaged, INativeList<byte>, IUTF8Bytes
     {
         T ToDisplayFixedString();
     }
@@ -24,17 +19,13 @@ namespace EncosyTower.Conversion
     public interface IToFixedString
     {
         T ToFixedString<T>()
-            where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                    , IComparable<string>, IEquatable<string>
-                    , IComparable<T>, IEquatable<T>;
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes;
     }
 
     public interface IToDisplayFixedString
     {
         T ToDisplayFixedString<T>()
-            where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                    , IComparable<string>, IEquatable<string>
-                    , IComparable<T>, IEquatable<T>;
+            where T : unmanaged, INativeList<byte>, IUTF8Bytes;
     }
 }
 

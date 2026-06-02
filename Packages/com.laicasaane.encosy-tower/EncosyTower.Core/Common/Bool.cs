@@ -302,8 +302,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TFixedString ToFixedString<TFixedString>()
-            where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             TFixedString result = default;
             result.Append(ToFixedString());
