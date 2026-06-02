@@ -48,10 +48,12 @@
             {
                 if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
                 {
-                    p.PrintBeginLine(", ETCon.IToFixedString");
-                    p.PrintBeginLine(", ETCon.IToDisplayFixedString");
+                    p.PrintBeginLine(", ETCon.IToFixedString").PrintEndLine();
+                    p.PrintBeginLine(", ETCon.IToDisplayFixedString").PrintEndLine();
                     p.PrintBeginLine(", ETCon.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
                     p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
+                    p.PrintBeginLine(", ETCon.ITryParse<").Print(typeName).PrintEndLine(">");
+                    p.PrintBeginLine(", ETCon.ITryParseSpan<").Print(typeName).PrintEndLine(">");
                 }
 
                 foreach (var kind in KindRefs)
@@ -1924,6 +1926,21 @@
                 return;
             }
 
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("public readonly TFixedString GetIdFixedString<TFixedString>()");
+            p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+            p.OpenScope();
+            {
+                p.PrintLine("TFixedString result = default;");
+                p.PrintLine("UC.FixedStringMethods.Append(ref result, GetIdFixedString());");
+                p.PrintLine("return result;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" GetIdFixedString()");
             p.OpenScope();
             {
@@ -2004,6 +2021,21 @@
             {
                 return;
             }
+
+            p.PrintLine(AGGRESSIVE_INLINING);
+            p.PrintLine("public readonly TFixedString GetIdDisplayFixedString<TFixedString>()");
+            p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
+                .PrintEndLine("UC.IIndexable<byte>, UC.IUTF8Bytes")
+                .WithIncreasedIndent().PrintLine(", S.IComparable<string>, S.IEquatable<string>")
+                    .PrintLine(", S.IComparable<TFixedString>, S.IEquatable<TFixedString>");
+            p.OpenScope();
+            {
+                p.PrintLine("TFixedString result = default;");
+                p.PrintLine("UC.FixedStringMethods.Append(ref result, GetIdDisplayFixedString());");
+                p.PrintLine("return result;");
+            }
+            p.CloseScope();
+            p.PrintEndLine();
 
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" GetIdDisplayFixedString()");
             p.OpenScope();
@@ -2514,8 +2546,8 @@
 
             if (References.unityCollections && string.IsNullOrEmpty(FixedStringType) == false)
             {
-                p.PrintBeginLine(", ETCon.IToFixedString");
-                p.PrintBeginLine(", ETCon.IToDisplayFixedString");
+                p.PrintBeginLine(", ETCon.IToFixedString").PrintEndLine();
+                p.PrintBeginLine(", ETCon.IToDisplayFixedString").PrintEndLine();
                 p.PrintBeginLine(", ETCon.IToFixedString<").Print(FixedStringType).PrintEndLine(">");
                 p.PrintBeginLine(", ETCon.IToDisplayFixedString<").Print(FixedStringType).PrintEndLine(">");
             }
