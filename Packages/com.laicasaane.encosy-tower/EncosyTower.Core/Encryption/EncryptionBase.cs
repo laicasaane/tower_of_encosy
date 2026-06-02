@@ -29,7 +29,7 @@ namespace EncosyTower.Encryption
             _decryptor = decryptor;
         }
 
-        public string Encrypt(string plain)
+        public virtual string Encrypt(string plain)
         {
             if (plain == null)
             {
@@ -58,7 +58,7 @@ namespace EncosyTower.Encryption
             }
         }
 
-        public string Decrypt(string encrypted)
+        public virtual string Decrypt(string encrypted)
         {
             if (encrypted == null)
             {
@@ -104,7 +104,7 @@ namespace EncosyTower.Encryption
         }
 
         [UnityEngine.HideInCallstack, System.Diagnostics.StackTraceHidden]
-        private static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool check)
+        protected static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool check)
         {
             if (check == false)
             {
