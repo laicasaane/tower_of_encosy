@@ -36,8 +36,7 @@ public readonly partial record struct WeaponId(ushort Id)
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T ToDisplayFixedString<T>()
-        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+        where T : unmanaged, INativeList<byte>, IUTF8Bytes
     {
         T result = default;
         result.Append(ToDisplayFixedString());
@@ -46,8 +45,7 @@ public readonly partial record struct WeaponId(ushort Id)
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T ToFixedString<T>()
-        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+        where T : unmanaged, INativeList<byte>, IUTF8Bytes
     {
         T result = default;
         result.Append(ToFixedString());

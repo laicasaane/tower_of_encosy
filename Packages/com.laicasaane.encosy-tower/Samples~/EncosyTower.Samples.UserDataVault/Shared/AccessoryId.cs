@@ -96,8 +96,7 @@ public readonly partial record struct RingId(ushort Id)
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T ToDisplayFixedString<T>()
-        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+        where T : unmanaged, INativeList<byte>, IUTF8Bytes
     {
         T result = default;
         result.Append(ToDisplayFixedString());
@@ -106,8 +105,7 @@ public readonly partial record struct RingId(ushort Id)
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T ToFixedString<T>()
-        where T : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-                , IComparable<string>, IEquatable<string>, IComparable<T>, IEquatable<T>
+        where T : unmanaged, INativeList<byte>, IUTF8Bytes
     {
         T result = default;
         result.Append(ToFixedString());
@@ -221,23 +219,13 @@ public readonly partial record struct BraceletId(ushort Id)
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TFixedString ToDisplayFixedString<TFixedString>()
-        where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-            , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
-    {
-        TFixedString result = default;
-        result.Append(ToDisplayFixedString());
-        return result;
-    }
+        where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        => ToDisplayFixedString().CastTo<TFixedString>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TFixedString ToFixedString<TFixedString>()
-        where TFixedString : unmanaged, INativeList<byte>, IIndexable<byte>, IUTF8Bytes
-            , IComparable<string>, IEquatable<string>, IComparable<TFixedString>, IEquatable<TFixedString>
-    {
-        TFixedString result = default;
-        result.Append(ToFixedString());
-        return result;
-    }
+        where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        => ToFixedString().CastTo<TFixedString>();
 
     public bool TryParse(ReadOnlySpan<char> str, out BraceletId result, bool ignoreCase, bool allowMatchingMetadataAttribute)
     {
