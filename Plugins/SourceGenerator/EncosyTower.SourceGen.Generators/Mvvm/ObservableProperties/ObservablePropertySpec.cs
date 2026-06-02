@@ -49,7 +49,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         public readonly bool Equals(ObservablePropertySpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && isBaseObservableObject == other.isBaseObservableObject
             && isSealed == other.isSealed
             && hasMemberObservableObject == other.hasMemberObservableObject
@@ -64,21 +63,19 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             => obj is ObservablePropertySpec other && Equals(other);
 
         public readonly override int GetHashCode()
-        {
-            var hash = new HashValue();
-            hash.Add(className);
-            hash.Add(hintName);
-            hash.Add(isBaseObservableObject);
-            hash.Add(isSealed);
-            hash.Add(hasMemberObservableObject);
-            hash.Add(hasSerializableAttribute);
-            hash.Add(hasGeneratePropertyBagAttribute);
-            hash.Add(fieldRefs);
-            hash.Add(propRefs);
-            hash.Add(notifyForEntries);
-            hash.Add(notifyCanExecuteChangedFor);
-            return hash.ToHashCode();
-        }
+            => HashValue.Combine(
+                  className
+                , isBaseObservableObject
+                , isSealed
+                , hasMemberObservableObject
+                , hasSerializableAttribute
+                , hasGeneratePropertyBagAttribute
+                , fieldRefs
+            )
+            .Add(propRefs)
+            .Add(notifyForEntries)
+            .Add(notifyCanExecuteChangedFor)
+            ;
 
         public static ObservablePropertySpec Extract(
               GeneratorAttributeSyntaxContext context

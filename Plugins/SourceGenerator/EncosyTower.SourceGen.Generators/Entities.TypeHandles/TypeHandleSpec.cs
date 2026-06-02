@@ -59,15 +59,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
 
         public readonly bool Equals(TypeHandleSpec other)
             => string.Equals(structName, other.structName, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && typeRefs.Equals(other.typeRefs)
             ;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(
-                  structName
-                , hintName
-                , typeRefs
-            );
+            => HashValue.Combine(structName, typeRefs);
     }
 }

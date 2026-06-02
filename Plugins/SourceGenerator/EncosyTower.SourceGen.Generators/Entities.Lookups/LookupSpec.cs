@@ -65,7 +65,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public readonly bool Equals(LookupSpec other)
             => kind == other.kind
             && string.Equals(structName, other.structName, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(interfaceLookupRO, other.interfaceLookupRO, StringComparison.Ordinal)
             && string.Equals(interfaceLookupRW, other.interfaceLookupRW, StringComparison.Ordinal)
             && typeRefs.Equals(other.typeRefs)
@@ -74,12 +73,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public readonly override int GetHashCode()
             => HashValue.Combine(
                   structName
-                , hintName
                 , interfaceLookupRO
                 , interfaceLookupRW
-            )
-            .Add((byte)kind)
-            .Add(typeRefs.GetHashCode())
-            ;
+                , kind
+                , typeRefs
+            );
     }
 }

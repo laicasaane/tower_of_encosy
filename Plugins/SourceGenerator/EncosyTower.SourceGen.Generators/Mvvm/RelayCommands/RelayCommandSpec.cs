@@ -27,20 +27,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
         public readonly bool Equals(RelayCommandSpec other)
             => string.Equals(className, other.className, StringComparison.Ordinal)
-            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && memberRefs.Equals(other.memberRefs);
 
         public readonly override bool Equals(object obj)
             => obj is RelayCommandSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-        {
-            var hash = new HashValue();
-            hash.Add(className);
-            hash.Add(hintName);
-            hash.Add(memberRefs);
-            return hash.ToHashCode();
-        }
+            => HashValue.Combine(className, memberRefs);
 
         public static RelayCommandSpec Extract(
               GeneratorAttributeSyntaxContext context
