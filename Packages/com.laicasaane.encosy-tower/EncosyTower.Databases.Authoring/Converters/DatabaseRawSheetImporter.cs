@@ -70,19 +70,19 @@ namespace EncosyTower.Databases.Authoring
                 }
 
                 string sheetName;
-                NamingStrategy namingStrategy;
+                NameCasing nameCasing;
 
                 var attribute = pair.Value.PropertyType.GetCustomAttribute<TableNamingAttribute>();
 
                 if (attribute != null)
                 {
                     sheetName = attribute.SheetName;
-                    namingStrategy = attribute.NamingStrategy;
+                    nameCasing = attribute.NameCasing;
                 }
                 else
                 {
                     sheetName = pair.Key;
-                    namingStrategy = NamingStrategy.PascalCase;
+                    nameCasing = NameCasing.Pascal;
                 }
 
                 using (context.Logger.BeginScope(pair.Key))
@@ -100,7 +100,7 @@ namespace EncosyTower.Databases.Authoring
                         continue;
                     }
 
-                    var namingMap = BuildNamingMap(sheet, sheetName, namingStrategy);
+                    var namingMap = BuildNamingMap(sheet, sheetName, nameCasing);
                     var pages = GetPages(namingMap.GetSerializedName(sheetName));
 
                     foreach (var page in pages.OrderBy(x => x.SubName))
@@ -307,9 +307,9 @@ namespace EncosyTower.Databases.Authoring
             }
         }
 
-        private static NamingMap BuildNamingMap(ISheet sheet, string sheetName, NamingStrategy namingStrategy)
+        private static NamingMap BuildNamingMap(ISheet sheet, string sheetName, NameCasing nameCasing)
         {
-            var map = new NamingMap(namingStrategy);
+            var map = new NamingMap(nameCasing);
             var sheetType = sheet.GetType();
             var uniqueTypes = new HashSet<Type>();
             var baseSheetType = sheetType;

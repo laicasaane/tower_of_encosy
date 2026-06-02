@@ -255,7 +255,7 @@ namespace EncosyTower.Databases.Settings
                     await exporter.Export(
                           outputFolderPath
                         , cleanFolder
-                        , NamingStrategy.SnakeCase
+                        , NameCasing.SnakeLower
                         , existingFolderNames
                     ).ConfigureAwait(continueOnCapturedContext);
                 }

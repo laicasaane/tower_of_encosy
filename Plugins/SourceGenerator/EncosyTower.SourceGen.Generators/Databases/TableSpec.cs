@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.Databases
 {
@@ -8,7 +7,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public string typeFullName;
         public string typeName;
         public string propertyName;
-        public NamingStrategy namingStrategy;
+        public NameCasing nameCasing;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeFullName) == false
@@ -21,9 +20,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
             => string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
             && string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
-            && namingStrategy == other.namingStrategy;
+            && nameCasing == other.nameCasing;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(typeFullName, typeName, propertyName, (int)namingStrategy);
+            => HashValue.Combine(typeFullName, typeName, propertyName, (int)nameCasing);
     }
 }

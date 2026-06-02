@@ -9,7 +9,7 @@ namespace Samples.Data.Databases
     using Samples.Data.DataConverters;
     using EncosyTower.Databases;
 
-    [Database(NamingStrategy.SnakeCase, typeof(IntWrapperConverter), WithInstanceAPI = true)]
+    [Database(NameCasing.SnakeLower, typeof(IntWrapperConverter), WithInstanceAPI = true)]
     public partial struct SampleDatabase
     {
         [Table] public readonly HeroDataTableAsset Heroes => Get_Heroes();
@@ -373,7 +373,7 @@ namespace Samples.Data.Databases.Settings
     using EncosyTower.Naming;
     using UnityEngine;
 
-    [Database(NamingStrategy.SnakeCase)]
+    [Database(NameCasing.SnakeLower)]
     internal readonly partial struct FileDatabase
     {
         [Table] public readonly FileTableAsset FileList => Get_FileList();

@@ -23,7 +23,7 @@ namespace EncosyTower.Databases
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
     public sealed class DatabaseAttribute : Attribute
     {
-        public NamingStrategy NamingStrategy { get; }
+        public NameCasing NameCasing { get; }
 
         /// <remarks>
         /// Converter precedences (smaller index means higher precedence):
@@ -53,11 +53,11 @@ namespace EncosyTower.Databases
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseAttribute"/> class.
         /// </summary>
-        /// <param name="namingStrategy">The naming strategy for generated database members.</param>
+        /// <param name="nameCasing">The naming strategy for generated database members.</param>
         /// <param name="converters">The converter types used by this database.</param>
-        public DatabaseAttribute(NamingStrategy namingStrategy, params Type[] converters)
+        public DatabaseAttribute(NameCasing nameCasing, params Type[] converters)
         {
-            NamingStrategy = namingStrategy;
+            NameCasing = nameCasing;
             Converters = converters ?? Array.Empty<Type>();
         }
     }

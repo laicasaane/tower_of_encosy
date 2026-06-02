@@ -5,7 +5,6 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.Databases
 {
@@ -17,7 +16,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
         public string typeName;
         public bool isStruct;
-        public NamingStrategy namingStrategy;
+        public NameCasing nameCasing;
         public string assetName;
         public bool withInstanceAPI;
         public string openingSource;
@@ -49,13 +48,13 @@ namespace EncosyTower.SourceGen.Generators.Databases
             var typeName = typeSyntax.Identifier.Text;
             var isStruct = typeSymbol.IsValueType;
             var attribute = context.Attributes[0];
-            var namingStrategy = default(NamingStrategy);
+            var nameCasing = NameCasing.Pascal;
 
             foreach (var arg in attribute.ConstructorArguments)
             {
                 if (arg.Kind != TypedConstantKind.Array && arg.Value != null)
                 {
-                    namingStrategy = arg.Value.ToNamingStrategy();
+                    nameCasing = arg.Value.ToNameCasing();
                     break;
                 }
             }
@@ -120,7 +119,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     typeFullName = propType.ToFullName(),
                     typeName = propType.Name,
                     propertyName = property.Name,
-                    namingStrategy = namingStrategy,
+                    nameCasing = nameCasing,
                 });
             }
 
@@ -158,7 +157,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 location = location,
                 typeName = typeName,
                 isStruct = isStruct,
-                namingStrategy = namingStrategy,
+                nameCasing = nameCasing,
                 assetName = assetName,
                 withInstanceAPI = withInstanceAPI,
                 openingSource = openingSource,
@@ -197,7 +196,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public readonly bool Equals(DatabaseSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && isStruct == other.isStruct
-            && namingStrategy == other.namingStrategy
+            && nameCasing == other.nameCasing
             && string.Equals(assetName, other.assetName, StringComparison.Ordinal)
             && withInstanceAPI == other.withInstanceAPI
             && tables.Equals(other.tables)
@@ -207,7 +206,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             => HashValue.Combine(
                   typeName
                 , isStruct
-                , namingStrategy
+                , nameCasing
                 , assetName
                 , withInstanceAPI
                 , tables

@@ -67,7 +67,7 @@
         public const string PR_AUTHOR_DATABASE_ATTRIBUTE = $"ETDBA.AuthorDatabaseAttribute";
         public const string PR_HORIZONTAL_LIST_ATTRIBUTE = $"ETDBA.HorizontalAttribute";
         public const string PR_DATA_SHEET_CONTAINER_BASE = $"ETDBA.DataSheetContainerBase";
-        public const string PR_TABLE_NAMING = $"[ETDBASG.TableNaming(\"{{0}}\", ETN.NamingStrategy.{{1}})]";
+        public const string PR_TABLE_NAMING = $"[ETDBASG.TableNaming(\"{{0}}\", ETN.NameCasing.{{1}})]";
         public const string PR_GENERATED_SHEET_CONTAINER = $"[ETDBASG.GeneratedSheetContainer]";
         public const string PR_GENERATED_SHEET_ATTRIBUTE = $"[ETDBASG.GeneratedSheet(typeof({{0}}), typeof({{1}}), typeof({{2}}), \"{{3}}\")]";
         public const string PR_GENERATED_SHEET_ROW = $"[ETDBASG.GeneratedSheetRow(typeof({{0}}), typeof({{1}}))]";

@@ -1,6 +1,5 @@
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
-    using Newtonsoft.Json.Utilities;
     using static EncosyTower.SourceGen.Generators.DatabaseAuthoring.Helpers;
 
     partial struct DatabaseSpec
@@ -137,16 +136,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 var tableTypeName = table.typeSimpleName;
                 var propertyName = table.propertyName;
-                var namingStrategy = table.namingStrategy;
+                var nameCasing = table.nameCasing;
                 var idTypeFullName = table.idTypeFullName;
                 var dataTypeFullName = table.dataTypeFullName;
                 var tableTypeFullName = table.typeFullName;
                 var assetName = table.deduplicateAssetName
-                    ? $"{tableTypeName}_{propertyName}".ToNamingCase(namingStrategy)
-                    : tableTypeName.ToNamingCase(namingStrategy);
+                    ? nameCasing.ConvertName($"{tableTypeName}_{propertyName}")
+                    : nameCasing.ConvertName(tableTypeName);
 
                 p.PrintLine(PR_SERIALIZABLE);
-                p.PrintLine(string.Format(PR_TABLE_NAMING, table.propertyName, table.namingStrategy));
+                p.PrintLine(string.Format(PR_TABLE_NAMING, table.propertyName, table.nameCasing));
                 p.PrintLine(string.Format(PR_GENERATED_SHEET_ATTRIBUTE, idTypeFullName, dataTypeFullName, tableTypeFullName, assetName));
                 p.PrintLine(PR_GENERATED_CODE).PrintLine(PR_EXCLUDE_COVERAGE);
                 p.PrintBeginLine("public partial class ").Print(table.uniqueSheetName)

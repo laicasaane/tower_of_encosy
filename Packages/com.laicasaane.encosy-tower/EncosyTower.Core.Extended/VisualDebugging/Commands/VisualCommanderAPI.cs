@@ -161,7 +161,7 @@ namespace EncosyTower.VisualDebugging.Commands
                         var propertyLabelAttrib = property.GetCustomAttribute<LabelAttribute>();
                         var propertyList = propertyOrder.HasValue ? orderedProperties : unorderedProperties;
                         var propertyLabel = (propertyLabelAttrib?.Label).NotEmptyOr(propertyName);
-                        var name = propertyName.ToKebabCase();
+                        var name = NameCasing.KebabLower.ConvertName(propertyName);
 
                         Enum defaultEnumValue = visualPropType == VisualPropertyType.Enum
                             ? Activator.CreateInstance(propType) as Enum
@@ -198,7 +198,7 @@ namespace EncosyTower.VisualDebugging.Commands
                         : Array.Empty<VisualPropertyData>();
 
                     commandList.Add(new VisualCommandData(
-                          commandType.Name.ToKebabCase()
+                          NameCasing.KebabLower.ConvertName(commandType.Name)
                         , command
                         , propertyArray
                         , commandOrder ?? 0
@@ -223,7 +223,7 @@ namespace EncosyTower.VisualDebugging.Commands
             static VisualDirectoryData CreateDirectoryData(string label)
             {
                 var id = StringToId.Get(label);
-                var name = label.Replace(' ', '_').Replace('/', '-').ToKebabCase();
+                var name = NameCasing.KebabLower.ConvertName(label.Replace(' ', '_').Replace('/', '-'));
                 return new VisualDirectoryData(name, label, id);
             }
 

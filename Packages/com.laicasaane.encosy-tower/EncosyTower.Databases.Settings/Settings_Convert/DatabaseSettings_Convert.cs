@@ -192,7 +192,7 @@ namespace EncosyTower.Databases.Settings
                     ? $"{databaseAssetName}_{databaseType.Name}"
                     : databaseAttrib.AssetName;
 
-                databaseAssetName = NamingMap.ConvertName(databaseAssetName, databaseAttrib.NamingStrategy);
+                databaseAssetName = databaseAttrib.NameCasing.ConvertName(databaseAssetName);
 
                 var candidates = authorType.GetMember(
                       "SheetContainer"

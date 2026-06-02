@@ -8,17 +8,17 @@ namespace EncosyTower.Databases.Authoring.SourceGen
     {
         public string SheetName { get; }
 
-        public NamingStrategy NamingStrategy { get; }
+        public NameCasing NameCasing { get; }
 
         public TableNamingAttribute(string sheetName)
         {
             this.SheetName = sheetName;
         }
 
-        public TableNamingAttribute(string sheetName, NamingStrategy namingStrategy)
+        public TableNamingAttribute(string sheetName, NameCasing nameCasing)
         {
             this.SheetName = sheetName;
-            this.NamingStrategy = namingStrategy;
+            this.NameCasing = nameCasing;
         }
     }
 }

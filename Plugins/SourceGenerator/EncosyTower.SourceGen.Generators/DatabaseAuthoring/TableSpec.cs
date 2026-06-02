@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
@@ -10,7 +9,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string idTypeFullName;
         public string dataTypeFullName;
         public string propertyName;
-        public NamingStrategy namingStrategy;
+        public NameCasing nameCasing;
         public bool deduplicateAssetName;
 
         // Pre-composed names, do not participate in Equals and GetHashCode
@@ -23,7 +22,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && string.Equals(idTypeFullName, other.idTypeFullName, StringComparison.Ordinal)
             && string.Equals(dataTypeFullName, other.dataTypeFullName, StringComparison.Ordinal)
             && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
-            && namingStrategy == other.namingStrategy
+            && nameCasing == other.nameCasing
             && deduplicateAssetName == other.deduplicateAssetName
             ;
 
@@ -37,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , idTypeFullName
                 , dataTypeFullName
                 , propertyName
-                , namingStrategy
+                , nameCasing
                 , deduplicateAssetName
             );
     }

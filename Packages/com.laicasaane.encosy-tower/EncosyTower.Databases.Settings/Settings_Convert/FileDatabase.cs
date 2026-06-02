@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace EncosyTower.Databases.Settings
 {
-    [Database(NamingStrategy.SnakeCase)]
+    [Database(NameCasing.SnakeLower)]
     internal readonly partial struct FileDatabase
     {
         [Table] public readonly FileTableAsset FileList => Get_FileList();

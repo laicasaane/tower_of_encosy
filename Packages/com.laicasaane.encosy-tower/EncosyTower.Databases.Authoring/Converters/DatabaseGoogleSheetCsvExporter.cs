@@ -85,7 +85,7 @@ namespace EncosyTower.Databases.Authoring
         public async Task Export(
               string savePath
             , bool cleanOutputFolder
-            , NamingStrategy namingStrategy
+            , NameCasing nameCasing
             , HashSet<string> existingFolderNames = null
         )
         {
@@ -106,11 +106,7 @@ namespace EncosyTower.Databases.Authoring
                 _isLoaded = true;
             }
 
-            var spreadsheetName = NamingMap.ConvertName(
-                  SheetUtility.ToFileName(_spreadsheet.Properties.Title)
-                , namingStrategy
-            );
-
+            var spreadsheetName = nameCasing.ConvertName(SheetUtility.ToFileName(_spreadsheet.Properties.Title));
             var fileSystem = _fileSystem;
             var validSpreadsheet = SheetUtility.ValidateSheetName(spreadsheetName);
             var folderName = _spreadsheetNameTransformer?.Transform(spreadsheetName) ?? spreadsheetName;
@@ -149,11 +145,7 @@ namespace EncosyTower.Databases.Authoring
                     continue;
                 }
 
-                var sheetName = NamingMap.ConvertName(
-                      SheetUtility.ToFileName(gSheet.Properties.Title, i)
-                    , namingStrategy
-                );
-
+                var sheetName = nameCasing.ConvertName(SheetUtility.ToFileName(gSheet.Properties.Title, i));
                 var validSheet = SheetUtility.ValidateSheetName(sheetName);
                 var canBeIgnored = validSheet == false || validSpreadsheet == false;
                 var fileName = sheetNameTransformer?.Transform(sheetName) ?? sheetName;

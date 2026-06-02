@@ -6,7 +6,6 @@ using EncosyTower.SourceGen.Helpers.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
@@ -60,7 +59,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
             var ignoredTypes = new IgnoredTypes();
             var resultTypes = new ResultTypes();
-            var namingStrategy = NamingStrategy.PascalCase;
+            var nameCasing = NameCasing.Pascal;
             var fullyQualifiedSheetNames = false;
 
             ProcessAttributes(
@@ -69,7 +68,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , dbConverterMap
                 , ignoredTypes
                 , resultTypes
-                , ref namingStrategy
+                , ref nameCasing
                 , ref fullyQualifiedSheetNames
             );
 
@@ -80,7 +79,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                   databaseSymbol
                 , ignoredTypes
                 , resultTypes
-                , namingStrategy
+                , nameCasing
                 , tableInfoList
                 , ref hlBuilder
             );
@@ -181,7 +180,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , Dictionary<string, ConverterSpec> dbConverterMap
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
-            , ref NamingStrategy namingStrategy
+            , ref NameCasing nameCasing
             , ref bool fullyQualifiedSheetNames
         )
         {
@@ -189,7 +188,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 if (arg.Kind != TypedConstantKind.Array && arg.Value != null)
                 {
-                    namingStrategy = arg.Value.ToNamingStrategy();
+                    nameCasing = arg.Value.ToNameCasing();
                     break;
                 }
             }
@@ -228,7 +227,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
               INamedTypeSymbol databaseSymbol
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
-            , NamingStrategy namingStrategy
+            , NameCasing nameCasing
             , List<TableInfo> tableInfoList
             , ref ImmutableArrayBuilder<HorizontalListSpec> hlBuilder
         )
@@ -263,14 +262,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     continue;
                 }
 
-                var tableNamingStrategy = namingStrategy;
+                var tableNameCasing = nameCasing;
                 var tableConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
 
                 foreach (var arg in tableAttrib.ConstructorArguments)
                 {
                     if (arg.Kind != TypedConstantKind.Array && arg.Value != null)
                     {
-                        tableNamingStrategy = arg.Value.ToNamingStrategy();
+                        tableNameCasing = arg.Value.ToNameCasing();
                     }
                     else if (arg.Kind == TypedConstantKind.Array)
                     {
@@ -296,7 +295,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     tableTypeSimpleName = tableTypeName,
                     dataTypeSimpleName = dataTypeSimpleName,
                     propertyName = property.Name,
-                    namingStrategy = tableNamingStrategy,
+                    nameCasing = tableNameCasing,
                     tableConverterMap = tableConverterMap,
                 });
 
@@ -416,7 +415,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                             idTypeFullName = tableInfo.idTypeFullName,
                             dataTypeFullName = tableInfo.dataTypeFullName,
                             propertyName = tableInfo.propertyName,
-                            namingStrategy = tableInfo.namingStrategy,
+                            nameCasing = tableInfo.nameCasing,
                             baseSheetName = baseSheetNamePerInfo,
                             uniqueSheetName = uniqueSheetName,
                             deduplicateAssetName = deduplicateAssetName,
@@ -1532,7 +1531,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             public string dataTypeSimpleName;
             public string propertyName;
             public Dictionary<string, ConverterSpec> tableConverterMap;
-            public NamingStrategy namingStrategy;
+            public NameCasing nameCasing;
         }
 
         private struct SheetGroupInfo

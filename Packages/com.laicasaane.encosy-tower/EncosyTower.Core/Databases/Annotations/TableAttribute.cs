@@ -9,7 +9,7 @@ namespace EncosyTower.Databases
         /// <summary>
         /// Determines the naming case for each sheet and its properties.
         /// </summary>
-        public NamingStrategy NamingStrategy { get; }
+        public NameCasing NameCasing { get; }
 
         /// <remarks>
         /// Converter precedences (smaller index means higher precedence):
@@ -28,9 +28,9 @@ namespace EncosyTower.Databases
             Converters = converters;
         }
 
-        public TableAttribute(NamingStrategy namingStrategy, params Type[] converters)
+        public TableAttribute(NameCasing nameCasing, params Type[] converters)
         {
-            NamingStrategy = namingStrategy;
+            NameCasing = nameCasing;
             Converters = converters;
         }
     }

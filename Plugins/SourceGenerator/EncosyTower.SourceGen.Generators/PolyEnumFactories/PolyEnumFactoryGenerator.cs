@@ -5,7 +5,6 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json.Utilities;
 
 namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 {
@@ -395,7 +394,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
                 var hasDefault = p.HasExplicitDefaultValue && p.RefKind == RefKind.None;
                 var literal = hasDefault ? FormatDefaultValue(p) : null;
-                var paramName = StringUtils.ToCamelCase(p.Name);
+                var paramName = NameCasing.Camel.ConvertName(p.Name);
 
                 builder.Add(new PolyEnumFactorySpec.ParamSpec {
                     name = paramName,
@@ -447,7 +446,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
                     builder.Add(new PolyEnumFactorySpec.MemberSpec {
                         name = field.Name,
-                        parameterName = StringUtils.ToCamelCase(field.Name),
+                        parameterName = NameCasing.Camel.ConvertName(field.Name),
                         typeFullyQualifiedName = field.Type.ToFullName(),
                         isProperty = false,
                     });
@@ -475,7 +474,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
                     builder.Add(new PolyEnumFactorySpec.MemberSpec {
                         name = property.Name,
-                        parameterName = StringUtils.ToCamelCase(property.Name),
+                        parameterName = NameCasing.Camel.ConvertName(property.Name),
                         typeFullyQualifiedName = property.Type.ToFullName(),
                         isProperty = true,
                     });
