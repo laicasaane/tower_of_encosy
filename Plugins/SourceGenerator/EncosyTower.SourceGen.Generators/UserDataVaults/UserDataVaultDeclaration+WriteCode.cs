@@ -346,7 +346,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public UnityTask SaveAsync")
-                    .PrintEndLine("(SaveDestination destination, CancellationToken token = default)");
+                    .PrintEndLine("(SaveDestination destination = default, CancellationToken token = default)");
                 p.OpenScope();
                 {
                     p.PrintLine("ThrowIfNotCreated(IsCreated);");
@@ -1356,7 +1356,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public UnityTask LoadEntireDirectoryAsync(SourcePriority priority, CancellationToken token = default)");
+                p.PrintLine("public UnityTask LoadEntireDirectoryAsync(SourcePriority priority = default, CancellationToken token = default)");
                 p.WithIncreasedIndent().PrintLine("=> LoadAsync(priority, token);");
                 p.PrintEndLine();
 
@@ -1424,7 +1424,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public UnityTask SaveEntireDirectoryAsync(SaveDestination destination, CancellationToken token = default)");
+                p.PrintLine("public UnityTask SaveEntireDirectoryAsync(SaveDestination destination = default, CancellationToken token = default)");
                 p.WithIncreasedIndent().PrintLine("=> SaveAsync(destination, token);");
                 p.PrintEndLine();
 
@@ -1432,7 +1432,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     .PrintEndLine("UnityTask SaveAsync(");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintLine("  SaveDestination destination");
+                    p.PrintLine("  SaveDestination destination = default");
                     p.PrintLine(", CancellationToken token = default");
 
                     for (var i = 0; i < defs.Length; i++)
@@ -1495,7 +1495,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintLine("public void CloneDataFromCloud(");
                 p = p.IncreasedIndent();
                 {
-                    p.PrintLine("  SourcePriority priority");
+                    p.PrintLine("  SourcePriority priority = default");
 
                     for (var i = 0; i < defs.Length; i++)
                     {
@@ -1646,7 +1646,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public static DataCollection GetFrom(ReadOnlyVault vault, SourcePriority priority)");
+                p.PrintLine("public static DataCollection GetFrom(ReadOnlyVault vault, SourcePriority priority = default)");
                 p.OpenScope();
                 {
                     p.PrintLine("if (vault.IsCreated == false)");
@@ -1678,7 +1678,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.PrintLine("public static DataCollection CloneFrom(ReadOnlyVault vault, SourcePriority priority)");
+                p.PrintLine("public static DataCollection CloneFrom(ReadOnlyVault vault, SourcePriority priority = default)");
                 p.OpenScope();
                 {
                     p.PrintLine("if (vault.IsCreated == false)");

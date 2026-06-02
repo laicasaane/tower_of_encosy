@@ -92,4 +92,64 @@ internal static class GeneratorTestHelper
 
         return Task.CompletedTask;
     }
+
+    internal static string[] RunDriverAndGetGeneratedSources<TGenerator>(string source = "")
+        where TGenerator : IIncrementalGenerator, new()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(
+              source
+            , CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp10)
+        );
+
+        IEnumerable<PortableExecutableReference> references = UnityDllPaths.All
+            .Select(p => MetadataReference.CreateFromFile(p))
+            .Concat(new[]
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location),
+            });
+
+        var compilation = CSharpCompilation.Create(
+              "TestAssembly"
+            , new[] { syntaxTree }
+            , references.ToImmutableArray()
+            , new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        var generator = new TGenerator();
+        var driver = (CSharpGeneratorDriver)CSharpGeneratorDriver
+            .Create(generator)
+            .RunGeneratorsAndUpdateCompilation(compilation, out _, out _);
+
+        var runResult = driver.GetRunResult();
+
+        var generatorErrors = System.Linq.Enumerable.SelectMany(
+              runResult.Results
+            , r => r.Exception is null ? r.Diagnostics : ImmutableArray.Create(
+                Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                          "GENTEST001"
+                        , "Generator threw exception"
+                        , r.Exception.ToString()
+                        , "Test"
+                        , DiagnosticSeverity.Error
+                        , isEnabledByDefault: true
+                    )
+                    , Location.None
+                )
+            )
+        ).Where(static d => d.Severity == DiagnosticSeverity.Error);
+
+        foreach (var error in generatorErrors)
+        {
+            throw new Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException(
+                $"Generator produced error: {error}");
+        }
+
+        return runResult.Results
+            .SelectMany(static x => x.GeneratedSources)
+            .Select(static x => x.SourceText.ToString())
+            .ToArray();
+    }
 }

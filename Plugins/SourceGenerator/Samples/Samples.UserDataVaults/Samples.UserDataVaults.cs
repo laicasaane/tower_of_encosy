@@ -5,26 +5,14 @@ using EncosyTower.UserDataVaults;
 
 namespace Samples.UserDataVaults
 {
-    internal partial class UserCommonData : IUserData
-    {
-        public string Id { get; set; }
+    [UserData]
+    internal partial record class UserCommonData { }
 
-        public string Version { get; set; }
-    }
+    [UserData]
+    internal partial class UserProgressData { }
 
-    internal partial class UserProgressData : IUserData
-    {
-        public string Id { get; set; }
-
-        public string Version { get; set; }
-    }
-
-    internal partial class UserEventData : IUserData
-    {
-        public string Id { get; set; }
-
-        public string Version { get; set; }
-    }
+    [UserData]
+    internal partial class UserEventData { }
 
     [DisplayName("Common")]
     [UserDataAccessor(typeof(UserCommonVault))]

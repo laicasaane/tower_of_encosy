@@ -6,7 +6,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
     using static Helpers;
 
-    internal class UserDataAccessorDeclaration
+    internal readonly struct UserDataAccessorDeclaration
     {
         public bool IsValid { get; }
 

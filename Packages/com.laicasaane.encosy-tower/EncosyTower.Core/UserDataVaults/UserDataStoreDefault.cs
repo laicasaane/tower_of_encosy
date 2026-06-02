@@ -1,13 +1,14 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Encryption;
-using EncosyTower.Logging;
 using EncosyTower.StringIds;
+using UnityEngine;
 
 namespace EncosyTower.UserDataVaults
 {
@@ -22,6 +23,7 @@ namespace EncosyTower.UserDataVaults
     {
         private readonly UserDataSourceDevice<TData> _source;
         private readonly Func<TData> _createDataFunc;
+        private readonly bool _isValueType;
 
         private string _userId;
         private TData _data;
@@ -30,7 +32,7 @@ namespace EncosyTower.UserDataVaults
               StringId<string> key
             , [NotNull] StringVault stringVault
             , [NotNull] EncryptionBase encryption
-            , ILogger logger
+            , EncosyTower.Logging.ILogger logger
             , bool ignoreEncryption
             , [NotNull] UserDataStoreArgs args
         )
@@ -43,6 +45,7 @@ namespace EncosyTower.UserDataVaults
 
             _userId = string.Empty;
             _createDataFunc = storeArgs.CreateDataFunc;
+            _isValueType = typeof(TData).IsValueType;
             _source = new UserDataSourceDevice<TData>(
                   key
                 , stringVault
@@ -108,9 +111,24 @@ namespace EncosyTower.UserDataVaults
             _data = data;
         }
 
-        public override TData GetData(SourcePriority priority)
+        public override TData GetData(SourcePriority priority = default)
         {
             return _data;
+        }
+
+        /// <summary>
+        /// Gets <typeparamref name="TData"/> by reference when it is a value type.
+        /// </summary>
+        /// <remarks>
+        /// Should be used as an optimization when copy-by-value is not desirable.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Throws when <typeparamref name="TData"/> is not a value type.
+        /// </exception>
+        public ref TData GetDataByRef()
+        {
+            ThrowInvalidOperationIfNotValueType(_isValueType);
+            return ref _data;
         }
 
         public override void SetData(TData data)
@@ -134,7 +152,7 @@ namespace EncosyTower.UserDataVaults
             _source.IsDirty = isDirty;
         }
 
-        public override async UnityTask LoadAsync(SourcePriority priority, CancellationToken token)
+        public override async UnityTask LoadAsync(SourcePriority priority = default, CancellationToken token = default)
         {
             var dataOpt = await _source.TryLoadAsync(token);
 
@@ -144,7 +162,7 @@ namespace EncosyTower.UserDataVaults
             }
         }
 
-        public override async UnityTask SaveAsync(SaveDestination destination, CancellationToken token)
+        public override async UnityTask SaveAsync(SaveDestination destination = default, CancellationToken token = default)
         {
             if (IsDataValid && destination.Contains(SaveDestination.Device))
             {
@@ -152,7 +170,7 @@ namespace EncosyTower.UserDataVaults
             }
         }
 
-        public override Option<TData> TryCloneData(SourcePriority priority)
+        public override Option<TData> TryCloneData(SourcePriority priority = default)
         {
             return IsDataValid && _source.TryCloneData(GetData(priority)).TryGetValue(out var clone)
                 ? Option.Some(clone)
@@ -166,6 +184,24 @@ namespace EncosyTower.UserDataVaults
 
         private static Exception CreateArgumentException_InstanceOfType()
             => new ArgumentException($"'args' must be an instance of '{typeof(Args).FullName}'.");
+
+        [HideInCallstack, StackTraceHidden]
+        private static void ThrowInvalidOperationIfNotValueType(
+              [DoesNotReturnIf(false)] bool check
+            , [CallerMemberName] string memberName = ""
+        )
+        {
+            if (check == false)
+            {
+                throw CreateException(memberName);
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException(string memberName)
+                => new($"Cannot use 'UserDataStoreDefault<{typeof(TData)}>.{memberName}' " +
+                    $"because {typeof(TData)} is not a value type."
+                );
+        }
 
         public sealed record class Args(
               [NotNull] Func<TData> CreateDataFunc

@@ -4,8 +4,10 @@
     {
         public const string NAMESPACE = "EncosyTower.UserDataVaults";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
+        public const string USER_DATA_ATTRIBUTE = $"global::{NAMESPACE}.UserDataAttribute";
         public const string VAULT_ATTRIBUTE = $"global::{NAMESPACE}.UserDataVaultAttribute";
         public const string ACCESSOR_ATTRIBUTE = $"global::{NAMESPACE}.UserDataAccessorAttribute";
+        public const string USER_DATA_ATTRIBUTE_METADATA = $"{NAMESPACE}.UserDataAttribute";
         public const string VAULT_ATTRIBUTE_METADATA = $"{NAMESPACE}.UserDataVaultAttribute";
         public const string ACCESSOR_ATTRIBUTE_METADATA = $"{NAMESPACE}.UserDataAccessorAttribute";
         public const string IUSER_DATA = $"global::{NAMESPACE}.IUserData";
