@@ -269,26 +269,31 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine("public TFixedString ToFixedString<TFixedString>()");
                     p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
                         .PrintEndLine("UC.IUTF8Bytes");
-                    p.OpenScope();
-                    {
-                        p.PrintLine("TFixedString result = default;");
-                        p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
-                        p.PrintLine("return result;");
-                    }
-                    p.CloseScope();
+                    p.WithIncreasedIndent().PrintBeginLine("=> ETCol.EncosyFixedStringExtensions")
+                        .PrintEndLine(".CastTo<TFixedString>(ToFixedString());");
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
                     p.PrintLine("public TFixedString ToDisplayFixedString<TFixedString>()");
                     p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
                         .PrintEndLine("UC.IUTF8Bytes");
-                    p.OpenScope();
+                    p.WithIncreasedIndent().PrintBeginLine("=> ETCol.EncosyFixedStringExtensions")
+                        .PrintEndLine(".CastTo<TFixedString>(ToDisplayFixedString());");
+                    p.PrintEndLine();
+                }
+
+                if (ReferenceUnityCollections)
+                {
+                    p.PrintLine(AggressiveInlining);
+                    p.PrintLine("public bool TryFormat(");
+                    p = p.IncreasedIndent();
                     {
-                        p.PrintLine("TFixedString result = default;");
-                        p.PrintLine("UC.FixedStringMethods.Append(ref result, ToDisplayFixedString());");
-                        p.PrintLine("return result;");
+                        p.PrintLine("  S.Span<char> destination");
+                        p.PrintLine(", out int charsWritten");
                     }
-                    p.CloseScope();
+                    p = p.DecreasedIndent();
+                    p.PrintBeginLine(") => ").Print(ExtensionsName)
+                        .PrintEndLine(".TryFormat(_value, destination, out charsWritten);");
                     p.PrintEndLine();
                 }
 
@@ -298,7 +303,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     p.PrintLine("  S.Span<char> destination");
                     p.PrintLine(", out int charsWritten");
-                    p.PrintLine(", S.ReadOnlySpan<char> format = default");
+                    p.PrintLine(", S.ReadOnlySpan<char> format");
                     p.PrintLine(", S.IFormatProvider provider = null");
                 }
                 p = p.DecreasedIndent();
@@ -1160,6 +1165,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                                         p.PrintLine("return true;");
                                     }
                                     p.CloseScope();
+                                    p.PrintEndLine();
                                 }
                             }
 
@@ -1182,6 +1188,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             p.PrintLine("return true;");
                         }
                         p.CloseScope();
+                        p.PrintEndLine();
                     }
 
                     p.PrintLine($"case string s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
@@ -1191,6 +1198,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine("return true;");
                     }
                     p.CloseScope();
+                    p.PrintEndLine();
 
                     p.PrintLine("default:");
                     p.OpenScope();
@@ -1312,6 +1320,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                                         p.PrintLine("return true;");
                                     }
                                     p.CloseScope();
+                                    p.PrintEndLine();
                                 }
                             }
 
@@ -1334,6 +1343,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             p.PrintLine("return true;");
                         }
                         p.CloseScope();
+                        p.PrintEndLine();
                     }
 
                     p.PrintLine($"case {SPAN} s when {UnderlyingTypeName}.TryParse(name, out var underlyingValue):");
@@ -1343,6 +1353,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine("return true;");
                     }
                     p.CloseScope();
+                    p.PrintEndLine();
 
                     p.PrintLine("default:");
                     p.OpenScope();
@@ -1491,6 +1502,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     p.PrintLine("var isDefinedInDisplayAttribute = false;");
                     p.PrintEndLine();
+
                     p.PrintLine("if (allowMatchingMetadataAttribute)");
                     p.OpenScope();
                     {
@@ -1510,6 +1522,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.CloseScope("};");
                     }
                     p.CloseScope();
+                    p.PrintEndLine();
 
                     p.PrintLine("if (isDefinedInDisplayAttribute)");
                     p.OpenScope();
@@ -1517,6 +1530,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                         p.PrintLine("return true;");
                     }
                     p.CloseScope();
+                    p.PrintEndLine();
                 }
 
                 p.PrintLine("return name switch");
@@ -1570,13 +1584,43 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
         private void WriteTryFormat(ref Printer p, string @this)
         {
+            if (ReferenceUnityCollections)
+            {
+                p.PrintLine("public static bool TryFormat(");
+                p = p.IncreasedIndent();
+                {
+                    p.PrintLine($"  {@this}{FullyQualifiedName} value");
+                    p.PrintLine(", S.Span<char> destination");
+                    p.PrintLine(", out int charsWritten");
+                }
+                p = p.DecreasedIndent();
+                p.PrintLine(")");
+                p.OpenScope();
+                {
+                    p.PrintLine("if (IsDefined(value))");
+                    p.OpenScope();
+                    {
+                        p.PrintBeginLine("return ETCol.EncosyFixedStringExtensions.TryFormat(ToFixedString(value)")
+                            .PrintEndLine(", destination, out charsWritten);");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("return ETCol.EncosyFixedStringExtensions.TryFormat(")
+                        .Print("ETCol.EncosyFixedStringExtensions.ToFixedString(ToUnderlyingValue(value))")
+                        .PrintEndLine(", destination, out charsWritten);");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+            }
+
             p.PrintLine("public static bool TryFormat(");
             p = p.IncreasedIndent();
             {
                 p.PrintLine($"  {@this}{FullyQualifiedName} value");
                 p.PrintLine(", S.Span<char> destination");
                 p.PrintLine(", out int charsWritten");
-                p.PrintLine(", S.ReadOnlySpan<char> format = default");
+                p.PrintLine(", S.ReadOnlySpan<char> format");
                 p.PrintLine(", S.IFormatProvider provider = null");
             }
             p = p.DecreasedIndent();
@@ -1586,20 +1630,31 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 p.PrintLine("if (IsDefined(value))");
                 p.OpenScope();
                 {
-                    p.PrintLine("var span = S.MemoryExtensions.AsSpan(ToStringFast(value));");
-
-                    p.PrintLine("if (span.Length == 0 || span.TryCopyTo(destination) == false)");
-                    p.OpenScope();
+                    if (ReferenceUnityCollections)
                     {
-                        p.PrintLine("charsWritten = 0;");
-                        p.PrintLine(" return false;");
+                        p.PrintBeginLine("return ETCol.EncosyFixedStringExtensions.TryFormat(ToFixedString(value)")
+                            .PrintEndLine(", destination, out charsWritten);");
                     }
-                    p.CloseScope();
+                    else
+                    {
+                        p.PrintLine("var span = S.MemoryExtensions.AsSpan(ToStringFast(value));");
+                        p.PrintEndLine();
 
-                    p.PrintLine("charsWritten = span.Length;");
-                    p.PrintLine(" return true;");
+                        p.PrintLine("if (span.Length == 0 || span.TryCopyTo(destination) == false)");
+                        p.OpenScope();
+                        {
+                            p.PrintLine("charsWritten = 0;");
+                            p.PrintLine(" return false;");
+                        }
+                        p.CloseScope();
+                        p.PrintEndLine();
+
+                        p.PrintLine("charsWritten = span.Length;");
+                        p.PrintLine(" return true;");
+                    }
                 }
                 p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine("if (ToUnderlyingValue(value).TryFormat(destination, out var chars, format, provider))");
                 p.OpenScope();
@@ -1608,6 +1663,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintLine(" return true;");
                 }
                 p.CloseScope();
+                p.PrintEndLine();
 
                 p.PrintLine("charsWritten = 0;");
                 p.PrintLine(" return false;");

@@ -735,6 +735,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
             p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
             p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
+            p.PrintLine("using ETCol = global::EncosyTower.Collections;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
             p.PrintEndLine();

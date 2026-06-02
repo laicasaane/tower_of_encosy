@@ -53,6 +53,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
         public bool EnableNullable { get; }
 
+        public bool GenerateTryFormat { get; }
+
         public EnumExtensionsDeclaration KindExtensionsRef { get; }
 
         public List<EnumExtensionsDeclaration> IdEnumExtensionsRefs { get; }
@@ -79,6 +81,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             DisplayNameForKind = string.IsNullOrWhiteSpace(id.displayNameForKind) ? string.Empty : id.displayNameForKind;
             References = references;
             EnableNullable = enableNullable;
+            GenerateTryFormat = id.generateTryFormat;
 
             var allKinds = new List<KindSpec>(id.inlineKinds.Count + externalKinds.Length);
 

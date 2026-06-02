@@ -619,13 +619,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
                 p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
                     .PrintEndLine("UC.IUTF8Bytes");
-                p.OpenScope();
-                {
-                    p.PrintLine("TFixedString result = default;");
-                    p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
-                    p.PrintLine("return result;");
-                }
-                p.CloseScope();
+                p.WithIncreasedIndent().PrintBeginLine("=> ETCol.EncosyFixedStringExtensions")
+                    .PrintEndLine(".CastTo<TFixedString>(ToFixedString());");
                 p.PrintEndLine();
 
                 p.PrintLine(PR_AGGRESSIVE_INLINING);
@@ -746,13 +741,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
                 p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
                     .PrintEndLine("UC.IUTF8Bytes");
-                p.OpenScope();
-                {
-                    p.PrintLine("TFixedString result = default;");
-                    p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
-                    p.PrintLine("return result;");
-                }
-                p.CloseScope();
+                p.WithIncreasedIndent().PrintBeginLine("=> ETCol.EncosyFixedStringExtensions")
+                    .PrintEndLine(".CastTo<TFixedString>(ToFixedString());");
                 p.PrintEndLine();
 
                 p.PrintLine(PR_AGGRESSIVE_INLINING);

@@ -158,6 +158,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             info.accessibility = symbol.DeclaredAccessibility;
             info.location = LocationInfo.From(context.TargetNode.GetLocation());
             info.parentIsNamespace = context.TargetNode.Parent is BaseNamespaceDeclarationSyntax;
+            info.generateTryFormat = CheckTryParse(symbol) == false;
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   context.TargetNode
@@ -538,6 +539,35 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 }
 
                 return true;
+            }
+
+            return false;
+        }
+
+        private static bool CheckTryParse(INamedTypeSymbol symbol)
+        {
+            var members = symbol.GetMembers("TryParse");
+
+            foreach (var member in members)
+            {
+                if (member is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.IsStatic
+                    || method.Parameters.Length != 2
+                    || method.ReturnType.SpecialType != SpecialType.System_Boolean
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+                var p1 = parameters[0];
+                var p2 = parameters[1];
+
+                return p2.Type.SpecialType == SpecialType.System_Int32
+                    && p2.RefKind == RefKind.Out
+                    && p1.Type.IsType("global::System.Span<char>")
+                    ;
             }
 
             return false;

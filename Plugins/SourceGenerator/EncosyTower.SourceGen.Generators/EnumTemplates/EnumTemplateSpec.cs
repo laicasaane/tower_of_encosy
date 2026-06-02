@@ -145,6 +145,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
             p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
             p.PrintLine("using SRIS = global::System.Runtime.InteropServices;");
+            p.PrintLine("using ETCol = global::EncosyTower.Collections;");
             p.PrintLine("using ETCon = global::EncosyTower.Conversion;");
             p.PrintLine("using ETEE = global::EncosyTower.EnumExtensions;");
             p.PrintLine("using ETEESG = global::EncosyTower.EnumExtensions.SourceGen;");

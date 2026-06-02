@@ -13,17 +13,18 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         public string simpleName;
         public string fileHintName;
         public string namespaceName;
-        public EquatableArray<string> containingTypes;
-        public Accessibility accessibility;
-        public bool parentIsNamespace;
-        public EquatableArray<KindSpec> inlineKinds;
-        public UnionIdSize size;
         public string displayNameForId;
         public string displayNameForKind;
+        public EquatableArray<string> containingTypes;
+        public EquatableArray<KindSpec> inlineKinds;
+        public Accessibility accessibility;
+        public int? fixedStringBytes;
         public char separator;
+        public bool parentIsNamespace;
+        public bool generateTryFormat;
+        public UnionIdSize size;
         public UnionIdKindSettings kindSettings;
         public ParsableStructConverterSettings converterSettings;
-        public int? fixedStringBytes;
 
 
         public readonly bool IsValid
@@ -33,7 +34,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
         public readonly bool Equals(IdSpec other)
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
-            && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
             && string.Equals(displayNameForId, other.displayNameForId, StringComparison.Ordinal)
             && string.Equals(displayNameForKind, other.displayNameForKind, StringComparison.Ordinal)
@@ -41,6 +41,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             && inlineKinds.Equals(other.inlineKinds)
             && accessibility == other.accessibility
             && parentIsNamespace == other.parentIsNamespace
+            && generateTryFormat == other.generateTryFormat
             && size == other.size
             && separator == other.separator
             && kindSettings == other.kindSettings
@@ -55,15 +56,15 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             => HashValue.Combine(
                   fullName
                 , simpleName
-                , fileHintName
                 , namespaceName
                 , displayNameForId
                 , displayNameForKind
+                , containingTypes
+                , inlineKinds
             )
-            .Add(containingTypes.GetHashCode())
-            .Add(inlineKinds.GetHashCode())
             .Add(accessibility)
             .Add(parentIsNamespace)
+            .Add(generateTryFormat)
             .Add(size)
             .Add(separator)
             .Add(kindSettings)

@@ -89,6 +89,7 @@
                 WriteTryParse_IdKindSpan_IdSpan(ref p, typeName);
                 WriteTryParse_IdKindSpan_IdUnsigned(ref p, typeName);
                 WriteTryParse_IdKindSpan_IdSigned(ref p, typeName);
+                WriteTryFormat(ref p);
                 WriteCommonMethods(ref p, typeName);
                 WriteToString(ref p, false);
                 WriteToDisplayString(ref p, false);
@@ -1284,6 +1285,74 @@
             p.PrintEndLine();
         }
 
+        private void WriteTryFormat(ref Printer p)
+        {
+            if (GenerateTryFormat == false)
+            {
+                return;
+            }
+
+            p.PrintLine("public bool TryFormat(S.Span<char> destination, out int charsWritten)");
+            p.OpenScope();
+            {
+                if (References.unityCollections)
+                {
+                    p.PrintBeginLine("if (ETCol.EncosyFixedStringExtensions.TryFormat(")
+                        .PrintEndLine("Kind.ToFixedString(), destination, out var kindCharsWritten) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("charsWritten = 0;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintBeginLine("if (ETCol.EncosyFixedStringExtensions.TryFormat(")
+                        .Print("GetIdFixedString(), destination[..kindCharsWritten]")
+                        .PrintEndLine(", out var idCharsWritten) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("charsWritten = 0;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("charsWritten = kindCharsWritten + idCharsWritten;");
+                    p.PrintLine("return true;");
+                }
+                else
+                {
+                    p.PrintLine("var kind = S.MemoryExtensions.AsSpan(Kind.ToStringFast());");
+                    p.PrintLine("var id = S.MemoryExtensions.AsSpan(GetIdStringFast());");
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (kind.TryCopyTo(destination) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("charsWritten = 0;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("if (id.TryCopyTo(destination[..kind.Length]) == false)");
+                    p.OpenScope();
+                    {
+                        p.PrintLine("charsWritten = 0;");
+                        p.PrintLine("return false;");
+                    }
+                    p.CloseScope();
+                    p.PrintEndLine();
+
+                    p.PrintLine("charsWritten = kind.Length + id.Length;");
+                    p.PrintLine("return true;");
+                }
+            }
+            p.CloseScope();
+            p.PrintEndLine();
+        }
+
         private void WriteCommonMethods(ref Printer p, string typeName)
         {
             p.PrintLine(AGGRESSIVE_INLINING);
@@ -1642,13 +1711,8 @@
             p.PrintLine("public readonly TFixedString ToFixedString<TFixedString>()");
             p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
                 .PrintEndLine("UC.IUTF8Bytes");
-            p.OpenScope();
-            {
-                p.PrintLine("TFixedString result = default;");
-                p.PrintLine("UC.FixedStringMethods.Append(ref result, ToFixedString());");
-                p.PrintLine("return result;");
-            }
-            p.CloseScope();
+            p.WithIncreasedIndent().PrintBeginLine("=> ETCol.EncosyFixedStringExtensions")
+                .PrintEndLine(".CastTo<TFixedString>(ToFixedString());");
             p.PrintEndLine();
 
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" ToFixedString()");
@@ -1739,13 +1803,8 @@
             p.PrintLine("public TFixedString ToDisplayFixedString<TFixedString>()");
             p.WithIncreasedIndent().PrintBeginLine("where TFixedString : unmanaged, UC.INativeList<byte>, ")
                 .PrintEndLine("UC.IUTF8Bytes");
-            p.OpenScope();
-            {
-                p.PrintLine("TFixedString result = default;");
-                p.PrintLine("UC.FixedStringMethods.Append(ref result, ToDisplayFixedString());");
-                p.PrintLine("return result;");
-            }
-            p.CloseScope();
+            p.WithIncreasedIndent().PrintBeginLine("=> ETCol.EncosyFixedStringExtensions")
+                .PrintEndLine(".CastTo<TFixedString>(ToDisplayFixedString());");
             p.PrintEndLine();
 
             p.PrintBeginLine("public readonly ").Print(FixedStringType).PrintEndLine(" ToDisplayFixedString()");
