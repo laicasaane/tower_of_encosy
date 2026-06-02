@@ -1,5 +1,3 @@
-#if UNITY_NEWTONSOFT_JSON
-
 #if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
 #define __ENCOSY_NO_VALIDATION__
 #else
@@ -15,7 +13,7 @@ using EncosyTower.Collections;
 using EncosyTower.Collections.Unsafe;
 using EncosyTower.Debugging;
 
-namespace EncosyTower.Serialization.NewtonsoftJson.Collections
+namespace EncosyTower.Serialization.Collections
 {
     public class JsonArrayMap<TKey, TValue> : ArrayMap<TKey, TValue>, IDictionary<TKey, TValue>
     {
@@ -310,5 +308,3 @@ namespace EncosyTower.Serialization.NewtonsoftJson.Collections
         public readonly void Dispose() { }
     }
 }
-
-#endif
