@@ -4,10 +4,13 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
+using EncosyTower.Common;
 using Unity.Collections;
 
 namespace EncosyTower.Collections
 {
+    using static EncosyTower.Common.GenericT;
+
     public static class EncosyFixedStringExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,6 +99,7 @@ namespace EncosyTower.Collections
             return fs;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedString32Bytes ToFixedString(this Range value)
         {
             var fs = new FixedString32Bytes();
@@ -108,6 +112,47 @@ namespace EncosyTower.Collections
             return fs;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest CastTo<TDest>(in this FixedString32Bytes fs)
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+            => fs.CastTo(T<TDest>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest CastTo<TDest>(in this FixedString64Bytes fs)
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+            => fs.CastTo(T<TDest>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest CastTo<TDest>(in this FixedString128Bytes fs)
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+            => fs.CastTo(T<TDest>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest CastTo<TDest>(in this FixedString512Bytes fs)
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+            => fs.CastTo(T<TDest>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest CastTo<TDest>(in this FixedString4096Bytes fs)
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+            => fs.CastTo(T<TDest>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest Cast<TSource, TDest>(this TSource fs)
+            where TSource : unmanaged, INativeList<byte>, IUTF8Bytes
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+            => fs.CastTo(T<TDest>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TDest CastTo<TSource, TDest>(this TSource fs, T<TDest> _)
+            where TSource : unmanaged, INativeList<byte>, IUTF8Bytes
+            where TDest : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            TDest result = default;
+            result.Append(fs);
+            return result;
+        }
+
         /// <summary>
         /// Copies a span of UTF-16 chars to this string (making the two strings equal).
         /// Replaces any existing content of the FixedString.
@@ -115,7 +160,7 @@ namespace EncosyTower.Collections
         /// <remarks>
         /// When the method returns an error, the destination string is not modified.
         /// </remarks>
-        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <typeparam name="TFixedString">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
         /// <param name="utf16Chars">The span of UTF-16 chars to be copied.</param>
         /// <returns>
@@ -123,8 +168,8 @@ namespace EncosyTower.Collections
         /// Returns CopyError.Truncation if the source string is too large to fit in the destination.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CopyError CopyFrom<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static CopyError CopyFrom<TFixedString>(this ref TFixedString fs, ReadOnlySpan<char> utf16Chars)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             fs.Length = 0;
 
@@ -176,15 +221,15 @@ namespace EncosyTower.Collections
         /// <remarks>
         /// When the method returns an error, the destination string is not modified.
         /// </remarks>
-        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <typeparam name="TFixedString">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
         /// <param name="utf16Chars">The span of UTF-16 chars to append.</param>
         /// <returns>
         /// <see cref="FormatError.None"/> if successful.
         /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
         /// </returns>
-        public static FormatError Append<T>(this ref T fs, ReadOnlySpan<char> utf16Chars)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static FormatError Append<TFixedString>(this ref TFixedString fs, ReadOnlySpan<char> utf16Chars)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             unsafe
             {
@@ -221,7 +266,7 @@ namespace EncosyTower.Collections
         /// <remarks>
         /// When the method returns an error, the destination string is not modified.
         /// </remarks>
-        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <typeparam name="TFixedString">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
         /// <param name="utf8Chars">The span of UTF8 chars to be copied.</param>
         /// <returns>
@@ -229,8 +274,8 @@ namespace EncosyTower.Collections
         /// Returns CopyError.Truncation if the source string is too large to fit in the destination.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CopyError CopyFrom<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static CopyError CopyFrom<TFixedString>(this ref TFixedString fs, ReadOnlySpan<byte> utf8Chars)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             fs.Length = 0;
 
@@ -247,7 +292,7 @@ namespace EncosyTower.Collections
         /// If the string exceeds the capacity it will be truncated.
         /// Replaces any existing content of the FixedString.
         /// </summary>
-        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <typeparam name="TFixedString">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
         /// <param name="utf8Chars">The span of UTF8 chars to be copied.</param>
         /// <returns>
@@ -255,8 +300,8 @@ namespace EncosyTower.Collections
         ///  Returns CopyError.Truncation if the source span is too large to fit in the destination.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static CopyError CopyFromTruncated<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static CopyError CopyFromTruncated<TFixedString>(this ref TFixedString fs, ReadOnlySpan<byte> utf8Chars)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             unsafe
             {
@@ -334,7 +379,7 @@ namespace EncosyTower.Collections
         /// <remarks>
         /// When the method returns an error, the destination string is not modified.
         /// </remarks>
-        /// <typeparam name="T">The type of the destination string.</typeparam>
+        /// <typeparam name="TFixedString">The type of the destination string.</typeparam>
         /// <param name="fs">The destination string.</param>
         /// <param name="utf8Chars">The span of UTF8 chars to append.</param>
         /// <returns>
@@ -342,8 +387,8 @@ namespace EncosyTower.Collections
         /// Returns <see cref="FormatError.Overflow"/> if the capacity of the destination string is exceeded.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static FormatError Append<T>(this ref T fs, ReadOnlySpan<byte> utf8Chars)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static FormatError Append<TFixedString>(this ref TFixedString fs, ReadOnlySpan<byte> utf8Chars)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             unsafe
             {
@@ -355,45 +400,74 @@ namespace EncosyTower.Collections
         }
 
         /// <summary>
-        /// Returns a span covering the entire length of <paramref name="self"/>.
+        /// Returns a span covering the entire length of <paramref name="fs"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan<T>(this ref T self)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
-            => new(self.GetUnsafePtr(), self.Length);
+        public static unsafe Span<byte> AsSpan<TFixedString>(this ref TFixedString fs)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+            => new(fs.GetUnsafePtr(), fs.Length);
 
         /// <summary>
-        /// Returns a readonly span covering the entire length of <paramref name="self"/>.
+        /// Returns a readonly span covering the entire length of <paramref name="fs"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<byte> AsReadOnlySpan<T>(this T self)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static ReadOnlySpan<byte> AsReadOnlySpan<TFixedString>(this TFixedString fs)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
             unsafe
             {
-                return new(self.GetUnsafePtr(), self.Length);
+                return new(fs.GetUnsafePtr(), fs.Length);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeText ToNativeText<T>(this T text, Allocator allocator)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static NativeText ToNativeText<TFixedString>(this TFixedString fs, Allocator allocator)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
-            var result = new NativeText(text.Length, allocator);
-            result.CopyFromTruncated(text.AsReadOnlySpan());
+            var result = new NativeText(fs.Length, allocator);
+            result.CopyFromTruncated(fs.AsReadOnlySpan());
 
             return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeText ToNativeText<T>(this T text, AllocatorManager.AllocatorHandle allocator)
-            where T : unmanaged, INativeList<byte>, IUTF8Bytes
+        public static NativeText ToNativeText<TFixedString>(this TFixedString fs, AllocatorManager.AllocatorHandle allocator)
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
         {
-            var result = new NativeText(text.Length, allocator);
-            result.CopyFromTruncated(text.AsReadOnlySpan());
+            var result = new NativeText(fs.Length, allocator);
+            result.CopyFromTruncated(fs.AsReadOnlySpan());
 
             return result;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryFormat<TFixedString>(
+              this TFixedString fs
+            , Span<char> destination
+            , out int charsWritten
+        )
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            var result = fs.CopyTo(destination, out var charCount) == CopyError.None;
+            charsWritten = result ? charCount : 0;
+
+            return result;
+        }
+
+#pragma warning disable IDE0060 // Remove unused parameter
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryFormat<TFixedString>(
+              this TFixedString fs
+            , Span<char> destination
+            , out int charsWritten
+            , ReadOnlySpan<char> format
+            , IFormatProvider provider = null
+        )
+            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
+        {
+            return TryFormat(fs, destination, out charsWritten);
+        }
+#pragma warning restore IDE0060 // Remove unused parameter
     }
 }
 
