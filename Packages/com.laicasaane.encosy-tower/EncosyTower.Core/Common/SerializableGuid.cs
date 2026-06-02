@@ -198,6 +198,7 @@ namespace EncosyTower.Common
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
+    using EncosyTower.Collections;
     using EncosyTower.Conversion;
     using EncosyTower.SystemExtensions;
     using Unity.Collections;
@@ -282,11 +283,7 @@ namespace EncosyTower.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly TFixedString ToFixedString<TFixedString>()
             where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes
-        {
-            TFixedString result = default;
-            result.Append(ToFixedString());
-            return result;
-        }
+            => ToFixedString().CastTo<TFixedString>();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden, DoesNotReturn]

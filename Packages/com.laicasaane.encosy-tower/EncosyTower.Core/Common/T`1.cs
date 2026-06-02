@@ -36,5 +36,8 @@ namespace EncosyTower.Common
             => TryCastTo(source, _);
     }
 
+    /// <summary>
+    /// Represents a generic version of <c>typeof(TType)</c> which can participates in generic contexts.
+    /// </summary>
     public readonly struct T<TType> { }
 }
