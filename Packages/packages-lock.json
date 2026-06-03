@@ -79,6 +79,12 @@
         "com.unity.serialization": "3.1.5"
       }
     },
+    "com.laicasaane.encosy-tower.dev-tools": {
+      "version": "file:com.laicasaane.encosy-tower.dev-tools",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.latios.latiosframework": {
       "version": "0.14.15",
       "depth": 0,

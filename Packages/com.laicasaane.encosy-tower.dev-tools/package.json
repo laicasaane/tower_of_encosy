@@ -1,0 +1,12 @@
+{
+  "name": "com.laicasaane.encosy-tower.dev-tools",
+  "displayName": "Encosy Tower Dev Tools",
+  "version": "0.0.1-exp.1",
+  "unity": "6000.0",
+  "dependencies": { },
+  "description": "Supporting tools in the development of Encosy Tower package.",
+  "keywords": [
+    "tools",
+    "unity"
+  ]
+}
