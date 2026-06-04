@@ -2,6 +2,6 @@
 {
     public static class SourceGenVersion
     {
-        public const string VALUE = "0.1.4-preview.17";
+        public const string VALUE = "0.1.4-preview.18";
     }
 }
