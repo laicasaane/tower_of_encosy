@@ -6,7 +6,6 @@ using EncosyTower.Collections;
 using EncosyTower.Logging;
 using EncosyTower.Mvvm.ComponentModel;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.Mvvm.ViewBinding.Components
 {
@@ -16,12 +15,10 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     [Serializable]
     public abstract partial class MonoBinder : IBinder
     {
-        [SerializeField]
-        [HideInInspector]
+        [SerializeField, HideInInspector]
         internal string _subtitle;
 
         [SerializeField, SerializeReference, HideInInspector]
-        [FormerlySerializedAs("_presetBindings")]
         internal List<MonoBinding> _bindings = new();
 
         public IObservableObject Context { get; protected set; }
@@ -50,7 +47,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
         where T : UnityEngine.Object
     {
         [SerializeField, HideInInspector]
-        [FormerlySerializedAs("_presetTargets")]
         internal List<T> _targets;
 
         protected ListFast<T>.ReadOnly Targets

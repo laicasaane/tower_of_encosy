@@ -8,7 +8,6 @@ using EncosyTower.Mvvm.ComponentModel;
 using EncosyTower.Mvvm.ViewBinding.Contexts;
 using EncosyTower.Tasks;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.Mvvm.ViewBinding.Components
 {
@@ -25,17 +24,13 @@ namespace EncosyTower.Mvvm.ViewBinding.Components
     /// </summary>
     public partial class MonoView : MonoBehaviour
     {
-        [SerializeField]
-        [HideInInspector]
+        [SerializeField, HideInInspector]
         internal MonoViewSettings _settings = new();
 
-        [SerializeField]
-        [SerializeReference]
-        [HideInInspector]
+        [SerializeField, SerializeReference, HideInInspector]
         internal IBindingContext _context = new UnityObjectBindingContext();
 
         [SerializeField, SerializeReference, HideInInspector]
-        [FormerlySerializedAs("_presetBinders")]
         internal List<MonoBinder> _binders;
 
         protected ListFast<MonoBinder>.ReadOnly Binders
