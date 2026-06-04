@@ -112,6 +112,11 @@
             "name": "org.nuget.raffinert.fuzzysharp",
             "expression": "",
             "define": "NUGET_RAFFINERT_FUZZYSHARP"
+        },
+        {
+            "name": "org.nuget.raffinert.fuzzysharp",
+            "expression": "5.0.0",
+            "define": "NUGET_RAFFINERT_FUZZYSHARP_5_0"
         }
     ],
     "noEngineReferences": false

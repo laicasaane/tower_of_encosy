@@ -105,11 +105,19 @@ namespace EncosyTower.Search
                 choices.Add(new(item, searchableString));
             }
 
+#if NUGET_RAFFINERT_FUZZYSHARP_5_0
+            var searchResults = Raffinert.FuzzySharp.Process.ExtractSortedBy(
+                  new Choice<T>(Option.None, searchString)
+                , choices
+                , static x => x.SearchableString
+            );
+#else
             var searchResults = Raffinert.FuzzySharp.Process.ExtractSorted(
                   new Choice<T>(Option.None, searchString)
                 , choices
                 , static x => x.SearchableString
             );
+#endif
 
             dest.TryIncreaseCapacityToFast(choices.Count);
 
@@ -149,10 +157,11 @@ namespace EncosyTower.Search
             {
                 StaticDevLogger.LogError(
                     "Please install Raffinert.FuzzySharp plugin via one of these methods:\n" +
-                    "1. OpenUPM: `openupm add org.nuget.raffinert.fuzzysharp`. " +
-                    "Read <a href=\"https://openupm.com/nuget/#using-uplinked-unitynuget\">more</a> about this method.\n" +
-                    "2. Add this scripting symbol to the project: ENCOSY_RAFFINERT_FUZZYSHARP. " +
-                    "Read <a href=\"https://docs.unity3d.com/Manual/custom-scripting-symbols.html\">more</a> about this method."
+                    "1. Open window <a href=\"\\menu:Encosy Tower/Project Settings/Features\" router=\"encosy-tower\">" +
+                        "Encosy Tower/Project Settings/Features</a>, then go to page \"<b>6. Encosy Tower: Search</b>\" " +
+                        "and install all required packages.\n" +
+                    "2. Open window <a href=\"\\open:Project/Player\" router=\"encosy-tower\">Project Settings/Player</a>, " +
+                        "then go to <b>Script Compilation</b> and add symbol <b>ENCOSY_RAFFINERT_FUZZYSHARP</b> to the list."
                 );
             }
         }

@@ -596,18 +596,30 @@
       "url": "https://package.openupm.com"
     },
     "org.nuget.indexrange": {
-      "version": "1.0.3",
+      "version": "1.1.1",
       "depth": 1,
       "source": "registry",
-      "dependencies": {},
+      "dependencies": {
+        "org.nuget.microsoft.bcl.memory": "9.0.14"
+      },
+      "url": "https://package.openupm.com"
+    },
+    "org.nuget.microsoft.bcl.memory": {
+      "version": "9.0.14",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {
+        "org.nuget.system.memory": "4.5.5",
+        "org.nuget.system.runtime.compilerservices.unsafe": "6.0.0"
+      },
       "url": "https://package.openupm.com"
     },
     "org.nuget.raffinert.fuzzysharp": {
-      "version": "4.0.1",
+      "version": "5.0.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "org.nuget.indexrange": "1.0.3",
+        "org.nuget.indexrange": "1.1.1",
         "org.nuget.system.memory": "4.5.5"
       },
       "url": "https://package.openupm.com"
@@ -638,8 +650,8 @@
       "url": "https://package.openupm.com"
     },
     "org.nuget.system.runtime.compilerservices.unsafe": {
-      "version": "4.5.3",
-      "depth": 2,
+      "version": "6.0.0",
+      "depth": 3,
       "source": "registry",
       "dependencies": {},
       "url": "https://package.openupm.com"

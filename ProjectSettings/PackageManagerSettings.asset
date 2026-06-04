@@ -47,6 +47,7 @@ MonoBehaviour:
     - com.xarbrough.renamer
     - com.xarbrough.scriptable-object-creator
     - jp.co.cyberagent.smartaddresser
+    - org.nuget.microsoft.bcl.memory
     - org.nuget.indexrange
     - org.nuget.raffinert.fuzzysharp
     - org.nuget.system.buffers
@@ -65,6 +66,6 @@ MonoBehaviour:
   m_RegistryInfoDraft:
     m_Modified: 0
     m_ErrorMessage: 
-    m_UserModificationsInstanceId: -874
-    m_OriginalInstanceId: -876
+    m_UserModificationsInstanceId: -864
+    m_OriginalInstanceId: -868
   m_LoadAssets: 50
