@@ -6,7 +6,6 @@ using EncosyTower.Collections;
 using EncosyTower.Collections.Extensions;
 using EncosyTower.Variants;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.Mvvm.ViewBinding.Adapters
 {
@@ -15,7 +14,6 @@ namespace EncosyTower.Mvvm.ViewBinding.Adapters
     public sealed class SequentialAdapter : IAdapter
     {
         [SerializeField, SerializeReference, HideInInspector]
-        [FormerlySerializedAs("_presetAdapters")]
         private List<IAdapter> _adapters;
 
         public ListFast<IAdapter>.ReadOnly Adapters

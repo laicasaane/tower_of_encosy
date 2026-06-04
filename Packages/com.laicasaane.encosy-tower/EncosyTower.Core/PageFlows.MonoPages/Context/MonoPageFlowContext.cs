@@ -21,7 +21,6 @@ namespace EncosyTower.PageFlows.MonoPages
 {
 #if UNITY_ADDRESSABLES
     using EncosyTower.AddressableKeys;
-    using UnityEngine.Serialization;
 #endif
 
 #if UNITASK
@@ -41,8 +40,6 @@ namespace EncosyTower.PageFlows.MonoPages
         public MonoPageLoaderStrategy loadStrategy;
 
         public RentingStrategy poolRentingStrategy;
-
-        [FormerlySerializedAs("pooledGameObjectStrategy")]
         public ReturningStrategy poolReturningStrategy;
 
         public MonoMessageScope messageScope;

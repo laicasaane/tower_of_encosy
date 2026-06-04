@@ -2,17 +2,13 @@
 
 using EncosyTower.Pooling;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
     public class MonoPageOptions : MonoBehaviour
     {
         [SerializeField] private RentingStrategy _rentingStrategy;
-
-        [FormerlySerializedAs("_pooledStrategy")]
         [SerializeField] private ReturningStrategy _returningStrategy;
-
         [SerializeField] private PageOptions _pageOptions;
 
         public RentingStrategy RentingStrategy

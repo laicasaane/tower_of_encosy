@@ -5,7 +5,6 @@ using System.Threading;
 using EncosyTower.Tasks;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace EncosyTower.PageFlows.MonoPages
@@ -20,11 +19,7 @@ namespace EncosyTower.PageFlows.MonoPages
     {
         public Graphic graphic;
         public bool disableTweening;
-
-        [FormerlySerializedAs("onShowOptions")]
         public Options showOperationOptions = Options.DefaultShow;
-
-        [FormerlySerializedAs("onHideOptions")]
         public Options hideOperationOptions = Options.DefaultHide;
 
         private bool _isTransitioning;

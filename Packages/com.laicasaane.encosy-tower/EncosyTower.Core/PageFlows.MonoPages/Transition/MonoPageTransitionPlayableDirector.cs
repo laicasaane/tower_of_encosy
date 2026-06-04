@@ -5,7 +5,6 @@ using System.Threading;
 using EncosyTower.Tasks;
 using EncosyTower.UnityExtensions;
 using UnityEngine.Playables;
-using UnityEngine.Serialization;
 
 namespace EncosyTower.PageFlows.MonoPages
 {
@@ -18,11 +17,7 @@ namespace EncosyTower.PageFlows.MonoPages
     public class MonoPageTransitionPlayableDirector : MonoPageTransition
     {
         public PlayableDirector director;
-
-        [FormerlySerializedAs("onShowOptions")]
         public Options showOperationOptions;
-
-        [FormerlySerializedAs("onHideOptions")]
         public Options hideOperationOptions;
 
         private bool _isTransitioning;
