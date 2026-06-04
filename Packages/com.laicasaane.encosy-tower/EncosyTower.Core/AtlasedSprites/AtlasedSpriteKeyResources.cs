@@ -53,7 +53,7 @@ namespace EncosyTower.AtlasedSprites
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
-            => HashCode.Combine(_atlas, _sprite);
+            => HashValue.Combine(_atlas, _sprite);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()

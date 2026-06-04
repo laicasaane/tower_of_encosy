@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.AssetKeys;
+using EncosyTower.Common;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -47,7 +48,7 @@ namespace EncosyTower.AtlasedSprites
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
-            => HashCode.Combine(_atlas, _sprite);
+            => HashValue.Combine(_atlas, _sprite);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override string ToString()

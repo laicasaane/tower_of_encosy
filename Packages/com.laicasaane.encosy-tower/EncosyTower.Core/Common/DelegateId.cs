@@ -41,7 +41,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(_delegate, _method, _stateHash);
+            => HashValue.Combine(_delegate, _method, _stateHash);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(DelegateId left, DelegateId right)

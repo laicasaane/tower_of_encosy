@@ -111,7 +111,7 @@ namespace EncosyTower.Common
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
-            => HashCode.Combine(IsFailure, _failure);
+            => HashValue.Combine(IsFailure, _failure);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TFailure GetFailureOrThrow()

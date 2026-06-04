@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Common;
 using UnityEngine;
 
 namespace EncosyTower.Databases
@@ -81,9 +82,7 @@ namespace EncosyTower.Databases
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return _value.IsEmpty == false
-                ? HashCode.Combine(_value, 0, 1)
-                : 0;
+            return _value.IsEmpty ? 0 : HashValue.Combine(_value, 0, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
