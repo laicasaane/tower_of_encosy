@@ -750,11 +750,11 @@ namespace EncosyTower.Editor.ProjectSetup
             var chars = name.AsSpan();
             var length = chars.Length;
 
-            const int MAX_LEN = 10;
-            Span<char> digits = stackalloc char[MAX_LEN];
+            const int MAX_DIGITS = 10;
+            Span<char> digits = stackalloc char[MAX_DIGITS];
             var digitCount = 0;
 
-            for (var i = 0; i < length; i++)
+            for (var i = 0; i < length && digitCount < MAX_DIGITS; i++)
             {
                 var ch = chars[i];
 
