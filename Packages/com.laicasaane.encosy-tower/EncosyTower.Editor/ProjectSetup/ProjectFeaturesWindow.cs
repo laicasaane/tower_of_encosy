@@ -52,12 +52,12 @@ namespace EncosyTower.Editor.ProjectSetup
         [SerializeField, HideInInspector]
         private PackageCollectionAsset _packageCollectionAsset;
 
-        private readonly List<string> _features = new();
-        private readonly Dictionary<string, PackageInfo[]> _featureMap = new(StringComparer.Ordinal);
+        private readonly List<FeatureInfo> _features = new();
+        private readonly Dictionary<FeatureInfo, PackageInfo[]> _featureMap = new(FeatureInfo.Comparer.Default);
         private readonly List<PackageInfo> _selectedPackages = new();
 
         private bool _initAfterRequest = false;
-        private SimpleTableView<string> _featureTable;
+        private SimpleTableView<FeatureInfo> _featureTable;
         private SimpleTableView<PackageInfo> _packageTable;
 
         private VisualElement _requestInfoContainer;
@@ -269,7 +269,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private void CreateFeatureTable(VisualElement container)
         {
-            var table = _featureTable = new SimpleTableView<string>() {
+            var table = _featureTable = new SimpleTableView<FeatureInfo>() {
                 name = "feature-table",
                 alternateRows = false,
                 bindingPath = nameof(FeatureCollectionAsset.features),
@@ -282,7 +282,7 @@ namespace EncosyTower.Editor.ProjectSetup
                 , DEFAULT_LEFT_PANE_WIDTH
                 , FeatureTableColumn_MakeCell_Feature
                 , FeatureTableColumn_BindCell_Feature
-                , header: new(static (a, b) => string.Compare(a, b, StringComparison.Ordinal))
+                , header: new(static (a, b) => a.CompareTo(b))
             );
 
             column.resizable = true;
@@ -299,7 +299,7 @@ namespace EncosyTower.Editor.ProjectSetup
             button.AddToClassList("feature-button");
 
             button.clicked += () => {
-                if (button.userData is string feature && feature.IsNotEmpty())
+                if (button.userData is FeatureInfo feature)
                 {
                     _selectedPackages.Clear();
 
@@ -315,14 +315,14 @@ namespace EncosyTower.Editor.ProjectSetup
             return button;
         }
 
-        private static void FeatureTableColumn_BindCell_Feature(VisualElement element, string item)
+        private static void FeatureTableColumn_BindCell_Feature(VisualElement element, FeatureInfo item)
         {
-            if (element is not Button button || string.IsNullOrEmpty(item))
+            if (element is not Button button || item.name.IsEmpty())
             {
                 return;
             }
 
-            button.text = item;
+            button.text = item.name;
             button.userData = item;
         }
 
@@ -507,8 +507,8 @@ namespace EncosyTower.Editor.ProjectSetup
 
         private static void GetFeatures(
               HashSet<string> installedPackages
-            , List<string> features
-            , Dictionary<string, PackageInfo[]> featureMap
+            , List<FeatureInfo> features
+            , Dictionary<FeatureInfo, PackageInfo[]> featureMap
         )
         {
             features.Clear();
@@ -516,6 +516,7 @@ namespace EncosyTower.Editor.ProjectSetup
 
             var types = UnityEditor.TypeCache.GetTypesWithAttribute<FeatureAttribute>();
             var packages = new HashSet<PackageInfo>();
+            var sb = new StringBuilder(32);
 
             foreach (var type in types)
             {
@@ -528,9 +529,12 @@ namespace EncosyTower.Editor.ProjectSetup
 
                 packages.Clear();
 
-                var featureName = featureAttrib.Name;
+                var feature = new FeatureInfo {
+                    name = featureAttrib.Name,
+                    order = GetStartingNumberUntilNonDigit(featureAttrib.Name),
+                };
 
-                if (featureMap.Remove(featureName, out var featurePackages))
+                if (featureMap.Remove(feature, out var featurePackages))
                 {
                     foreach (var package in featurePackages)
                     {
@@ -572,7 +576,7 @@ namespace EncosyTower.Editor.ProjectSetup
                     continue;
                 }
 
-                featureMap[featureName] = packages
+                featureMap[feature] = packages
                     .OrderBy(static x => x.name)
                     .ThenBy(static x => x.registry)
                     .ToArray();
@@ -741,9 +745,85 @@ namespace EncosyTower.Editor.ProjectSetup
             }
         }
 
+        private static int GetStartingNumberUntilNonDigit(string name)
+        {
+            var chars = name.AsSpan();
+            var length = chars.Length;
+
+            const int MAX_LEN = 10;
+            Span<char> digits = stackalloc char[MAX_LEN];
+            var digitCount = 0;
+
+            for (var i = 0; i < length; i++)
+            {
+                var ch = chars[i];
+
+                if (char.IsDigit(ch))
+                {
+                    digits[digitCount++] = ch;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            int.TryParse(digits[..digitCount], out var result);
+            return result;
+        }
+
         private class FeatureCollectionAsset : ScriptableObject
         {
-            public List<string> features;
+            public List<FeatureInfo> features;
+        }
+
+        [Serializable]
+        private class FeatureInfo : IEquatable<FeatureInfo>, IComparable<FeatureInfo>
+        {
+            public string name;
+            public int order;
+
+            public int CompareTo(FeatureInfo other)
+            {
+                if (other == null) return 1;
+
+                var comp = order.CompareTo(other.order);
+                return comp != 0 ? comp : string.Compare(name, other.name, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public bool Equals(FeatureInfo other)
+                => order == other.order && name == other.name;
+
+            public override bool Equals(object obj)
+                => obj is FeatureInfo other && Equals(other);
+
+            public override int GetHashCode()
+                => HashValue.Combine(name, order);
+
+            public class Comparer : IComparer<FeatureInfo>, IEqualityComparer<FeatureInfo>
+            {
+                public static readonly Comparer Default = new();
+
+                public int Compare(FeatureInfo x, FeatureInfo y)
+                {
+                    if (x == null && y == null) return 0;
+                    if (y == null) return 1;
+                    if (x == null) return -1;
+                    return ReferenceEquals(x, y) ? 0 : x.CompareTo(y);
+                }
+
+                public bool Equals(FeatureInfo x, FeatureInfo y)
+                {
+                    if (x == null && y == null) return true;
+                    if (y == null || x == null) return false;
+                    return ReferenceEquals(x, y) || x.Equals(y);
+                }
+
+                public int GetHashCode(FeatureInfo obj)
+                {
+                    return obj == null ? 0 : obj.GetHashCode();
+                }
+            }
         }
 
         [Serializable]
@@ -764,7 +844,7 @@ namespace EncosyTower.Editor.ProjectSetup
                 => a.registry - b.registry;
 
             public override int GetHashCode()
-                => HashCode.Combine(name);
+                => HashValue.Combine(name);
 
             public override bool Equals(object obj)
                 => obj is PackageInfo other && Equals(other);
