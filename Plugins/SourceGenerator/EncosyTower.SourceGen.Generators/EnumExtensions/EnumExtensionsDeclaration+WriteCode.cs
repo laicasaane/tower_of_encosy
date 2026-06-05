@@ -700,16 +700,31 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                p.PrintLine($"public static UC.NativeArray<{PrintFixedStringTypeName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public static UC.NativeArray<").Print(PrintFixedStringTypeName)
+                    .Print("> ToNativeArray(").Print(ALLOCATOR_MANAGER).PrintEndLine(" allocator)");
+                p.WithIncreasedIndent().PrintBeginLine("=> ToNativeArray<").Print(PrintFixedStringTypeName)
+                        .PrintEndLine(">(allocator);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public static UC.NativeArray<TFixedString> ToNativeArray<TFixedString>(")
+                    .Print(ALLOCATOR_MANAGER).PrintEndLine("  allocator)");
+                p.WithIncreasedIndent().PrintLine("where TFixedString : unmanaged, UC.INativeList<byte>, UC.IUTF8Bytes");
                 p.OpenScope();
                 {
-                    p.PrintLine($"var names = UC.CollectionHelper.CreateNativeArray<{PrintFixedStringTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
+                    p.PrintBeginLine("var names = UC.CollectionHelper.CreateNativeArray<TFixedString>(")
+                        .Print(ExtensionsName).Print(".Length, allocator, ")
+                        .PrintEndLine("UC.NativeArrayOptions.UninitializedMemory);");
 
                     var index = 0;
 
                     foreach (var member in Members)
                     {
-                        p.PrintLine($"names[{index}] = {member.name};");
+                        p.PrintBeginLine("names[").Print(index).Print("] = ")
+                            .Print("ETCol.EncosyFixedStringExtensions.CastTo<TFixedString>(")
+                            .Print(member.name)
+                            .PrintEndLine(");");
+
                         index++;
 
                         if (index >= Members.Count)
@@ -722,30 +737,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
                 p.CloseScope();
                 p.PrintEndLine();
-
-                foreach (var fixedTypeName in GeneratorHelpers.Print_FixedStringTypeNames)
-                {
-                    p.PrintLine($"public static void Get({ALLOCATOR_MANAGER} allocator, out UC.NativeArray<{fixedTypeName}> names)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine($"names = UC.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
-
-                        var index = 0;
-
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"names[{index}] = ({fixedTypeName}){CLASS_DISPLAY_NAMES}.{member.name};");
-                            index++;
-
-                            if (index >= Members.Count)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-                }
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static {PrintFixedStringTypeName} Get({FullyQualifiedName} value)");
@@ -795,16 +786,31 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
                 }
 
-                p.PrintLine($"public static UC.NativeArray<{PrintFixedStringTypeName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
+                p.PrintLine(AggressiveInlining);
+                p.PrintBeginLine("public static UC.NativeArray<").Print(PrintFixedStringTypeName)
+                    .Print("> ToNativeArray(").Print(ALLOCATOR_MANAGER).PrintEndLine(" allocator)");
+                p.WithIncreasedIndent().PrintBeginLine("=> ToNativeArray<").Print(PrintFixedStringTypeName)
+                        .PrintEndLine(">(allocator);");
+                p.PrintEndLine();
+
+                p.PrintBeginLine("public static UC.NativeArray<TFixedString> ToNativeArray<TFixedString>(")
+                    .Print(ALLOCATOR_MANAGER).PrintEndLine("  allocator)");
+                p.WithIncreasedIndent().PrintLine("where TFixedString : unmanaged, UC.INativeList<byte>, UC.IUTF8Bytes");
                 p.OpenScope();
                 {
-                    p.PrintLine($"var names = UC.CollectionHelper.CreateNativeArray<{PrintFixedStringTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
+                    p.PrintBeginLine("var names = UC.CollectionHelper.CreateNativeArray<TFixedString>(")
+                        .Print(ExtensionsName).Print(".Length, allocator, ")
+                        .PrintEndLine("UC.NativeArrayOptions.UninitializedMemory);");
 
                     var index = 0;
 
                     foreach (var member in Members)
                     {
-                        p.PrintLine($"names[{index}] = {member.name};");
+                        p.PrintBeginLine("names[").Print(index).Print("] = ")
+                            .Print("ETCol.EncosyFixedStringExtensions.CastTo<TFixedString>(")
+                            .Print(member.name)
+                            .PrintEndLine(");");
+
                         index++;
 
                         if (index >= Members.Count)
@@ -817,30 +823,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 }
                 p.CloseScope();
                 p.PrintEndLine();
-
-                foreach (var fixedTypeName in GeneratorHelpers.Print_FixedStringTypeNames)
-                {
-                    p.PrintLine($"public static void Get({ALLOCATOR_MANAGER} allocator, out UC.NativeArray<{fixedTypeName}> names)");
-                    p.OpenScope();
-                    {
-                        p.PrintLine($"names = UC.CollectionHelper.CreateNativeArray<{fixedTypeName}>({ExtensionsName}.Length, allocator, UC.NativeArrayOptions.UninitializedMemory);");
-
-                        var index = 0;
-
-                        foreach (var member in Members)
-                        {
-                            p.PrintLine($"names[{index}] = ({fixedTypeName}){CLASS_NAMES}.{member.name};");
-                            index++;
-
-                            if (index >= Members.Count)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    p.CloseScope();
-                    p.PrintEndLine();
-                }
 
                 p.PrintLine(AggressiveInlining);
                 p.PrintLine($"public static {PrintFixedStringTypeName} Get({FullyQualifiedName} value)");
@@ -1012,7 +994,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintLine($"public static UC.NativeArray<{UnderlyingTypeName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
+                    p.PrintLine($"public static UC.NativeArray<{UnderlyingTypeName}> ToNativeArray({ALLOCATOR_MANAGER} allocator)");
                     p = p.IncreasedIndent();
                     p.PrintLine($"=> UC.CollectionHelper.CreateNativeArray<{UnderlyingTypeName}>(s_values, allocator);");
                     p = p.DecreasedIndent();
@@ -1051,7 +1033,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     p.PrintEndLine();
 
                     p.PrintLine(AggressiveInlining);
-                    p.PrintLine($"public static UC.NativeArray<{FullyQualifiedName}> AsNativeArray({ALLOCATOR_MANAGER} allocator)");
+                    p.PrintLine($"public static UC.NativeArray<{FullyQualifiedName}> ToNativeArray({ALLOCATOR_MANAGER} allocator)");
                     p = p.IncreasedIndent();
                     p.PrintLine($"=> UC.CollectionHelper.CreateNativeArray<{FullyQualifiedName}>(s_values, allocator);");
                     p = p.DecreasedIndent();
