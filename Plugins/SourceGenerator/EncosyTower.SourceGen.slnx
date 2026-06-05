@@ -3,6 +3,7 @@
     <File Path="Samples/Directory.Build.props" />
     <Project Path="Samples/Samples.Data/Samples.Data.csproj" />
     <Project Path="Samples/Samples.DatabaseAuthoring/Samples.DatabaseAuthoring.csproj" />
+    <Project Path="Samples/Samples.Entities/Samples.Entities.csproj" />
     <Project Path="Samples/Samples.Entities.Lookups/Samples.Entities.Lookups.csproj" />
     <Project Path="Samples/Samples.Entities.Stats/Samples.Entities.Stats.csproj" />
     <Project Path="Samples/Samples.Entities.TypeHandles/Samples.Entities.TypeHandles.csproj" />
