@@ -2380,8 +2380,9 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine(kind.enumExtensionsName)
-                                .PrintEndLine(".FixedNames.Get(allocator, out result);");
+                            p.PrintBeginLine("result = ").Print(kind.enumExtensionsName)
+                                .Print(".FixedNames.ToNativeArray<").Print(FixedStringType)
+                                .PrintEndLine(">(allocator);");
                             p.PrintLine("return true;");
                         }
                         else
@@ -2436,8 +2437,9 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine(kind.enumExtensionsName)
-                                .PrintEndLine(".FixedDisplayNames.Get(allocator, out result);");
+                            p.PrintBeginLine("result = ").Print(kind.enumExtensionsName)
+                                .Print(".FixedDisplayNames.ToNativeArray<").Print(FixedStringType)
+                                .PrintEndLine(">(allocator);");
                             p.PrintLine("return true;");
                         }
                         else
