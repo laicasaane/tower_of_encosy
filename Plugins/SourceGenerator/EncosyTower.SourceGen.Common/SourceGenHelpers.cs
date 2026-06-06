@@ -27,6 +27,9 @@ namespace EncosyTower.SourceGen
 
         public const string NEWLINE = "\n";
 
+        public const string OUTPUT_PATH_ADDITIONAL_FILE
+            = "encosy-tower-sourcegen-output-path.EncosyTower.SourceGen.Generators.additionalfile";
+
         private static string s_projectPath = string.Empty;
 
         public static string ProjectPath
@@ -64,81 +67,50 @@ namespace EncosyTower.SourceGen
                 => HashValue.Combine(projectPath, outputSourceGenFiles);
         }
 
-        public struct ParseOptionConfig : IEquatable<ParseOptionConfig>
-        {
-            public bool outputSourceGenFiles;
-            public bool pathIsInFirstAdditionalTextItem;
-
-            public readonly override bool Equals(object obj)
-                => obj is ParseOptionConfig other && Equals(other);
-
-            public readonly bool Equals(ParseOptionConfig other)
-                => outputSourceGenFiles == other.outputSourceGenFiles
-                && pathIsInFirstAdditionalTextItem == other.pathIsInFirstAdditionalTextItem
-                ;
-
-            public readonly override int GetHashCode()
-                => HashValue.Combine(outputSourceGenFiles, pathIsInFirstAdditionalTextItem);
-        }
-
         public static IncrementalValueProvider<SourceGenConfig> GetSourceGenConfigProvider(
             IncrementalGeneratorInitializationContext context
         )
         {
-            var parseOptionConfigProvider = context.ParseOptionsProvider.Select((options, token) =>
-            {
-                var parseOptionsConfig = new ParseOptionConfig();
-                var inUnity2021OrNewer = false;
+            var sourceGenConfigProvider = context.AdditionalTextsProvider.Collect().Select((texts, token) => {
+                var config = new SourceGenConfig();
 
-                foreach (var symbolName in options.PreprocessorSymbolNames)
+                if (texts.Length == 0)
                 {
-                    inUnity2021OrNewer |= symbolName == "UNITY_2021_1_OR_NEWER";
-                    parseOptionsConfig.outputSourceGenFiles |= symbolName == "ENCOSY_OUTPUT_SOURCEGEN_FILES";
+                    return config;
                 }
 
-                parseOptionsConfig.pathIsInFirstAdditionalTextItem = inUnity2021OrNewer;
+                var index = -1;
 
-                return parseOptionsConfig;
+                for (var i = 0; i < texts.Length; i++)
+                {
+                    if (texts[i].Path.EndsWith(OUTPUT_PATH_ADDITIONAL_FILE))
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index < 0)
+                {
+                    return config;
+                }
+
+                var path = texts[index].GetText(token)?.ToString();
+
+                if (string.IsNullOrEmpty(path))
+                {
+                    return config;
+                }
+
+                path = path.Replace('\\', '/');
+
+                config.outputSourceGenFiles = Directory.Exists(path);
+                config.projectPath = path;
+
+                return config;
             });
 
-            var sourceGenConfigProvider = context.AdditionalTextsProvider.Collect()
-                .Combine(parseOptionConfigProvider)
-                .Select((lTextsRIsInsideText, token) =>
-                {
-                    var config = new SourceGenConfig {
-                        outputSourceGenFiles = lTextsRIsInsideText.Right.outputSourceGenFiles
-                    };
-
-                    if (config.outputSourceGenFiles == false)
-                    {
-                        return config;
-                    }
-
-                    var texts = lTextsRIsInsideText.Left;
-                    var projectPathIsInFirstAdditionalTextItem = lTextsRIsInsideText.Right.pathIsInFirstAdditionalTextItem;
-
-                    if (texts.Length == 0 || string.IsNullOrEmpty(texts[0].Path))
-                    {
-                        return config;
-                    }
-
-                    var path = projectPathIsInFirstAdditionalTextItem ? texts[0].GetText(token)?.ToString() : texts[0].Path;
-                    config.projectPath = path?.Replace('\\', '/');
-                    config.projectPath = texts[0].Path?.Replace('\\', '/');
-                    return config;
-                });
-
             return sourceGenConfigProvider;
-        }
-
-        private static string GetTempGeneratedPathToFile(string fileNameWithExtension)
-        {
-            if (CanWriteToProjectPath == false)
-                return Path.Combine("Temp", "GeneratedCode");
-
-            var tempFileDirectory = Path.Combine(ProjectPath, "Temp", "GeneratedCode");
-            Directory.CreateDirectory(tempFileDirectory);
-            return Path.Combine(tempFileDirectory, fileNameWithExtension);
         }
 
         public static SourceText WithInitialLineDirectiveToGeneratedSource(
