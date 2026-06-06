@@ -324,35 +324,35 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static ITypeSymbol FindCorrectIdType(ITypeSymbol dataType, ITypeSymbol candidateIdType)
         {
-            ISymbol member = null;
+            ISymbol foundMember = null;
             var members = dataType.GetMembers();
 
-            foreach (var candidate in members)
+            foreach (var member in members)
             {
-                if (candidate is IPropertySymbol && candidate.Name.Equals("Id", StringComparison.Ordinal))
+                if (member is IPropertySymbol && member.Name.Equals("Id", StringComparison.Ordinal))
                 {
-                    member = candidate;
+                    foundMember = member;
                     break;
                 }
 
-                if (candidate is IFieldSymbol && candidate.Name.Equals("_id", StringComparison.Ordinal))
+                if (member is IFieldSymbol && member.Name.Equals("_id", StringComparison.Ordinal))
                 {
-                    member = candidate;
+                    foundMember = member;
                     break;
                 }
             }
 
-            if (member == null)
-            {
-                return candidateIdType;
-            }
-
-            if (member is IFieldSymbol field)
+            if (foundMember is IFieldSymbol field)
             {
                 return field.Type;
             }
 
-            var attributes = member.GetAttributes();
+            if (foundMember is not IPropertySymbol property)
+            {
+                return candidateIdType;
+            }
+
+            var attributes = property.GetAttributes();
             ITypeSymbol correctIdType = default;
 
             foreach (var attribute in attributes)
@@ -749,15 +749,15 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         {
                             ITypeSymbol fieldType;
 
-                            if (attribute.ConstructorArguments.Length < 1
-                                || attribute.ConstructorArguments[0].Value is not ITypeSymbol ft
+                            if (attribute.ConstructorArguments.Length > 0
+                                && attribute.ConstructorArguments[0].Value is ITypeSymbol ft
                             )
                             {
-                                fieldType = property.Type;
+                                fieldType = ft;
                             }
                             else
                             {
-                                fieldType = ft;
+                                fieldType = property.Type;
                             }
 
                             fields.Add(new MemberInfo {
@@ -836,8 +836,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 uniqueFieldNames.Add(member.fieldName);
                 propBuilder.Add(BuildMemberModel(
-                      member
+                      member.propertyName
+                    , member.member
                     , sourceMemberSymbol
+                    , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
                     , queue
@@ -862,8 +864,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 uniqueFieldNames.Add(member.fieldName);
                 fieldBuilder.Add(BuildMemberModel(
-                      member
+                      member.propertyName
+                    , member.member
                     , generatedFromMember
+                    , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
                     , queue
@@ -877,8 +881,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         }
 
         private static MemberSpec BuildMemberModel(
-              MemberInfo member
+              string propertyName
+            , ISymbol memberSymbol
             , ISymbol sourceMemberSymbol
+            , ITypeSymbol fieldType
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
             , Queue<ITypeSymbol> queue
@@ -886,10 +892,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , ResultTypes resultTypes
         )
         {
-            var propertyName = member.propertyName;
-            var memberSymbol = member.member;
-            var fieldType = member.fieldType;
-
             resultTypes.Clear();
             TryAddToResultTypes(fieldType, ignoredTypes, resultTypes);
 
@@ -952,11 +954,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol);
             }
 
-            var typeModel = MakeTypeModel(fieldType);
             return new MemberSpec {
                 propertyName = propertyName,
                 manualAuthoring = manualAuthoring,
-                type = typeModel,
+                type = MakeTypeModel(fieldType),
                 collection = collection,
                 converter = converter,
                 sheetConverter = sheetConverter,
