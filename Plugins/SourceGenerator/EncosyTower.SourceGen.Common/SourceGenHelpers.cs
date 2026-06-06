@@ -141,20 +141,6 @@ namespace EncosyTower.SourceGen
             return Path.Combine(tempFileDirectory, fileNameWithExtension);
         }
 
-        public static void LogInfo(string message)
-        {
-            if (CanWriteToProjectPath == false)
-                return;
-
-            // Ignore IO exceptions in case there is already a lock, could use a named mutex but don't want to eat the performance cost
-            try
-            {
-                using StreamWriter w = File.AppendText(GetTempGeneratedPathToFile("SourceGen.log"));
-                w.WriteLine(message);
-            }
-            catch (IOException) { }
-        }
-
         public static SourceText WithInitialLineDirectiveToGeneratedSource(
               this SourceText sourceText
             , string generatedSourceFilePath
@@ -219,7 +205,6 @@ namespace EncosyTower.SourceGen
 
             try
             {
-                LogInfo($"Outputting generated source to file {generatedSourceFilePath}...");
                 File.WriteAllText(generatedSourceFilePath, sourceTextForNewClass.ToString());
             }
             catch (IOException ioException)
