@@ -237,15 +237,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             foreach (var member in memberModels)
             {
-                if (isRowData && member.propertyName == "Id")
-                {
-                    // Property `Id` has been defined in CBS.Sheet<TKey>
-                    continue;
-                }
-
+                var isId = isRowData && member.propertyName == "Id";
+                var isNotId = !isId;
                 var manualAuthoring = member.manualAuthoring;
 
-                if (manualAuthoring.defined)
+                if (isNotId && manualAuthoring.defined)
                 {
                     var type = manualAuthoring.type;
                     var collection = manualAuthoring.collection;
@@ -253,19 +249,27 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     if (type.IsValid)
                     {
                         var propertyTypeName = GetPropertyTypeName(
-                              collection
-                            , type
-                            , dataMap
-                            , horizontalListMap
-                            , tableTypeFullName
-                            , member.propertyName
-                        );
+                                  collection
+                                , type
+                                , dataMap
+                                , horizontalListMap
+                                , tableTypeFullName
+                                , member.propertyName
+                            );
 
                         p.PrintBeginLine("public ").Print(propertyTypeName).Print(" ").Print(member.propertyName)
                             .PrintEndLine(" { get; set; }");
                         p.PrintEndLine();
                     }
+                }
 
+                if (isId && manualAuthoring.defined == false)
+                {
+                    continue;
+                }
+
+                if (manualAuthoring.defined)
+                {
                     p.PrintLine("[CBS.NonSerialized]");
                 }
                 else if (member.sheetConverter.kind != ConverterKind.None)

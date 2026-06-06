@@ -249,7 +249,7 @@ namespace Samples.Data.Enemies
     [Data]
     public partial struct Modifier
     {
-        [SerializeField, DataManualAuthoring] private float _hp;
+        [SerializeField, DataManualAuthoring(typeof(string))] private float _hp;
     }
 
     public struct EnemyTypeExConverter
@@ -388,9 +388,12 @@ namespace Samples.Data.ConvertibleIds
 namespace Samples.Data.Databases.Settings
 {
     using EncosyTower.Data;
+    using EncosyTower.Data.Authoring;
     using EncosyTower.Databases;
     using EncosyTower.Databases.Authoring;
+    using EncosyTower.Ids;
     using EncosyTower.Naming;
+    using EncosyTower.StringIds;
     using UnityEngine;
 
     [Database(NameCasing.SnakeLower)]
@@ -406,13 +409,14 @@ namespace Samples.Data.Databases.Settings
     }
 
     [DataTableAsset]
-    internal sealed partial class FileTableAsset : DataTableAssetBase<uint, FileData> { }
+    internal sealed partial class FileTableAsset : DataTableAssetBase<StringId, FileData> { }
 
     [Data(Converters = new[] { typeof(Converters) }, Comparers = new[] { typeof(Comparers) })]
     internal partial struct FileData
     {
-        [DataProperty(typeof(int))]
-        public readonly uint Id => Get_Id();
+        [DataProperty(typeof(uint), typeof(StringIdValueConverter))]
+        [DataManualAuthoring(typeof(string))]
+        public readonly StringId Id => Get_Id();
 
         [DataProperty, DataComparer(typeof(StringComparer))]
         public readonly string FileName => Get_FileName();
@@ -425,6 +429,18 @@ namespace Samples.Data.Databases.Settings
 
         [DataProperty]
         public readonly string Url => Get_Url();
+    }
+    public readonly struct StringIdValueConverter
+    {
+        public static StringId Convert(uint value)
+        {
+            return (StringId)((Id)value);
+        }
+
+        public static uint Convert(StringId value)
+        {
+            return (uint)((Id)value);
+        }
     }
 
     public readonly struct Converters

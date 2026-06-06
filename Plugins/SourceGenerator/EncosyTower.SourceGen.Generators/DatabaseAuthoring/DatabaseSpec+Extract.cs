@@ -342,6 +342,15 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
+            if (foundMember is { }
+                && foundMember.GetAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE) is { } manualAuthoringAttrib
+                && manualAuthoringAttrib.ConstructorArguments.Length > 0
+                && manualAuthoringAttrib.ConstructorArguments[0].Value is ITypeSymbol authoringType
+            )
+            {
+                return authoringType;
+            }
+
             if (foundMember is IFieldSymbol field)
             {
                 return field.Type;
