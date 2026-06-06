@@ -5,12 +5,13 @@ using EncosyTower.Databases;
 namespace EncosyTower.Samples.Data
 {
     [DataTableAsset]
-    public sealed partial class EnemyTableAsset : DataTableAssetBase<EntityUidData, EnemyData, EntityUid> { }
+    public sealed partial class EnemyTableAsset : DataTableAssetBase<EntityUid, EnemyData> { }
 
     [Data]
     public partial struct EnemyData
     {
-        [DataProperty] public readonly EntityUidData Id => Get_Id();
+        [DataProperty(typeof(EntityUidData))]
+        public readonly EntityUid Id => Get_Id();
 
         [DataProperty] public readonly string Name => Get_Name();
 

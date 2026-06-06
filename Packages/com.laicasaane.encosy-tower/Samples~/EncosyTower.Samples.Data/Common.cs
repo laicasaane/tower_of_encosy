@@ -91,6 +91,10 @@ namespace EncosyTower.Samples.Data
             var result = @default.TryParse(data._kind, data._subId, out var value, false, true);
             return result ? value : @default;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator EntityIdData(EntityId value)
+            => new() { _kind = value.Kind.ToString(), _subId = value.IdSigned };
     }
 
     [Data, DataWithoutId]
@@ -103,6 +107,10 @@ namespace EncosyTower.Samples.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator EntityUid(EntityUidData data)
             => new((EntityId)data._entityId, data._rarity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator EntityUidData(EntityUid value)
+            => new() { _entityId = value.Id, _rarity = value.Rarity };
     }
 
     [Data]
