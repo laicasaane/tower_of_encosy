@@ -25,14 +25,14 @@ namespace EncosyTower.Data.Authoring
     /// and its name will be suffixed with <c>_Manual</c>.
     /// </remarks>
     [ApiForAuthoring]
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
     public sealed class DataManualAuthoringAttribute : Attribute
     {
-        public DataManualAuthoringAttribute(bool emiRawStringProperty = true)
+        public DataManualAuthoringAttribute(Type authoringType = null)
         {
-            EmitRawStringProperty = emiRawStringProperty;
+            BackingType = authoringType;
         }
 
-        public bool EmitRawStringProperty { get; }
+        public Type BackingType { get; }
     }
 }
