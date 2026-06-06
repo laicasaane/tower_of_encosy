@@ -12,7 +12,7 @@ public class DatabaseAuthoringConverterTests
     private const string STUB_ATTRIBUTES = DatabaseAnalyzerStubs.ATTRIBUTES;
 
     private static string Wrap(string body)
-        => $"{STUB_ATTRIBUTES}\nnamespace TestProject\n{{\n    using EncosyTower.Data;\n    using EncosyTower.Databases;\n    using EncosyTower.Databases.Authoring;\n{body}\n}}\n";
+        => $"{STUB_ATTRIBUTES}\nnamespace TestProject\n{{\n    using EncosyTower.Data;\n    using EncosyTower.Data.Authoring;\n    using EncosyTower.Databases;\n    using EncosyTower.Databases.Authoring;\n{body}\n}}\n";
 
     private static Task RunAsync(string body, params DiagnosticResult[] expected)
     {
@@ -60,7 +60,7 @@ public class DatabaseAuthoringConverterTests
 
                 public class MyTable : DataTableAsset<int, MyData>
                 {
-                    [DataConverter(typeof(IntStringConv))]
+                    [DataAuthoringConverter(typeof(IntStringConv))]
                     public string Foo { get; set; }
                 }
 
@@ -85,7 +85,7 @@ public class DatabaseAuthoringConverterTests
 
                   public class MyTable : DataTableAsset<int, MyData>
                   {
-                      [{|#0:DataConverter(typeof(BadStaticReturn))|}]
+                      [{|#0:DataAuthoringConverter(typeof(BadStaticReturn))|}]
                       public int Foo { get; set; }
                   }
 
@@ -114,7 +114,7 @@ public class DatabaseAuthoringConverterTests
 
                   public class MyTable : DataTableAsset<int, MyData>
                   {
-                      [{|#0:DataConverter(typeof(BadInstanceReturn))|}]
+                      [{|#0:DataAuthoringConverter(typeof(BadInstanceReturn))|}]
                       public int Foo { get; set; }
                   }
 
@@ -184,14 +184,14 @@ public class DatabaseAuthoringConverterTests
         );
 
     [TestMethod]
-    public Task NullDataConverterArg_ReportsNotTypeOfExpression()
+    public Task NullDataAuthoringConverterArg_ReportsNotTypeOfExpression()
         => RunAsync(
               """
                   public class MyData : IData { }
 
                   public class MyTable : DataTableAsset<int, MyData>
                   {
-                      [{|#0:DataConverter(null)|}]
+                      [{|#0:DataAuthoringConverter(null)|}]
                       public int Foo { get; set; }
                   }
 

@@ -406,18 +406,18 @@ namespace Samples.Data.Databases.Settings
     }
 
     [DataTableAsset]
-    internal sealed partial class FileTableAsset : DataTableAssetBase<int, FileData> { }
+    internal sealed partial class FileTableAsset : DataTableAssetBase<uint, FileData> { }
 
-    [Data]
+    [Data(Converters = new[] { typeof(Converters) }, Comparers = new[] { typeof(Comparers) })]
     internal partial struct FileData
     {
-        [DataProperty]
-        public readonly int Id => Get_Id();
+        [DataProperty(typeof(int))]
+        public readonly uint Id => Get_Id();
 
-        [DataProperty]
+        [DataProperty, DataComparer(typeof(StringComparer))]
         public readonly string FileName => Get_FileName();
 
-        [DataProperty]
+        [DataProperty(typeof(string), typeof(StringConverter))]
         public readonly string FileId => Get_FileId();
 
         [DataProperty]
@@ -425,5 +425,27 @@ namespace Samples.Data.Databases.Settings
 
         [DataProperty]
         public readonly string Url => Get_Url();
+    }
+
+    public readonly struct Converters
+    {
+        public static int Convert(uint value) => (int)value;
+
+        public static uint Convert(int value) => (uint)value;
+    }
+
+    public readonly struct Comparers
+    {
+        public static bool Equals(int a, int b) => a == b;
+    }
+
+    public readonly struct StringConverter
+    {
+        public static string Convert(string value) => value;
+    }
+
+    public readonly struct StringComparer
+    {
+        public static bool Equals(string a, string b) => string.Equals(a, b, System.StringComparison.Ordinal);
     }
 }

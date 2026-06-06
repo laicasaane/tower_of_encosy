@@ -8,7 +8,7 @@
         public const string DATA_ATTRIBUTE_METADATA = $"{NAMESPACE}.DataAttribute";
         public const string IDATA = $"global::{NAMESPACE}.IData";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{NAMESPACE}.DataPropertyAttribute";
-        public const string DATA_CONVERTER_ATTRIBUTE = $"global::{NAMESPACE}.Authoring.DataConverterAttribute";
+        public const string DATA_AUTHORING_CONVERTER_ATTRIBUTE = $"global::{NAMESPACE}.Authoring.DataAuthoringConverterAttribute";
         public const string DATA_MANUAL_AUTHORING_ATTRIBUTE = $"global::{NAMESPACE}.Authoring.DataManualAuthoringAttribute";
         public const string DATA_COMPARER_ATTRIBUTE = $"global::{NAMESPACE}.DataComparerAttribute";
         public const string SERIALIZABLE_ATTRIBUTE = "global::System.SerializableAttribute";

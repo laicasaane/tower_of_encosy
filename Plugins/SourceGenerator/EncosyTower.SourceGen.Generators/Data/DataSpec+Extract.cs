@@ -11,6 +11,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Data
 {
     using static EncosyTower.SourceGen.Helpers.Data.Helpers;
+    using ReturnTypeName = String;
+    using ParamTypeName = String;
+    using ConvertExpression = String;
+    using EqualsExpression = String;
 
     partial struct DataSpec
     {
@@ -29,6 +33,13 @@ namespace EncosyTower.SourceGen.Generators.Data
             }
 
             if (typeSyntax.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
+            {
+                return default;
+            }
+
+            var dataAttribute = typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA);
+
+            if (dataAttribute == null)
             {
                 return default;
             }
@@ -53,6 +64,44 @@ namespace EncosyTower.SourceGen.Generators.Data
             var typeIdentifier = typeSyntax.Identifier.Text;
             var typeValidIdentifier = typeSymbol.ToValidIdentifier();
             var typeNameBuilder = new StringBuilder(typeIdentifier);
+            var converterMap = new Dictionary<ReturnTypeName, Dictionary<ParamTypeName, ConvertExpression>>(StringComparer.Ordinal);
+            var comparerMap = new Dictionary<ParamTypeName, EqualsExpression>(StringComparer.Ordinal);
+
+            foreach (var kvp in dataAttribute.NamedArguments)
+            {
+                switch (kvp.Key)
+                {
+                    case "Converters":
+                    {
+                        if (kvp.Value.Kind == TypedConstantKind.Array && kvp.Value.Values.Length > 0)
+                        {
+                            foreach (var tc in kvp.Value.Values)
+                            {
+                                if (tc.Value is ITypeSymbol type)
+                                {
+                                    RegisterConvertMethods(type, converterMap);
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                    case "Comparers":
+                    {
+                        if (kvp.Value.Kind == TypedConstantKind.Array && kvp.Value.Values.Length > 0)
+                        {
+                            foreach (var tc in kvp.Value.Values)
+                            {
+                                if (tc.Value is ITypeSymbol type)
+                                {
+                                    RegisterEqualsMethods(type, comparerMap);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
 
             if (typeSyntax.TypeParameterList is TypeParameterListSyntax typeParamList
                 && typeParamList.Parameters.Count > 0
@@ -187,9 +236,20 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var propertyConverter = string.Empty;
                     var fieldEqualityComparer = string.Empty;
 
+                    ITypeSymbol converterType = null;
+
+                    if (propertyTypeAttrib != null && propertyTypeAttrib.ConstructorArguments.Length > 1)
+                    {
+                        if (propertyTypeAttrib.ConstructorArguments[1].Value is ITypeSymbol foundConverter)
+                        {
+                            converterType = foundConverter;
+                        }
+                    }
+
                     MakeConverters(
                           ref fieldConverter
                         , ref propertyConverter
+                        , converterType
                         , fieldType
                         , propertyType
                         , typeSymbol
@@ -206,6 +266,16 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var fieldTypeName = GetFieldTypeName(fieldType, collection);
                     var fieldTypeOriginalFullName = fieldType.ToFullName();
                     var propertyTypeName = propertyType.ToFullName();
+
+                    TryGetConverterAndComparer(
+                          converterMap
+                        , comparerMap
+                        , fieldTypeOriginalFullName
+                        , propertyTypeName
+                        , ref fieldConverter
+                        , ref propertyConverter
+                        , ref fieldEqualityComparer
+                    );
 
                     GetTypeNames(
                           propertyType
@@ -239,23 +309,29 @@ namespace EncosyTower.SourceGen.Generators.Data
                         });
                     }
 
-                    field.GatherAttributes(
-                          semanticModel
-                        , token
-                        , out var manualAuthoringAttributes
-                        , DATA_MANUAL_AUTHORING_ATTRIBUTE
-                    );
+                    field.GatherAttributes(semanticModel, token, out var attributes);
 
                     ForwardedAttributeData? manualAuthoringAttribute = null;
+                    ForwardedAttributeData? converterAttribute = null;
 
-                    if (manualAuthoringAttributes.Length > 0)
+                    foreach (var (fullyTypeName, attributeInfo) in attributes)
                     {
-                        var (fullyTypeName, attributeInfo) = manualAuthoringAttributes[0];
+                        switch (fullyTypeName)
+                        {
+                            case DATA_MANUAL_AUTHORING_ATTRIBUTE:
+                                manualAuthoringAttribute = new ForwardedAttributeData {
+                                    fullTypeName = fullyTypeName,
+                                    syntax = attributeInfo.GetSyntax().ToFullString(),
+                                };
+                                break;
 
-                        manualAuthoringAttribute = new ForwardedAttributeData {
-                            fullTypeName = fullyTypeName,
-                            syntax = attributeInfo.GetSyntax().ToFullString(),
-                        };
+                            case DATA_AUTHORING_CONVERTER_ATTRIBUTE:
+                                converterAttribute = new ForwardedAttributeData {
+                                    fullTypeName = fullyTypeName,
+                                    syntax = attributeInfo.GetSyntax().ToFullString(),
+                                };
+                                break;
+                        }
                     }
 
                     var fieldRefData = new FieldRefData {
@@ -281,6 +357,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         fieldTypeIsReferenceType = fieldTypeIsReferenceType,
                         forwardedPropertyAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
                         manualAuthoringAttribute = manualAuthoringAttribute,
+                        converterAttribute = converterAttribute,
                     };
 
                     var fieldIndex = fieldArrayBuilder.Count;
@@ -311,7 +388,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         }
                     }
 
-                    if (property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not { } attribute)
+                    if (property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not { } dataPropertyAttribute)
                     {
                         continue;
                     }
@@ -319,8 +396,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                     ITypeSymbol fieldType;
                     bool implicitlyConvertible;
 
-                    if (attribute.ConstructorArguments.Length > 0
-                        && attribute.ConstructorArguments[0].Value is ITypeSymbol fieldTypeSymbol
+                    if (dataPropertyAttribute.ConstructorArguments.Length > 0
+                        && dataPropertyAttribute.ConstructorArguments[0].Value is ITypeSymbol fieldTypeSymbol
                     )
                     {
                         fieldType = fieldTypeSymbol;
@@ -346,9 +423,20 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var propertyConverter = string.Empty;
                     var fieldEqualityComparer = string.Empty;
 
+                    ITypeSymbol converterType = null;
+
+                    if (dataPropertyAttribute != null && dataPropertyAttribute.ConstructorArguments.Length > 1)
+                    {
+                        if (dataPropertyAttribute.ConstructorArguments[1].Value is ITypeSymbol foundConverter)
+                        {
+                            converterType = foundConverter;
+                        }
+                    }
+
                     MakeConverters(
                           ref fieldConverter
                         , ref propertyConverter
+                        , converterType
                         , fieldType
                         , property.Type
                         , typeSymbol
@@ -364,6 +452,16 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     var fieldTypeName = GetFieldTypeName(fieldType, collection);
                     var propertyTypeName = property.Type.ToFullName();
+
+                    TryGetConverterAndComparer(
+                          converterMap
+                        , comparerMap
+                        , fieldTypeName
+                        , propertyTypeName
+                        , ref fieldConverter
+                        , ref propertyConverter
+                        , ref fieldEqualityComparer
+                    );
 
                     GetTypeNames(
                           property.Type
@@ -398,23 +496,29 @@ namespace EncosyTower.SourceGen.Generators.Data
                         });
                     }
 
-                    property.GatherAttributes(
-                          semanticModel
-                        , token
-                        , out var manualAuthoringAttributes
-                        , DATA_MANUAL_AUTHORING_ATTRIBUTE
-                    );
+                    property.GatherAttributes(semanticModel, token, out var attributes);
 
                     ForwardedAttributeData? manualAuthoringAttribute = null;
+                    ForwardedAttributeData? converterAttribute = null;
 
-                    if (manualAuthoringAttributes.Length > 0)
+                    foreach (var (fullyTypeName, attributeInfo) in attributes)
                     {
-                        var (fullyTypeName, attributeInfo) = manualAuthoringAttributes[0];
+                        switch (fullyTypeName)
+                        {
+                            case DATA_MANUAL_AUTHORING_ATTRIBUTE:
+                                manualAuthoringAttribute = new ForwardedAttributeData {
+                                    fullTypeName = fullyTypeName,
+                                    syntax = attributeInfo.GetSyntax().ToFullString(),
+                                };
+                                break;
 
-                        manualAuthoringAttribute = new ForwardedAttributeData {
-                            fullTypeName = fullyTypeName,
-                            syntax = attributeInfo.GetSyntax().ToFullString(),
-                        };
+                            case DATA_AUTHORING_CONVERTER_ATTRIBUTE:
+                                converterAttribute = new ForwardedAttributeData {
+                                    fullTypeName = fullyTypeName,
+                                    syntax = attributeInfo.GetSyntax().ToFullString(),
+                                };
+                                break;
+                        }
                     }
 
                     var doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE);
@@ -443,6 +547,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         fieldTypeIsReferenceType = fieldTypeIsReferenceType,
                         forwardedFieldAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
                         manualAuthoringAttribute = manualAuthoringAttribute,
+                        converterAttribute = converterAttribute,
                     };
 
                     var propIndex = propArrayBuilder.Count;
@@ -567,6 +672,45 @@ namespace EncosyTower.SourceGen.Generators.Data
                 propRefs = resolvedPropRefs.AsEquatableArray(),
                 overrideEquals = overrideEqualsBuilder.ToImmutable().AsEquatableArray(),
             };
+        }
+
+        private static void TryGetConverterAndComparer(
+              Dictionary<ReturnTypeName, Dictionary<ParamTypeName, ConvertExpression>> converterMap
+            , Dictionary<ParamTypeName, EqualsExpression> comparerMap
+            , string fieldTypeName
+            , string propertyTypeName
+            , ref string fieldConverter
+            , ref string propertyConverter
+            , ref string fieldEqualityComparer
+        )
+        {
+            if (string.IsNullOrEmpty(fieldEqualityComparer))
+            {
+                if (comparerMap.TryGetValue(fieldTypeName, out var foundComparer))
+                {
+                    fieldEqualityComparer = foundComparer;
+                }
+            }
+
+            if (string.IsNullOrEmpty(fieldConverter))
+            {
+                if (converterMap.TryGetValue(fieldTypeName, out var dict)
+                    && dict.TryGetValue(propertyTypeName, out var foundConverter)
+                )
+                {
+                    fieldConverter = foundConverter;
+                }
+            }
+
+            if (string.IsNullOrEmpty(propertyConverter))
+            {
+                if (converterMap.TryGetValue(propertyTypeName, out var dict)
+                    && dict.TryGetValue(fieldTypeName, out var foundConverter)
+                )
+                {
+                    propertyConverter = foundConverter;
+                }
+            }
         }
 
         private static FieldCollectionData ToFieldCollectionData(in CollectionRef collection)
@@ -929,13 +1073,12 @@ namespace EncosyTower.SourceGen.Generators.Data
         private static void MakeConverters(
               ref string fieldConverter
             , ref string propertyConverter
+            , ITypeSymbol converterType
             , ITypeSymbol fieldType
             , ITypeSymbol propertyType
             , ITypeSymbol containingTypeSymbol
         )
         {
-            ITypeSymbol converterType = null;
-
             if (converterType is null)
             {
                 if (TryGetConvertMethod(containingTypeSymbol, out var fc1, propertyType, fieldType, IsAny))
@@ -980,13 +1123,165 @@ namespace EncosyTower.SourceGen.Generators.Data
             return;
 
             static string Make(ITypeSymbol type, IMethodSymbol method)
-                => method.IsStatic ? $"{type.ToFullName()}.{method.Name}" : $"new {type.ToFullName()}().{method.Name}";
+                => method.IsStatic
+                    ? $"{type.ToFullName()}.{method.Name}"
+                    : $"new {type.ToFullName()}().{method.Name}";
 
             static bool IsPublic(Accessibility v)
                 => v == Accessibility.Public;
 
             static bool IsAny(Accessibility _)
                 => true;
+        }
+
+        private static void RegisterConvertMethods(
+              ITypeSymbol converterType
+            , Dictionary<ReturnTypeName, Dictionary<ParamTypeName, ConvertExpression>> converterMap
+        )
+        {
+            if (converterType.IsAbstract)
+            {
+                return;
+            }
+
+            if (converterType is INamedTypeSymbol { IsUnboundGenericType: true })
+            {
+                return;
+            }
+
+            if (converterType.IsValueType == false)
+            {
+                var ctors = converterType.GetMembers(".ctor");
+                IMethodSymbol ctorMethod = null;
+
+                foreach (var ctor in ctors)
+                {
+                    if (ctor is not IMethodSymbol ctorM
+                        || ctorM.DeclaredAccessibility != Accessibility.Public
+                    )
+                    {
+                        continue;
+                    }
+
+                    if (ctorM.Parameters.Length == 0)
+                    {
+                        ctorMethod = ctorM;
+                        break;
+                    }
+                }
+
+                if (ctorMethod == null)
+                {
+                    return;
+                }
+            }
+
+            var containerTypeName = converterType.ToFullName();
+            var members = converterType.GetMembers("Convert");
+
+            foreach (var m in members)
+            {
+                if (m is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.Parameters.Length != 1
+                    || method.IsGenericMethod
+                )
+                {
+                    continue;
+                }
+
+                var returnTypeName = method.ReturnType.ToFullName();
+                var paramTypeName = method.Parameters[0].Type.ToFullName();
+
+                if (converterMap.TryGetValue(returnTypeName, out var dict) == false)
+                {
+                    converterMap[returnTypeName] = dict = new(StringComparer.Ordinal);
+                }
+
+                if (dict.ContainsKey(paramTypeName) == false)
+                {
+                    dict[paramTypeName] = method.IsStatic
+                        ? $"{containerTypeName}.{method.Name}"
+                        : $"new {containerTypeName}().{method.Name}";
+                }
+            }
+        }
+
+        private static void RegisterEqualsMethods(
+              ITypeSymbol converterType
+            , Dictionary<ParamTypeName, EqualsExpression> comparerMap
+        )
+        {
+            if (converterType.IsAbstract)
+            {
+                return;
+            }
+
+            if (converterType is INamedTypeSymbol { IsUnboundGenericType: true })
+            {
+                return;
+            }
+
+            if (converterType.IsValueType == false)
+            {
+                var ctors = converterType.GetMembers(".ctor");
+                IMethodSymbol ctorMethod = null;
+
+                foreach (var ctor in ctors)
+                {
+                    if (ctor is not IMethodSymbol ctorM
+                        || ctorM.DeclaredAccessibility != Accessibility.Public
+                    )
+                    {
+                        continue;
+                    }
+
+                    if (ctorM.Parameters.Length == 0)
+                    {
+                        ctorMethod = ctorM;
+                        break;
+                    }
+                }
+
+                if (ctorMethod == null)
+                {
+                    return;
+                }
+            }
+
+            var containerTypeName = converterType.ToFullName();
+            var members = converterType.GetMembers("Equals");
+            var comparer = SymbolEqualityComparer.Default;
+
+            foreach (var m in members)
+            {
+                if (m is not IMethodSymbol method
+                    || method.DeclaredAccessibility != Accessibility.Public
+                    || method.Parameters.Length != 2
+                    || method.IsGenericMethod
+                )
+                {
+                    continue;
+                }
+
+                var parameters = method.Parameters;
+                var p0 = parameters[0].Type;
+                var p1 = parameters[1].Type;
+
+                if (comparer.Equals(p0, p1) == false)
+                {
+                    continue;
+                }
+
+                var typeName = p0.ToFullName();
+
+                if (comparerMap.ContainsKey(typeName) == false)
+                {
+                    comparerMap[typeName] = method.IsStatic
+                        ? $"{converterType.ToFullName()}.{method.Name}"
+                        : $"new {converterType.ToFullName()}().{method.Name}";
+                }
+            }
         }
 
         private static bool TryGetConvertMethod(
@@ -1094,9 +1389,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                 if (TryGetEqualsMethod(comparerType, out var em, fieldType, IsPublic))
                 {
                     fieldEqualityComparer = Make(comparerType, em);
+                    return;
                 }
-
-                return;
             }
 
             if (TryGetEqualsMethod(containingTypeSymbol, out var em1, fieldType, IsAny))
@@ -1178,7 +1472,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             foreach (var m in members)
             {
                 if (m is not IMethodSymbol method
-                    || method.DeclaredAccessibility != Accessibility.Public
+                    || validateAccessibility(method.DeclaredAccessibility) == false
                     || method.Parameters.Length != 2
                 )
                 {

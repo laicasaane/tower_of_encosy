@@ -112,35 +112,48 @@ namespace EncosyTower.SourceGen.Generators.Data
             var hasGenPropertyBagAttrib = hasGeneratePropertyBagAttribute;
             var withDontCreateProperty = false;
             var withManualAuthoring = false;
-
-            p.PrintBeginLine();
+            var withConverter = false;
 
             foreach (var attr in prop.forwardedFieldAttributes)
             {
-                if (attr.fullTypeName == SERIALIZE_FIELD_ATTRIBUTE)
+                switch (attr.fullTypeName)
                 {
-                    withSerializeField = true;
-                }
-                else if (hasGenPropertyBagAttrib && attr.fullTypeName == DONT_CREATE_PROPERTY_ATTRIBUTE)
-                {
-                    withDontCreateProperty = true;
-                }
-                else if (attr.fullTypeName == DATA_MANUAL_AUTHORING_ATTRIBUTE)
-                {
-                    withManualAuthoring = true;
+                    case SERIALIZE_FIELD_ATTRIBUTE:
+                        withSerializeField = true;
+                        break;
+
+                    case DONT_CREATE_PROPERTY_ATTRIBUTE:
+                        if (hasGenPropertyBagAttrib)
+                        {
+                            withDontCreateProperty = true;
+                        }
+                        break;
+
+                    case DATA_MANUAL_AUTHORING_ATTRIBUTE:
+                        withManualAuthoring = true;
+                        break;
+
+                    case DATA_AUTHORING_CONVERTER_ATTRIBUTE:
+                        withConverter = true;
+                        break;
                 }
 
-                p.Print("[").Print(attr.syntax).Print("]");
+                p.PrintBeginLine("[").Print(attr.syntax).PrintEndLine("]");
             }
 
             if (withSerializeField == false)
             {
-                p.Print("[UE.SerializeField]");
+                p.PrintLine("[UE.SerializeField]");
             }
 
             if (withManualAuthoring == false && prop.manualAuthoringAttribute.HasValue)
             {
-                p.Print("[").Print(prop.manualAuthoringAttribute.Value.syntax).Print("]");
+                p.PrintBeginLine("[").Print(prop.manualAuthoringAttribute.Value.syntax).PrintEndLine("]");
+            }
+
+            if (withConverter == false && prop.converterAttribute.HasValue)
+            {
+                p.PrintBeginLine("[").Print(prop.converterAttribute.Value.syntax).PrintEndLine("]");
             }
 
             if (hasGenPropertyBagAttrib
@@ -148,12 +161,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 && withDontCreateProperty == false
             )
             {
-                p.Print("[").Print(DONT_CREATE_PROPERTY_ATTRIBUTE).Print("]");
+                p.PrintBeginLine("[").Print(DONT_CREATE_PROPERTY_ATTRIBUTE).PrintEndLine("]");
             }
 
-            p.Print(string.Format(PR_GENERATED_FIELD_FROM_PROPERTY, prop.propertyName));
-            p.Print(PR_GENERATED_CODE);
-            p.PrintEndLine();
+            p.PrintBeginLine(string.Format(PR_GENERATED_FIELD_FROM_PROPERTY, prop.propertyName));
+            p.PrintEndLine(PR_GENERATED_CODE);
 
             var fieldTypeName = prop.fieldTypeName;
             var propTypeName = prop.propertyTypeName;
@@ -252,6 +264,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             var immutableTypeName = field.immutablePropertyTypeName;
             var sameType = field.samePropertyType;
             var withManualAuthoring = false;
+            var withConverter = false;
 
             p.PrintLine(string.Format(PR_GENERATED_PROPERTY_FROM_FIELD, fieldName, field.fieldTypeOriginalFullName));
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
@@ -262,6 +275,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                 {
                     withManualAuthoring = true;
                 }
+                else if (attr.fullTypeName == DATA_AUTHORING_CONVERTER_ATTRIBUTE)
+                {
+                    withConverter = true;
+                }
 
                 p.PrintBeginLine("[").Print(attr.syntax).PrintEndLine("]");
             }
@@ -269,6 +286,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             if (withManualAuthoring == false && field.manualAuthoringAttribute.HasValue)
             {
                 p.PrintBeginLine("[").Print(field.manualAuthoringAttribute.Value.syntax).PrintEndLine("]");
+            }
+
+            if (withConverter == false && field.converterAttribute.HasValue)
+            {
+                p.PrintBeginLine("[").Print(field.converterAttribute.Value.syntax).PrintEndLine("]");
             }
 
             var mustCast = field.typesAreDifferent;

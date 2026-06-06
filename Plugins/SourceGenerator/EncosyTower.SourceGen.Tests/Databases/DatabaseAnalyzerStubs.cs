@@ -22,11 +22,14 @@ internal static class DatabaseAnalyzerStubs
 
             [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
             public sealed class DataAttribute : System.Attribute { }
+        }
 
+        namespace EncosyTower.Data.Authoring
+        {
             [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field)]
-            public sealed class DataConverterAttribute : System.Attribute
+            public sealed class DataAuthoringConverterAttribute : System.Attribute
             {
-                public DataConverterAttribute(System.Type type) { }
+                public DataAuthoringConverterAttribute(System.Type type) { }
                 public System.Type Type { get; }
             }
         }

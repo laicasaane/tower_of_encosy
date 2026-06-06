@@ -81,6 +81,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
         public EquatableArray<ForwardedAttributeData> forwardedPropertyAttributes;
 
         public ForwardedAttributeData? manualAuthoringAttribute;
+        public ForwardedAttributeData? converterAttribute;
 
         public readonly bool Equals(FieldRefData other)
             => string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
@@ -104,6 +105,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
             && string.Equals(fieldTypeOriginalFullName, other.fieldTypeOriginalFullName, StringComparison.Ordinal)
             && forwardedPropertyAttributes.Equals(other.forwardedPropertyAttributes)
             && manualAuthoringAttribute.Equals(other.manualAuthoringAttribute)
+            && converterAttribute.Equals(other.converterAttribute)
             ;
 
         public readonly override bool Equals(object obj)
@@ -133,6 +135,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
             hash.Add(fieldTypeOriginalFullName);
             hash.Add(forwardedPropertyAttributes);
             hash.Add(manualAuthoringAttribute);
+            hash.Add(converterAttribute);
             return hash.ToHashCode();
         }
     }

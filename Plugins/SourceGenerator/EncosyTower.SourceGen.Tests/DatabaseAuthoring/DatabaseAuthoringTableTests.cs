@@ -12,7 +12,7 @@ public class DatabaseAuthoringTableTests
     private const string STUB_ATTRIBUTES = DatabaseAnalyzerStubs.ATTRIBUTES;
 
     private static string Wrap(string body)
-        => $"{STUB_ATTRIBUTES}\nnamespace TestProject\n{{\n    using EncosyTower.Data;\n    using EncosyTower.Databases;\n    using EncosyTower.Databases.Authoring;\n{body}\n}}\n";
+        => $"{STUB_ATTRIBUTES}\nnamespace TestProject\n{{\n    using EncosyTower.Data;\n    using EncosyTower.Data.Authoring;\n    using EncosyTower.Databases;\n    using EncosyTower.Databases.Authoring;\n{body}\n}}\n";
 
     private static Task RunAsync(string body, params DiagnosticResult[] expected)
     {
@@ -168,7 +168,7 @@ public class DatabaseAuthoringTableTests
 
                   public class MyTable : DataTableAsset<int, MyData>
                   {
-                      [{|#0:DataConverter(typeof(NoConvert))|}]
+                      [{|#0:DataAuthoringConverter(typeof(NoConvert))|}]
                       public int Foo { get; set; }
                   }
 

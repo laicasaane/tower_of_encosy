@@ -1242,7 +1242,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , ResultTypes resultTypes
         )
         {
-            var attrib = memberSymbol.GetAttribute(DATA_CONVERTER_ATTRIBUTE);
+            var attrib = memberSymbol.GetAttribute(DATA_AUTHORING_CONVERTER_ATTRIBUTE);
 
             if (attrib == null || attrib.ConstructorArguments.Length != 1)
             {

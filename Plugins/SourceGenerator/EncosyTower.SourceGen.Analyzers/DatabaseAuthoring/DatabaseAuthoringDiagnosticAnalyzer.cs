@@ -18,7 +18,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         private const string AUTHOR_DATABASE_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.AuthorDatabaseAttribute";
         private const string DATABASE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.DatabaseAttribute";
         private const string TABLE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.TableAttribute";
-        private const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataConverterAttribute";
+        private const string DATA_AUTHORING_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataAuthoringConverterAttribute";
         private const string IDATA = $"global::{DATA_NAMESPACE}.IData";
 
         public static readonly DiagnosticDescriptor MissingDefaultConstructor = new DiagnosticDescriptor(
@@ -269,7 +269,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                         continue;
                     }
 
-                    var converterAttrib = GetAttribute(member, DATA_CONVERTER_ATTRIBUTE);
+                    var converterAttrib = GetAttribute(member, DATA_AUTHORING_CONVERTER_ATTRIBUTE);
 
                     if (converterAttrib != null)
                     {
