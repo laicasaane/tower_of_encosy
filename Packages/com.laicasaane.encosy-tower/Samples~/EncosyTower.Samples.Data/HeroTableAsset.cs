@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using EncosyTower.Data;
 using EncosyTower.Data.Authoring;
 using EncosyTower.Databases;
@@ -16,7 +15,8 @@ namespace EncosyTower.Samples.Data
         [DataProperty(typeof(EntityIdData))]
         public readonly EntityId Id => Get_Id();
 
-        [DataProperty(typeof(uint)), DataManualAuthoring(typeof(string))]
+        [DataProperty(typeof(uint), typeof(StringIdValueConverter))]
+        [DataManualAuthoring(typeof(string))]
         public readonly StringId Name => Get_Name();
 
         [DataProperty] public readonly EntityStatData Stat => Get_Stat();
@@ -25,13 +25,5 @@ namespace EncosyTower.Samples.Data
 
         public readonly override string ToString()
             => $"{_id} :: {_name} :: {_stat}";
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId Convert(uint value)
-            => UIntToStringIdConverter.Convert(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint Convert(StringId value)
-            => StringIdToUIntConverter.Convert(value);
     }
 }

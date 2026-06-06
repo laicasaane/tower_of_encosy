@@ -17,7 +17,8 @@ namespace EncosyTower.Samples.Data
         [DataProperty(typeof(EntityUidData))]
         public readonly EntityUid Id => Get_Id();
 
-        [DataProperty(typeof(uint)), DataManualAuthoring(typeof(string))]
+        [DataProperty(typeof(uint), typeof(StringIdValueConverter))]
+        [DataManualAuthoring(typeof(string))]
         public readonly StringId Name => Get_Name();
 
         [DataProperty] public readonly EnemyType Type => Get_Type();
@@ -26,14 +27,6 @@ namespace EncosyTower.Samples.Data
 
         [DataProperty, DataManualAuthoring(typeof(Int2Data))]
         public readonly Int2 Pivot => Get_Pivot();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static StringId Convert(uint value)
-            => UIntToStringIdConverter.Convert(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint Convert(StringId value)
-            => StringIdToUIntConverter.Convert(value);
     }
 
     public enum EnemyType : byte

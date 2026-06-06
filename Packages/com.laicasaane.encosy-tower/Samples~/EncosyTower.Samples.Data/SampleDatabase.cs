@@ -90,7 +90,7 @@ namespace EncosyTower.Samples.DatabaseAuthoring
                     }
 
                     Add(new __StringData {
-                        Id = StringIdToUIntConverter.Convert(id),
+                        Id = StringIdValueConverter.Convert(id),
                         Value_Manual = str,
                     });
                 }
@@ -109,7 +109,7 @@ namespace EncosyTower.Samples.DatabaseAuthoring
                 ProcessorAPI.ProcessStringKey(this, container.StringVault);
             }
 
-            partial class __HeroData : IWithStringKey
+            partial class __HeroData : IWithStringName
             {
             }
         }
@@ -126,12 +126,12 @@ namespace EncosyTower.Samples.DatabaseAuthoring
                 ProcessorAPI.ProcessStringKey(this, container.StringVault);
             }
 
-            partial class __EnemyData : IWithStringKey
+            partial class __EnemyData : IWithStringName
             {
             }
         }
 
-        internal interface IWithStringKey
+        internal interface IWithStringName
         {
             string Name { get; set; }
 
@@ -141,13 +141,13 @@ namespace EncosyTower.Samples.DatabaseAuthoring
         internal static class ProcessorAPI
         {
             public static void ProcessStringKey<T>(IEnumerable<T> items, StringVault vault)
-                where T : IWithStringKey
+                where T : IWithStringName
             {
                 foreach (var item in items)
                 {
                     if (vault.TryGetId(item.Name, out var id))
                     {
-                        item.Name_Manual = StringIdToUIntConverter.Convert(id);
+                        item.Name_Manual = StringIdValueConverter.Convert(id);
                     }
                 }
             }
