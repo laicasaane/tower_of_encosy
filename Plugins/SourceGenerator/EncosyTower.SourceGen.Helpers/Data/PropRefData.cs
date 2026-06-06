@@ -83,7 +83,9 @@ namespace EncosyTower.SourceGen.Helpers.Data
         public bool fieldTypeIsReferenceType;
 
         /// <summary>Precomputed forwarded field attributes (fullTypeName + syntax string pairs).</summary>
-        public EquatableArray<ForwardedFieldAttributeData> forwardedFieldAttributes;
+        public EquatableArray<ForwardedAttributeData> forwardedFieldAttributes;
+
+        public bool withManualAuthoring;
 
         public readonly bool Equals(PropRefData other)
             => string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
@@ -105,7 +107,9 @@ namespace EncosyTower.SourceGen.Helpers.Data
             && fieldEquality.Equals(other.fieldEquality)
             && string.Equals(fieldTypeDeclNameForEquality, other.fieldTypeDeclNameForEquality, StringComparison.Ordinal)
             && fieldTypeIsReferenceType == other.fieldTypeIsReferenceType
-            && forwardedFieldAttributes.Equals(other.forwardedFieldAttributes);
+            && forwardedFieldAttributes.Equals(other.forwardedFieldAttributes)
+            && withManualAuthoring == other.withManualAuthoring
+            ;
 
         public readonly override bool Equals(object obj)
             => obj is PropRefData other && Equals(other);
@@ -133,6 +137,7 @@ namespace EncosyTower.SourceGen.Helpers.Data
             hash.Add(fieldTypeDeclNameForEquality);
             hash.Add(fieldTypeIsReferenceType);
             hash.Add(forwardedFieldAttributes);
+            hash.Add(withManualAuthoring);
             return hash.ToHashCode();
         }
     }

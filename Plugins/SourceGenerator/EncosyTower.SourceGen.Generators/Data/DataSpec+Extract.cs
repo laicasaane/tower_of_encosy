@@ -177,7 +177,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     field.GatherForwardedAttributes(
                           semanticModel
                         , token
-                        , out ImmutableArray<AttributeInfo> propertyAttributes
+                        , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
                     );
 
                     var propertyName = field.ToPropertyName();
@@ -229,11 +229,14 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     var fieldTypeFullNameForEquality = equalityFieldType.ToFullName();
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
-                    using var attrSyntaxBuilder = ImmutableArrayBuilder<string>.Rent();
+                    using var attrBuilder = ImmutableArrayBuilder<ForwardedAttributeData>.Rent();
 
-                    foreach (var attr in propertyAttributes)
+                    foreach (var (fullTypeName, attributeInfo) in propertyAttributes)
                     {
-                        attrSyntaxBuilder.Add(attr.GetSyntax().ToFullString());
+                        attrBuilder.Add(new ForwardedAttributeData {
+                            fullTypeName = fullTypeName,
+                            attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
+                        });
                     }
 
                     var fieldRefData = new FieldRefData {
@@ -257,7 +260,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                         fieldEquality = fieldEquality,
                         fieldTypeFullNameForEquality = fieldTypeFullNameForEquality,
                         fieldTypeIsReferenceType = fieldTypeIsReferenceType,
-                        forwardedPropertyAttributeSyntaxes = attrSyntaxBuilder.ToImmutable().AsEquatableArray(),
+                        forwardedPropertyAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
+                        withManualAuthoring = field.HasAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE),
                     };
 
                     var fieldIndex = fieldArrayBuilder.Count;
@@ -365,11 +369,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                     var equalityCollection = GetCollection(equalityFieldType, isField: true);
                     var fieldTypeDeclNameForEquality = GetFieldTypeName(equalityFieldType, equalityCollection);
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
-                    using var attrBuilder = ImmutableArrayBuilder<ForwardedFieldAttributeData>.Rent();
+                    using var attrBuilder = ImmutableArrayBuilder<ForwardedAttributeData>.Rent();
 
                     foreach (var (fullTypeName, attributeInfo) in fieldAttributes)
                     {
-                        attrBuilder.Add(new ForwardedFieldAttributeData {
+                        attrBuilder.Add(new ForwardedAttributeData {
                             fullTypeName = fullTypeName,
                             attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
                         });
@@ -400,6 +404,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         fieldTypeDeclNameForEquality = fieldTypeDeclNameForEquality,
                         fieldTypeIsReferenceType = fieldTypeIsReferenceType,
                         forwardedFieldAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
+                        withManualAuthoring = property.HasAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE),
                     };
 
                     var propIndex = propArrayBuilder.Count;
@@ -1181,6 +1186,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             p.PrintLine("using ET = global::EncosyTower.Common;");
             p.PrintLine("using ETCE = global::EncosyTower.Collections.Extensions;");
             p.PrintLine("using ETD = global::EncosyTower.Data;");
+            p.PrintLine("using ETDA = global::EncosyTower.Data.Authoring;");
             p.PrintLine("using ETDSG = global::EncosyTower.Data.SourceGen;");
             p.PrintLine("using UE = global::UnityEngine;");
             p.PrintLine("using UP = global::Unity.Properties;");

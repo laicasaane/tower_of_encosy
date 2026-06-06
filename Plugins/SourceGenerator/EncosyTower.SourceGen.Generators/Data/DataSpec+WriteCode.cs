@@ -111,6 +111,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             var withSerializeField = false;
             var hasGenPropertyBagAttrib = hasGeneratePropertyBagAttribute;
             var withDontCreateProperty = false;
+            var withManualAuthoring = false;
 
             p.PrintBeginLine();
 
@@ -124,6 +125,10 @@ namespace EncosyTower.SourceGen.Generators.Data
                 {
                     withDontCreateProperty = true;
                 }
+                else if (attr.fullTypeName == DATA_MANUAL_AUTHORING_ATTRIBUTE)
+                {
+                    withManualAuthoring = true;
+                }
 
                 p.Print("[").Print(attr.attributeSyntax).Print("]");
             }
@@ -131,6 +136,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             if (withSerializeField == false)
             {
                 p.Print("[UE.SerializeField]");
+            }
+
+            if (withManualAuthoring == false && prop.withManualAuthoring)
+            {
+                p.Print("[ETDA.DataManualAuthoring]");
             }
 
             if (hasGenPropertyBagAttrib
@@ -241,13 +251,24 @@ namespace EncosyTower.SourceGen.Generators.Data
             var mutableTypeName = field.mutablePropertyTypeName;
             var immutableTypeName = field.immutablePropertyTypeName;
             var sameType = field.samePropertyType;
+            var withManualAuthoring = false;
 
             p.PrintLine(string.Format(PR_GENERATED_PROPERTY_FROM_FIELD, fieldName, field.fieldTypeOriginalFullName));
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
 
-            foreach (var attributeSyntax in field.forwardedPropertyAttributeSyntaxes)
+            foreach (var attr in field.forwardedPropertyAttributes)
             {
-                p.PrintBeginLine("[").Print(attributeSyntax).PrintEndLine("]");
+                if (attr.fullTypeName == DATA_MANUAL_AUTHORING_ATTRIBUTE)
+                {
+                    withManualAuthoring = true;
+                }
+
+                p.PrintBeginLine("[").Print(attr.attributeSyntax).PrintEndLine("]");
+            }
+
+            if (withManualAuthoring == false && field.withManualAuthoring)
+            {
+                p.Print("[ETDA.DataManualAuthoring]");
             }
 
             var mustCast = field.typesAreDifferent;
