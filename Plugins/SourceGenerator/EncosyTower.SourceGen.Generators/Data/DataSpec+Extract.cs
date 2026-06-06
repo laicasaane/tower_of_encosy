@@ -235,8 +235,27 @@ namespace EncosyTower.SourceGen.Generators.Data
                     {
                         attrBuilder.Add(new ForwardedAttributeData {
                             fullTypeName = fullTypeName,
-                            attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
+                            syntax = attributeInfo.GetSyntax().ToFullString(),
                         });
+                    }
+
+                    field.GatherAttributes(
+                          semanticModel
+                        , token
+                        , out var manualAuthoringAttributes
+                        , DATA_MANUAL_AUTHORING_ATTRIBUTE
+                    );
+
+                    ForwardedAttributeData? manualAuthoringAttribute = null;
+
+                    if (manualAuthoringAttributes.Length > 0)
+                    {
+                        var (fullyTypeName, attributeInfo) = manualAuthoringAttributes[0];
+
+                        manualAuthoringAttribute = new ForwardedAttributeData {
+                            fullTypeName = fullyTypeName,
+                            syntax = attributeInfo.GetSyntax().ToFullString(),
+                        };
                     }
 
                     var fieldRefData = new FieldRefData {
@@ -261,7 +280,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         fieldTypeFullNameForEquality = fieldTypeFullNameForEquality,
                         fieldTypeIsReferenceType = fieldTypeIsReferenceType,
                         forwardedPropertyAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
-                        withManualAuthoring = field.HasAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE),
+                        manualAuthoringAttribute = manualAuthoringAttribute,
                     };
 
                     var fieldIndex = fieldArrayBuilder.Count;
@@ -375,8 +394,27 @@ namespace EncosyTower.SourceGen.Generators.Data
                     {
                         attrBuilder.Add(new ForwardedAttributeData {
                             fullTypeName = fullTypeName,
-                            attributeSyntax = attributeInfo.GetSyntax().ToFullString(),
+                            syntax = attributeInfo.GetSyntax().ToFullString(),
                         });
+                    }
+
+                    property.GatherAttributes(
+                          semanticModel
+                        , token
+                        , out var manualAuthoringAttributes
+                        , DATA_MANUAL_AUTHORING_ATTRIBUTE
+                    );
+
+                    ForwardedAttributeData? manualAuthoringAttribute = null;
+
+                    if (manualAuthoringAttributes.Length > 0)
+                    {
+                        var (fullyTypeName, attributeInfo) = manualAuthoringAttributes[0];
+
+                        manualAuthoringAttribute = new ForwardedAttributeData {
+                            fullTypeName = fullyTypeName,
+                            syntax = attributeInfo.GetSyntax().ToFullString(),
+                        };
                     }
 
                     var doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE);
@@ -404,7 +442,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         fieldTypeDeclNameForEquality = fieldTypeDeclNameForEquality,
                         fieldTypeIsReferenceType = fieldTypeIsReferenceType,
                         forwardedFieldAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
-                        withManualAuthoring = property.HasAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE),
+                        manualAuthoringAttribute = manualAuthoringAttribute,
                     };
 
                     var propIndex = propArrayBuilder.Count;

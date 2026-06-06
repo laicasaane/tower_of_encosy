@@ -130,7 +130,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     withManualAuthoring = true;
                 }
 
-                p.Print("[").Print(attr.attributeSyntax).Print("]");
+                p.Print("[").Print(attr.syntax).Print("]");
             }
 
             if (withSerializeField == false)
@@ -138,9 +138,9 @@ namespace EncosyTower.SourceGen.Generators.Data
                 p.Print("[UE.SerializeField]");
             }
 
-            if (withManualAuthoring == false && prop.withManualAuthoring)
+            if (withManualAuthoring == false && prop.manualAuthoringAttribute.HasValue)
             {
-                p.Print("[ETDA.DataManualAuthoring]");
+                p.Print("[").Print(prop.manualAuthoringAttribute.Value.syntax).Print("]");
             }
 
             if (hasGenPropertyBagAttrib
@@ -263,12 +263,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                     withManualAuthoring = true;
                 }
 
-                p.PrintBeginLine("[").Print(attr.attributeSyntax).PrintEndLine("]");
+                p.PrintBeginLine("[").Print(attr.syntax).PrintEndLine("]");
             }
 
-            if (withManualAuthoring == false && field.withManualAuthoring)
+            if (withManualAuthoring == false && field.manualAuthoringAttribute.HasValue)
             {
-                p.Print("[ETDA.DataManualAuthoring]");
+                p.PrintBeginLine("[").Print(field.manualAuthoringAttribute.Value.syntax).PrintEndLine("]");
             }
 
             var mustCast = field.typesAreDifferent;

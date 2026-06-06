@@ -798,16 +798,13 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        if (attributeList.Target != null)
+                        if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
                         {
-                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
-                            {
-                                fieldAttributesInfo.Add(attributeInfo);
-                            }
-                            else if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
-                            {
-                                propertyAttributesInfo.Add(attributeInfo);
-                            }
+                            fieldAttributesInfo.Add(attributeInfo);
+                        }
+                        else if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
+                        {
+                            propertyAttributesInfo.Add(attributeInfo);
                         }
                     }
                 }
@@ -886,97 +883,7 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        if (attributeList.Target != null)
-                        {
-                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
-                            {
-                                propertyAttributesInfo.Add(attributeInfo);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gathers all forwarded attributes for the generated field.
-        /// </summary>
-        /// <param name="propertySymbol">The input <see cref="IPropertySymbol"/> instance to process.</param>
-        /// <param name="semanticModel">The <see cref="SemanticModel"/> instance for the current run.</param>
-        /// <param name="token">The cancellation token for the current operation.</param>
-        /// <param name="diagnostics">The current collection of gathered diagnostics.</param>
-        /// <param name="fieldAttributes">The resulting field attributes to forward.</param>
-        public static void GatherForwardedAttributes(
-              this IPropertySymbol propertySymbol
-            , SemanticModel semanticModel
-            , CancellationToken token
-            , out ImmutableArray<AttributeInfo> fieldAttributes
-        )
-        {
-            using var fieldAttributesInfo = ImmutableArrayBuilder<AttributeInfo>.Rent();
-
-            GatherForwardedAttributes(
-                  propertySymbol
-                , semanticModel
-                , token
-                , in fieldAttributesInfo
-            );
-
-            fieldAttributes = fieldAttributesInfo.ToImmutable();
-
-            static void GatherForwardedAttributes(
-                  IPropertySymbol symbol
-                , SemanticModel semanticModel
-                , CancellationToken token
-                , in ImmutableArrayBuilder<AttributeInfo> fieldAttributesInfo
-            )
-            {
-                if (symbol.DeclaringSyntaxReferences.Length != 1
-                    || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
-                )
-                {
-                    return;
-                }
-
-                var syntax = syntaxReference.GetSyntax(token);
-
-                if (syntax is not PropertyDeclarationSyntax propDeclaration)
-                {
-                    return;
-                }
-
-                foreach (AttributeListSyntax attributeList in propDeclaration.AttributeLists)
-                {
-                    if (attributeList.Target == null
-                        || attributeList.Target.Identifier.Kind() is not SyntaxKind.FieldKeyword
-                    )
-                    {
-                        continue;
-                    }
-
-                    foreach (AttributeSyntax attribute in attributeList.Attributes)
-                    {
-                        if (semanticModel.GetSymbolInfo(attribute, token)
-                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
-                        )
-                        {
-                            continue;
-                        }
-
-                        var attributeInfo = AttributeInfo.From(
-                              attributeTypeSymbol
-                            , semanticModel
-                            , attribute.ArgumentList?.Arguments ?? Enumerable.Empty<AttributeArgumentSyntax>()
-                            , token
-                        );
-
-                        if (attributeList.Target != null)
-                        {
-                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
-                            {
-                                fieldAttributesInfo.Add(attributeInfo);
-                            }
-                        }
+                        propertyAttributesInfo.Add(attributeInfo);
                     }
                 }
             }
@@ -1054,14 +961,8 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        if (attributeList.Target != null)
-                        {
-                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.PropertyKeyword))
-                            {
-                                var typeName = attributeTypeSymbol.ToFullName();
-                                propertyAttributesInfo.Add((typeName, attributeInfo));
-                            }
-                        }
+                        var typeName = attributeTypeSymbol.ToFullName();
+                        propertyAttributesInfo.Add((typeName, attributeInfo));
                     }
                 }
             }
@@ -1139,14 +1040,170 @@ namespace EncosyTower.SourceGen
                             , token
                         );
 
-                        if (attributeList.Target != null)
+                        var typeName = attributeTypeSymbol.ToFullName();
+                        fieldAttributesInfo.Add((typeName, attributeInfo));
+                    }
+                }
+            }
+        }
+
+        public static void GatherAttributes(
+              this IFieldSymbol fieldSymbol
+            , SemanticModel semanticModel
+            , CancellationToken token
+            , out ImmutableArray<(string, AttributeInfo)> attributes
+            , string attributeFullyQualifiedTypeName = null
+        )
+        {
+            using var attributeBuilder = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
+
+            GatherAttributes(
+                  fieldSymbol
+                , semanticModel
+                , token
+                , in attributeBuilder
+                , attributeFullyQualifiedTypeName
+            );
+
+            attributes = attributeBuilder.ToImmutable();
+
+            static void GatherAttributes(
+                  IFieldSymbol symbol
+                , SemanticModel semanticModel
+                , CancellationToken token
+                , in ImmutableArrayBuilder<(string, AttributeInfo)> attributes
+                , string attributeFullyQualifiedTypeName
+            )
+            {
+                if (symbol.DeclaringSyntaxReferences.Length != 1
+                    || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
+                )
+                {
+                    return;
+                }
+
+                var syntax = syntaxReference.GetSyntax(token);
+
+                if (syntax.Parent?.Parent is not FieldDeclarationSyntax fieldDeclaration)
+                {
+                    return;
+                }
+
+                foreach (AttributeListSyntax attributeList in fieldDeclaration.AttributeLists)
+                {
+                    if (attributeList.Target != null
+                        && attributeList.Target.Identifier.Kind() is not SyntaxKind.FieldDeclaration
+                    )
+                    {
+                        continue;
+                    }
+
+                    foreach (AttributeSyntax attribute in attributeList.Attributes)
+                    {
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
+                        )
                         {
-                            if (attributeList.Target.Identifier.IsKind(SyntaxKind.FieldKeyword))
-                            {
-                                var typeName = attributeTypeSymbol.ToFullName();
-                                fieldAttributesInfo.Add((typeName, attributeInfo));
-                            }
+                            continue;
                         }
+
+                        if (string.IsNullOrEmpty(attributeFullyQualifiedTypeName) == false
+                            && attributeTypeSymbol.HasFullName(attributeFullyQualifiedTypeName) == false
+                        )
+                        {
+                            continue;
+                        }
+
+                        var attributeInfo = AttributeInfo.From(
+                              attributeTypeSymbol
+                            , semanticModel
+                            , attribute.ArgumentList?.Arguments ?? Enumerable.Empty<AttributeArgumentSyntax>()
+                            , token
+                        );
+
+                        var typeName = attributeTypeSymbol.ToFullName();
+                        attributes.Add((typeName, attributeInfo));
+                    }
+                }
+            }
+        }
+
+        public static void GatherAttributes(
+              this IPropertySymbol propertySymbol
+            , SemanticModel semanticModel
+            , CancellationToken token
+            , out ImmutableArray<(string, AttributeInfo)> attributes
+            , string attributeFullyQualifiedTypeName = null
+        )
+        {
+            using var attributeBuilder = ImmutableArrayBuilder<(string, AttributeInfo)>.Rent();
+
+            GatherAttributes(
+                  propertySymbol
+                , semanticModel
+                , token
+                , in attributeBuilder
+                , attributeFullyQualifiedTypeName
+            );
+
+            attributes = attributeBuilder.ToImmutable();
+
+            static void GatherAttributes(
+                  IPropertySymbol symbol
+                , SemanticModel semanticModel
+                , CancellationToken token
+                , in ImmutableArrayBuilder<(string, AttributeInfo)> fieldAttributesInfo
+                , string attributeFullyQualifiedTypeName
+            )
+            {
+                if (symbol.DeclaringSyntaxReferences.Length != 1
+                    || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
+                )
+                {
+                    return;
+                }
+
+                var syntax = syntaxReference.GetSyntax(token);
+
+                if (syntax is not PropertyDeclarationSyntax propDeclaration)
+                {
+                    return;
+                }
+
+                foreach (AttributeListSyntax attributeList in propDeclaration.AttributeLists)
+                {
+                    if (attributeList.Target != null
+                        && attributeList.Target.Identifier.Kind() is not SyntaxKind.PropertyKeyword
+                    )
+                    {
+                        continue;
+                    }
+
+                    foreach (AttributeSyntax attribute in attributeList.Attributes)
+                    {
+                        if (semanticModel.GetSymbolInfo(attribute, token)
+                            .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
+                        )
+                        {
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(attributeFullyQualifiedTypeName) == false
+                            && attributeTypeSymbol.HasFullName(attributeFullyQualifiedTypeName) == false
+                        )
+                        {
+                            continue;
+                        }
+
+                        var attributeInfo = AttributeInfo.From(
+                              attributeTypeSymbol
+                            , semanticModel
+                            , attribute.ArgumentList?.Arguments ?? Enumerable.Empty<AttributeArgumentSyntax>()
+                            , token
+                        );
+
+                        var typeName = attributeTypeSymbol.ToFullName();
+                        fieldAttributesInfo.Add((typeName, attributeInfo));
                     }
                 }
             }
