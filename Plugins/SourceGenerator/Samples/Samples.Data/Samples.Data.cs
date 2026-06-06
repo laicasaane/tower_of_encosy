@@ -28,13 +28,31 @@ namespace Samples.Data.Databases
 #if UNITY_EDITOR
 namespace EncosyTower.Tests.Databases.Authoring
 {
+    using EncosyTower.Data;
     using EncosyTower.Databases.Authoring;
     using Samples.Data.Databases;
+    using Unity.Mathematics;
 
-    [AuthorDatabase(typeof(SampleDatabase))]
+    [AuthorDatabase(typeof(SampleDatabase), typeof(Int2DataSetConverter))]
     public partial struct SampleDatabaseAuthoring
     {
 
+    }
+
+    public readonly struct Int2DataSetConverter
+    {
+        public static int2[] Convert(Int2Data[] data)
+        {
+            return default;
+        }
+    }
+
+    [Data]
+    public partial struct Int2Data
+    {
+        [DataProperty] public readonly int X => Get_X();
+
+        [DataProperty] public readonly int Y => Get_Y();
     }
 }
 #endif
@@ -206,6 +224,7 @@ namespace Samples.Data.Enemies
     using EncosyTower.Databases;
     using EncosyTower.Initialization;
     using Samples.Data.Data;
+    using Unity.Mathematics;
     using UnityEngine;
 
     [Data]
@@ -220,6 +239,7 @@ namespace Samples.Data.Enemies
         [SerializeField] private Queue<float> _floatQueue;
         [SerializeField] private Stack<float> _floatStack;
         [SerializeField] private Modifier _modifier;
+        [SerializeField] private int2[] _int2Array;
 
         public void Initialize()
         {

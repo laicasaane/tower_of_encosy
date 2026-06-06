@@ -740,7 +740,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                 fieldType = genFieldType,
                                 isGenerated = true,
                             });
-                            continue;
+                            break;
                         }
 
                         if (attribute.AttributeClass.HasFullName(DATA_PROPERTY_ATTRIBUTE))
@@ -764,7 +764,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                 member = property,
                                 fieldType = fieldType,
                             });
-                            continue;
+                            break;
                         }
                     }
 
@@ -794,7 +794,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                 fieldType = field.Type,
                                 isGenerated = true,
                             });
-                            continue;
+                            break;
                         }
 
                         if (attribute.AttributeClass.HasFullName(SERIALIZE_FIELD_ATTRIBUTE))
@@ -805,7 +805,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                                 member = field,
                                 fieldType = field.Type,
                             });
-                            continue;
+                            break;
                         }
                     }
 
@@ -896,7 +896,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol, ignoredTypes, resultTypes);
             }
 
-            var collection = MakeCollectionModel(fieldType, ignoredTypes, resultTypes);
             var converter = TryMakeConverterModel(memberSymbol, fieldType, ignoredTypes, resultTypes);
 
             if (converter.kind == ConverterKind.None && sourceMemberSymbol != null)
@@ -924,6 +923,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
 
             var sheetConverter = default(ConverterSpec);
+            var collection = MakeCollectionModel(fieldType, ignoredTypes, resultTypes);
 
             if (collection.kind == CollectionKind.NotCollection
                 && converter.kind != ConverterKind.None
