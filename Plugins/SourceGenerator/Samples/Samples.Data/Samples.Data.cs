@@ -229,7 +229,7 @@ namespace Samples.Data.Enemies
     [Data]
     public partial struct Modifier
     {
-        [SerializeField, DataManualAuthoring(false)] private float _hp;
+        [SerializeField, DataManualAuthoring] private float _hp;
     }
 
     public struct EnemyTypeExConverter

@@ -20,7 +20,7 @@ namespace EncosyTower.Samples.Data
         [DataProperty]
         public readonly uint Id => Get_Id();
 
-        [DataProperty, DataManualAuthoring(false)]
+        [DataProperty, DataManualAuthoring(typeof(string))]
         public readonly string Value => Get_Value();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

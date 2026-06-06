@@ -16,7 +16,7 @@ namespace EncosyTower.Samples.Data
         [DataProperty(typeof(EntityIdData))]
         public readonly EntityId Id => Get_Id();
 
-        [DataProperty(typeof(uint)), DataManualAuthoring]
+        [DataProperty(typeof(uint)), DataManualAuthoring(typeof(string))]
         public readonly StringId Name => Get_Name();
 
         [DataProperty] public readonly EntityStatData Stat => Get_Stat();
