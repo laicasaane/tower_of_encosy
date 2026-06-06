@@ -184,111 +184,45 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             foreach (var member in memberModels)
             {
-                var coll = member.SelectCollection();
-                string newExpression;
+                var manualAuthoring = member.manualAuthoring;
 
-                switch (coll.kind)
+                if (manualAuthoring.defined)
                 {
-                    case CollectionKind.Array:
-                    case CollectionKind.List:
-                    case CollectionKind.HashSet:
-                    case CollectionKind.Queue:
-                    case CollectionKind.Stack:
+                    var type = manualAuthoring.type;
+                    var collection = manualAuthoring.collection;
+
+                    if (type.IsValid)
                     {
-                        var collectionTypeName = PR_VERTICAL_LIST_T;
+                        var newExpression = GetNewExpression(
+                              collection
+                            , type
+                            , dataMap
+                            , horizontalListMap
+                            , targetTypeFullName
+                            , containingTypeFullName
+                            , member.propertyName
+                        );
 
-                        if (coll.kind == CollectionKind.Array
-                            && horizontalListMap.TryGetValue(targetTypeFullName, out var innerMap)
-                        )
-                        {
-                            if (innerMap.TryGetValue(containingTypeFullName, out var propertyNames)
-                                && propertyNames.Contains(member.propertyName)
-                            )
-                            {
-                                collectionTypeName = PR_LIST_T;
-                            }
-                        }
-
-                        string elemTypeName;
-
-                        if (dataMap.ContainsKey(coll.elementType.fullName))
-                        {
-                            elemTypeName = $"__{coll.elementType.simpleName}";
-                        }
-                        else
-                        {
-                            elemTypeName = coll.elementType.fullName;
-                        }
-
-                        newExpression = $"new {collectionTypeName}<{elemTypeName}>()";
-                        break;
-                    }
-
-                    case CollectionKind.Dictionary:
-                    {
-                        string keyTypeName;
-                        string elemTypeName;
-
-                        if (dataMap.ContainsKey(coll.keyType.fullName))
-                        {
-                            keyTypeName = $"__{coll.keyType.simpleName}";
-                        }
-                        else
-                        {
-                            keyTypeName = coll.keyType.fullName;
-                        }
-
-                        if (dataMap.ContainsKey(coll.elementType.fullName))
-                        {
-                            elemTypeName = $"__{coll.elementType.simpleName}";
-                        }
-                        else
-                        {
-                            elemTypeName = coll.elementType.fullName;
-                        }
-
-                        newExpression = $"new {PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>()";
-                        break;
-                    }
-
-                    default:
-                    {
-                        var type = member.SelectType();
-
-                        if (dataMap.ContainsKey(type.fullName))
-                        {
-                            newExpression = $"new __{type.simpleName}()";
-                        }
-                        else if (type.isValueType)
-                        {
-                            newExpression = "default";
-                        }
-                        else if (type.fullName == "string")
-                        {
-                            newExpression = "string.Empty";
-                        }
-                        else if (type.hasParameterlessConstructor)
-                        {
-                            newExpression = $"new {type.fullName}()";
-                        }
-                        else
-                        {
-                            newExpression = "default";
-                        }
-
-                        break;
+                        p.PrintBeginLine("this.").Print(member.propertyName)
+                            .Print(" = ").Print(newExpression).PrintEndLine(";");
                     }
                 }
 
-                if (member.manualAuthoring.DefineEmitRawStringProperty)
                 {
+                    var newExpression = GetNewExpression(
+                          member.SelectCollection()
+                        , member.SelectType()
+                        , dataMap
+                        , horizontalListMap
+                        , targetTypeFullName
+                        , containingTypeFullName
+                        , member.propertyName
+                    );
+
                     p.PrintBeginLine("this.").Print(member.propertyName)
-                        .PrintEndLine(" = string.Empty;");
+                        .PrintIf(member.manualAuthoring.defined, MemberManualAuthoring.SUFFIX)
+                        .Print(" = ").Print(newExpression).PrintEndLine(";");
                 }
-
-                p.PrintBeginLine("this.").Print(member.propertyName)
-                    .PrintIf(member.manualAuthoring.defined, MemberManualAuthoring.SUFFIX)
-                    .Print(" = ").Print(newExpression).PrintEndLine(";");
             }
         }
 
@@ -309,94 +243,25 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     continue;
                 }
 
-                var coll = member.SelectCollection();
-                string propTypeName;
+                var manualAuthoring = member.manualAuthoring;
 
-                switch (coll.kind)
+                if (manualAuthoring.defined)
                 {
-                    case CollectionKind.Array:
-                    case CollectionKind.List:
-                    case CollectionKind.HashSet:
-                    case CollectionKind.Queue:
-                    case CollectionKind.Stack:
+                    var type = manualAuthoring.type;
+                    var collection = manualAuthoring.collection;
+
+                    if (type.IsValid)
                     {
-                        var collectionTypeName = PR_VERTICAL_LIST_T;
+                        var propertyTypeName = GetPropertyTypeName(
+                              collection
+                            , type
+                            , dataMap
+                            , horizontalListMap
+                            , tableTypeFullName
+                            , member.propertyName
+                        );
 
-                        if (coll.kind == CollectionKind.Array
-                            && horizontalListMap.TryGetValue(tableTypeFullName, out var innerMap)
-                        )
-                        {
-                            if (innerMap.TryGetValue(tableTypeFullName, out var propertyNames)
-                                && propertyNames.Contains(member.propertyName)
-                            )
-                            {
-                                collectionTypeName = PR_LIST_T;
-                            }
-                        }
-
-                        string elemTypeName;
-
-                        if (dataMap.ContainsKey(coll.elementType.fullName))
-                        {
-                            elemTypeName = $"__{coll.elementType.simpleName}";
-                        }
-                        else
-                        {
-                            elemTypeName = coll.elementType.fullName;
-                        }
-
-                        propTypeName = $"{collectionTypeName}<{elemTypeName}>";
-                        break;
-                    }
-
-                    case CollectionKind.Dictionary:
-                    {
-                        string keyTypeName;
-                        string elemTypeName;
-
-                        if (dataMap.ContainsKey(coll.keyType.fullName))
-                        {
-                            keyTypeName = $"__{coll.keyType.simpleName}";
-                        }
-                        else
-                        {
-                            keyTypeName = coll.keyType.fullName;
-                        }
-
-                        if (dataMap.ContainsKey(coll.elementType.fullName))
-                        {
-                            elemTypeName = $"__{coll.elementType.simpleName}";
-                        }
-                        else
-                        {
-                            elemTypeName = coll.elementType.fullName;
-                        }
-
-                        propTypeName = $"{PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>";
-                        break;
-                    }
-
-                    default:
-                    {
-                        var type = member.SelectType();
-
-                        if (dataMap.ContainsKey(type.fullName))
-                        {
-                            propTypeName = $"__{type.simpleName}";
-                        }
-                        else
-                        {
-                            propTypeName = type.fullName;
-                        }
-                        break;
-                    }
-                }
-
-                if (member.manualAuthoring.defined)
-                {
-                    if (member.manualAuthoring.DefineEmitRawStringProperty)
-                    {
-                        p.PrintBeginLine("public string ").Print(member.propertyName)
+                        p.PrintBeginLine("public ").Print(propertyTypeName).Print(" ").Print(member.propertyName)
                             .PrintEndLine(" { get; set; }");
                         p.PrintEndLine();
                     }
@@ -413,11 +278,220 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         .PrintEndLine("))]");
                 }
 
-                p.PrintBeginLine("public ").Print(propTypeName).Print(" ").Print(member.propertyName)
-                    .PrintIf(member.manualAuthoring.defined, MemberManualAuthoring.SUFFIX)
-                    .PrintEndLine(" { get; set; }");
-                p.PrintEndLine();
+                {
+                    var propertyTypeName = GetPropertyTypeName(
+                          member.SelectCollection()
+                        , member.SelectType()
+                        , dataMap
+                        , horizontalListMap
+                        , tableTypeFullName
+                        , member.propertyName
+                    );
+
+                    p.PrintBeginLine("public ").Print(propertyTypeName).Print(" ").Print(member.propertyName)
+                        .PrintIf(member.manualAuthoring.defined, MemberManualAuthoring.SUFFIX)
+                        .PrintEndLine(" { get; set; }");
+                    p.PrintEndLine();
+                }
             }
+        }
+
+        private static string GetNewExpression(
+              CollectionSpec collection
+            , TypeSpec type
+            , Dictionary<string, DataSpec> dataMap
+            , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
+            , string targetTypeFullName
+            , string containingTypeFullName
+            , string propertyName
+        )
+        {
+            string newExpression;
+
+            switch (collection.kind)
+            {
+                case CollectionKind.Array:
+                case CollectionKind.List:
+                case CollectionKind.HashSet:
+                case CollectionKind.Queue:
+                case CollectionKind.Stack:
+                {
+                    var collectionTypeName = PR_VERTICAL_LIST_T;
+
+                    if (collection.kind == CollectionKind.Array
+                        && horizontalListMap.TryGetValue(targetTypeFullName, out var innerMap)
+                    )
+                    {
+                        if (innerMap.TryGetValue(containingTypeFullName, out var propertyNames)
+                            && propertyNames.Contains(propertyName)
+                        )
+                        {
+                            collectionTypeName = PR_LIST_T;
+                        }
+                    }
+
+                    string elemTypeName;
+
+                    if (dataMap.ContainsKey(collection.elementType.fullName))
+                    {
+                        elemTypeName = $"__{collection.elementType.simpleName}";
+                    }
+                    else
+                    {
+                        elemTypeName = collection.elementType.fullName;
+                    }
+
+                    newExpression = $"new {collectionTypeName}<{elemTypeName}>()";
+                    break;
+                }
+
+                case CollectionKind.Dictionary:
+                {
+                    string keyTypeName;
+                    string elemTypeName;
+
+                    if (dataMap.ContainsKey(collection.keyType.fullName))
+                    {
+                        keyTypeName = $"__{collection.keyType.simpleName}";
+                    }
+                    else
+                    {
+                        keyTypeName = collection.keyType.fullName;
+                    }
+
+                    if (dataMap.ContainsKey(collection.elementType.fullName))
+                    {
+                        elemTypeName = $"__{collection.elementType.simpleName}";
+                    }
+                    else
+                    {
+                        elemTypeName = collection.elementType.fullName;
+                    }
+
+                    newExpression = $"new {PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>()";
+                    break;
+                }
+
+                default:
+                {
+                    if (dataMap.ContainsKey(type.fullName))
+                    {
+                        newExpression = $"new __{type.simpleName}()";
+                    }
+                    else if (type.isValueType)
+                    {
+                        newExpression = "default";
+                    }
+                    else if (type.fullName == "string")
+                    {
+                        newExpression = "string.Empty";
+                    }
+                    else if (type.hasParameterlessConstructor)
+                    {
+                        newExpression = $"new {type.fullName}()";
+                    }
+                    else
+                    {
+                        newExpression = "default";
+                    }
+
+                    break;
+                }
+            }
+
+            return newExpression;
+        }
+
+        private static string GetPropertyTypeName(
+              CollectionSpec collection
+            , TypeSpec type
+            , Dictionary<string, DataSpec> dataMap
+            , Dictionary<string, Dictionary<string, HashSet<string>>> horizontalListMap
+            , string tableTypeFullName
+            , string propertyName
+        )
+        {
+            string propertyTypeName;
+
+            switch (collection.kind)
+            {
+                case CollectionKind.Array:
+                case CollectionKind.List:
+                case CollectionKind.HashSet:
+                case CollectionKind.Queue:
+                case CollectionKind.Stack:
+                {
+                    var collectionTypeName = PR_VERTICAL_LIST_T;
+
+                    if (collection.kind == CollectionKind.Array
+                        && horizontalListMap.TryGetValue(tableTypeFullName, out var innerMap)
+                    )
+                    {
+                        if (innerMap.TryGetValue(tableTypeFullName, out var propertyNames)
+                            && propertyNames.Contains(propertyName)
+                        )
+                        {
+                            collectionTypeName = PR_LIST_T;
+                        }
+                    }
+
+                    string elemTypeName;
+
+                    if (dataMap.ContainsKey(collection.elementType.fullName))
+                    {
+                        elemTypeName = $"__{collection.elementType.simpleName}";
+                    }
+                    else
+                    {
+                        elemTypeName = collection.elementType.fullName;
+                    }
+
+                    propertyTypeName = $"{collectionTypeName}<{elemTypeName}>";
+                    break;
+                }
+
+                case CollectionKind.Dictionary:
+                {
+                    string keyTypeName;
+                    string elemTypeName;
+
+                    if (dataMap.ContainsKey(collection.keyType.fullName))
+                    {
+                        keyTypeName = $"__{collection.keyType.simpleName}";
+                    }
+                    else
+                    {
+                        keyTypeName = collection.keyType.fullName;
+                    }
+
+                    if (dataMap.ContainsKey(collection.elementType.fullName))
+                    {
+                        elemTypeName = $"__{collection.elementType.simpleName}";
+                    }
+                    else
+                    {
+                        elemTypeName = collection.elementType.fullName;
+                    }
+
+                    propertyTypeName = $"{PR_DICTIONARY_T}<{keyTypeName}, {elemTypeName}>";
+                    break;
+                }
+
+                default:
+                {
+                    if (dataMap.ContainsKey(type.fullName))
+                    {
+                        propertyTypeName = $"__{type.simpleName}";
+                    }
+                    else
+                    {
+                        propertyTypeName = type.fullName;
+                    }
+                    break;
+                }
+            }
+
+            return propertyTypeName;
         }
 
         private readonly void WriteSheetValueConverters(ref Printer p)

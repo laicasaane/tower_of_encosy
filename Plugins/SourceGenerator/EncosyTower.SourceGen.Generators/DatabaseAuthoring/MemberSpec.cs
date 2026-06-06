@@ -38,17 +38,19 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public const string SUFFIX = "_Manual";
 
         public bool defined;
-        public bool emitRawStringProperty;
-
-        public readonly bool DefineEmitRawStringProperty => defined && emitRawStringProperty;
+        public TypeSpec type;
+        public CollectionSpec collection;
 
         public readonly bool Equals(MemberManualAuthoring other)
-            => defined == other.defined && emitRawStringProperty == other.emitRawStringProperty;
+            => defined == other.defined
+            && type.Equals(other.type)
+            && collection.Equals(other.collection)
+            ;
 
         public readonly override bool Equals(object obj)
             => obj is MemberManualAuthoring other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(defined, emitRawStringProperty);
+            => HashValue.Combine(defined, type, collection);
     }
 }

@@ -604,10 +604,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                           type
                         , dbConverterMap
                         , tableInfo.tableConverterMap
-                        , queue
                         , ignoredTypes
                         , resultTypes
                     );
+
+                    EnqueueTypes(queue, resultTypes);
+                    resultTypes.Clear();
 
                     if (dataModel.propRefs.Count < 1
                         && dataModel.fieldRefs.Count < 1
@@ -628,7 +630,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
               ITypeSymbol type
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
-            , Queue<ITypeSymbol> queue
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
         )
@@ -637,7 +638,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                   type
                 , dbConverterMap
                 , tableConverterMap
-                , queue
                 , ignoredTypes
                 , resultTypes
                 , out var propRefs
@@ -659,7 +659,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                       baseType
                     , dbConverterMap
                     , tableConverterMap
-                    , queue
                     , ignoredTypes
                     , resultTypes
                     , out var basePropRefs
@@ -678,12 +677,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 baseType = baseType.BaseType;
             }
 
-            var rawLayers = baseTypeBuilder.ToImmutable();
+            var baseTypes = baseTypeBuilder.ToImmutable();
             using var reversedBaseTypeBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
 
-            for (var i = rawLayers.Length - 1; i >= 0; i--)
+            for (var i = baseTypes.Length - 1; i >= 0; i--)
             {
-                reversedBaseTypeBuilder.Add(rawLayers[i]);
+                reversedBaseTypeBuilder.Add(baseTypes[i]);
             }
 
             return new DataSpec {
@@ -701,7 +700,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
               ITypeSymbol type
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
-            , Queue<ITypeSymbol> queue
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
             , out EquatableArray<MemberSpec> propRefs
@@ -842,7 +840,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
-                    , queue
                     , ignoredTypes
                     , resultTypes
                 ));
@@ -870,7 +867,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
-                    , queue
                     , ignoredTypes
                     , resultTypes
                 ));
@@ -887,13 +883,18 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , ITypeSymbol fieldType
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
-            , Queue<ITypeSymbol> queue
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
         )
         {
-            resultTypes.Clear();
             TryAddToResultTypes(fieldType, ignoredTypes, resultTypes);
+
+            var manualAuthoring = ExtractManualAuthoring(memberSymbol, ignoredTypes, resultTypes);
+
+            if (manualAuthoring.defined == false && sourceMemberSymbol != null)
+            {
+                manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol, ignoredTypes, resultTypes);
+            }
 
             var collection = MakeCollectionModel(fieldType, ignoredTypes, resultTypes);
             var converter = TryMakeConverterModel(memberSymbol, fieldType, ignoredTypes, resultTypes);
@@ -944,16 +945,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 }
             }
 
-            EnqueueTypes(queue, resultTypes);
-            resultTypes.Clear();
-
-            var manualAuthoring = ExtractManualAuthoring(memberSymbol);
-
-            if (manualAuthoring.defined == false && sourceMemberSymbol != null)
-            {
-                manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol);
-            }
-
             return new MemberSpec {
                 propertyName = propertyName,
                 manualAuthoring = manualAuthoring,
@@ -965,7 +956,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             static ConverterSpec TryFallbackConverterModel(
                   ITypeSymbol fieldType
-                , IgnoredTypes ignoreTypes
+                , IgnoredTypes ignoredTypes
                 , ResultTypes resultTypes
             )
             {
@@ -979,7 +970,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     return default;
                 }
 
-                return MakeConverterModelFromMethod(namedReturn, convertMethod, ignoreTypes, resultTypes);
+                return MakeConverterModelFromMethod(namedReturn, convertMethod, ignoredTypes, resultTypes);
             }
         }
 
@@ -1022,11 +1013,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void EnqueueTypes(Queue<ITypeSymbol> queue, HashSet<ITypeSymbol> types)
         {
-            if (types == null)
-            {
-                return;
-            }
-
             foreach (var type in types)
             {
                 if (type != null)
@@ -1220,7 +1206,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static MemberManualAuthoring ExtractManualAuthoring(ISymbol memberSymbol)
+        private static MemberManualAuthoring ExtractManualAuthoring(
+              ISymbol memberSymbol
+            , IgnoredTypes ignoredTypes
+            , ResultTypes resultTypes
+        )
         {
             var attrib = memberSymbol.GetAttribute(DATA_MANUAL_AUTHORING_ATTRIBUTE);
 
@@ -1231,11 +1221,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             var result = new MemberManualAuthoring() { defined = true };
 
-            if (attrib.ConstructorArguments.Length > 0)
+            foreach (var arg in attrib.ConstructorArguments)
             {
-                if (attrib.ConstructorArguments[0].Value is bool value)
+                if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol type)
                 {
-                    result.emitRawStringProperty = value;
+                    TryAddToResultTypes(type, ignoredTypes, resultTypes);
+
+                    result.type = MakeTypeModel(type);
+                    result.collection = MakeCollectionModel(type, ignoredTypes, resultTypes);
                 }
             }
 
@@ -1506,20 +1499,36 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             foreach (var member in members)
             {
-                var coll = member.SelectCollection();
+                var manualAuthoring = member.manualAuthoring;
 
-                if (coll.kind == CollectionKind.Dictionary)
+                if (manualAuthoring.defined && manualAuthoring.type.IsValid)
                 {
-                    TryEnqueue(coll.keyType.fullName, dataMap, uniqueTypes, queue);
-                    TryEnqueue(coll.elementType.fullName, dataMap, uniqueTypes, queue);
+                    Enqueue(manualAuthoring.collection, manualAuthoring.type, dataMap, uniqueTypes, queue);
                 }
-                else if (coll.kind != CollectionKind.NotCollection)
+
+                Enqueue(member.SelectCollection(), member.SelectType(), dataMap, uniqueTypes, queue);
+            }
+
+            static void Enqueue(
+                  CollectionSpec collection
+                , TypeSpec type
+                , Dictionary<string, DataSpec> dataMap
+                , HashSet<string> uniqueTypes
+                , Queue<string> queue
+            )
+            {
+                if (collection.kind == CollectionKind.Dictionary)
                 {
-                    TryEnqueue(coll.elementType.fullName, dataMap, uniqueTypes, queue);
+                    TryEnqueue(collection.keyType.fullName, dataMap, uniqueTypes, queue);
+                    TryEnqueue(collection.elementType.fullName, dataMap, uniqueTypes, queue);
+                }
+                else if (collection.kind != CollectionKind.NotCollection)
+                {
+                    TryEnqueue(collection.elementType.fullName, dataMap, uniqueTypes, queue);
                 }
                 else
                 {
-                    TryEnqueue(member.SelectType().fullName, dataMap, uniqueTypes, queue);
+                    TryEnqueue(type.fullName, dataMap, uniqueTypes, queue);
                 }
             }
         }

@@ -9,6 +9,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public bool isValueType;
         public bool hasParameterlessConstructor;
 
+        public readonly bool IsValid => string.IsNullOrEmpty(fullName) == false;
+
         public readonly bool Equals(TypeSpec other)
             => string.Equals(fullName, other.fullName, StringComparison.Ordinal)
             && string.Equals(simpleName, other.simpleName, StringComparison.Ordinal)
