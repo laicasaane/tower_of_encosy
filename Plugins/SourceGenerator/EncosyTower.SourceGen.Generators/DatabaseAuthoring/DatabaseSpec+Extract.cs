@@ -1305,7 +1305,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 {
                     if (ctor is IMethodSymbol m
                         && m.DeclaredAccessibility == Accessibility.Public
-                        && m.Parameters.Length == 0)
+                        && m.Parameters.Length == 0
+                    )
                     {
                         hasPublicParameterlessCtor = true;
                         break;
@@ -1328,7 +1329,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             {
                 if (member is not IMethodSymbol method
                     || method.IsGenericMethod
-                    || method.DeclaredAccessibility != Accessibility.Public)
+                    || method.DeclaredAccessibility != Accessibility.Public
+                )
                 {
                     continue;
                 }
