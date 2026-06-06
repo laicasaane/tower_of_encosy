@@ -15,7 +15,7 @@ namespace EncosyTower.Data.Authoring
     /// <para>
     /// Converter precedences (smaller index means higher precedence):
     /// <list type="number">
-    /// <item><see cref="EncosyTower.Data.Authoring.DataConverterAttribute"/></item>
+    /// <item><see cref="EncosyTower.Data.Authoring.DataAuthoringConverterAttribute"/></item>
     /// <item><see cref="EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"/></item>
     /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
     /// <item><see cref="EncosyTower.Databases.TableAttribute"/></item>
@@ -33,24 +33,24 @@ namespace EncosyTower.Data.Authoring
     /// [Data]
     /// public partial class MyData
     /// {
-    ///     [DataProperty, DataConverter(typeof(IntToFloatConverter))]
+    ///     [DataProperty, DataAuthoringConverter(typeof(IntToFloatConverter))]
     ///     public float Hp { get; set; }
     ///
-    ///     [JsonProperty, DataConverter(typeof(IntToFloatConverter))]
+    ///     [JsonProperty, DataAuthoringConverter(typeof(IntToFloatConverter))]
     ///     private float _atk;
     /// }
     /// </code>
     /// </example>
     [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public sealed class DataConverterAttribute : Attribute
+    public sealed class DataAuthoringConverterAttribute : Attribute
     {
-        public Type Type { get; }
-
-        /// <inheritdoc cref="DataConverterAttribute" />
-        public DataConverterAttribute(Type type)
+        /// <inheritdoc cref="DataAuthoringConverterAttribute" />
+        public DataAuthoringConverterAttribute(Type type)
         {
-            this.Type = type;
+            Type = type;
         }
+
+        public Type Type { get; }
     }
 }

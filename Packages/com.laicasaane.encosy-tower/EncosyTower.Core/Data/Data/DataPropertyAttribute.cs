@@ -9,11 +9,14 @@ namespace EncosyTower.Data
         {
         }
 
-        public DataPropertyAttribute(Type fieldType)
+        public DataPropertyAttribute(Type fieldType, Type converterType = null)
         {
             FieldType = fieldType;
+            ConverterType = converterType;
         }
 
         public Type FieldType { get; }
+
+        public Type ConverterType { get; }
     }
 }

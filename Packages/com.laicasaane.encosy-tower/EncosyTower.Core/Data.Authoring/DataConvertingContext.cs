@@ -3,7 +3,7 @@ using System.Globalization;
 using EncosyTower.Core;
 
 
-namespace EncosyTower.Data
+namespace EncosyTower.Data.Authoring
 {
     [ApiForAuthoring]
     public readonly struct DataConvertingContext

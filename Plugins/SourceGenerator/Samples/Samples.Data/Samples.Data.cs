@@ -89,10 +89,10 @@ namespace Samples.Data.Data
     [Data]
     public partial class StatData
     {
-        [DataConverter(typeof(WrapperConverter<float, FloatWrapper>))]
+        [DataAuthoringConverter(typeof(WrapperConverter<float, FloatWrapper>))]
         [DataProperty] public FloatWrapper Hp => Get_Hp();
 
-        [DataConverter(typeof(FloatWrapperConverter))]
+        [DataAuthoringConverter(typeof(FloatWrapperConverter))]
         [JsonProperty] private FloatWrapper _atk;
     }
 
@@ -232,7 +232,7 @@ namespace Samples.Data.Enemies
     {
         [SerializeField] private IdData _id;
         [SerializeField] private string _name;
-        [DataConverter(typeof(EnemyTypeExConverter))]
+        [DataAuthoringConverter(typeof(EnemyTypeExConverter))]
         [SerializeField] private EnemyTypeEx _type;
         [SerializeField] private StatData _stat;
         [SerializeField] private HashSet<int> _intSet;

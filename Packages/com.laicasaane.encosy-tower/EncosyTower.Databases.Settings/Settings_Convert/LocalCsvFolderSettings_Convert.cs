@@ -1,5 +1,5 @@
 using Cathei.BakingSheet;
-using EncosyTower.Data;
+using EncosyTower.Data.Authoring;
 using EncosyTower.Databases.Authoring;
 
 namespace EncosyTower.Databases.Settings

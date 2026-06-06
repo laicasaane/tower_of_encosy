@@ -87,5 +87,10 @@ namespace EncosyTower.Data
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-    public sealed class DataAttribute : Attribute { }
+    public sealed class DataAttribute : Attribute
+    {
+        public Type[] Converters { get; set; }
+
+        public Type[] Comparers { get; set; }
+    }
 }

@@ -10,7 +10,7 @@ using NReco.Csv;
 
 namespace EncosyTower.Databases.Authoring
 {
-    using DCC = EncosyTower.Data.DataConvertingContext;
+    using DCC = Data.Authoring.DataConvertingContext;
 
     public class DatabaseCsvSheetConverter : DatabaseRawSheetConverter
     {

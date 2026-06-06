@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Cathei.BakingSheet;
 using Cathei.BakingSheet.Internal;
 using Cathei.BakingSheet.Raw;
-using EncosyTower.Data;
+using EncosyTower.Data.Authoring;
 using EncosyTower.Databases.Authoring.SourceGen;
 using EncosyTower.Naming;
 using Microsoft.Extensions.Logging;

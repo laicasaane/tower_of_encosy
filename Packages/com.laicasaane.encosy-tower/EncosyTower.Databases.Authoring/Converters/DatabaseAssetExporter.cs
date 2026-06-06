@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cathei.BakingSheet;
-using EncosyTower.Data;
+using EncosyTower.Data.Authoring;
 using EncosyTower.Databases.Authoring.SourceGen;
 using EncosyTower.UnityExtensions;
 using Microsoft.Extensions.Logging;

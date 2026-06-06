@@ -3,8 +3,7 @@ using System;
 namespace EncosyTower.Data
 {
     /// <summary>
-    /// Instructs the source generator to use a custom comparer for the annotated property or field
-    /// in the authoring pipeline.
+    /// Instructs the source generator to use a custom comparer for the annotated property or field.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -30,12 +29,12 @@ namespace EncosyTower.Data
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class DataComparerAttribute : Attribute
     {
-        public Type Type { get; }
-
         /// <inheritdoc cref="DataComparerAttribute" />
         public DataComparerAttribute(Type type)
         {
-            this.Type = type;
+            Type = type;
         }
+
+        public Type Type { get; }
     }
 }
