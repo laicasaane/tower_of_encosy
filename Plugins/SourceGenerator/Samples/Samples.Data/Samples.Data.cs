@@ -363,7 +363,7 @@ namespace Samples.Data.ConvertibleIds
         public static implicit operator int(IdData id)
             => id.Value;
 
-        public static int Convert(int a) => a;
+        private static int Convert(int a) => a;
 
         public static bool Equals(int a, int b) => a == b;
 

@@ -1017,7 +1017,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                 foreach (var ctor in ctors)
                 {
                     if (ctor is not IMethodSymbol ctorM
-                        || validateAccessibility(ctorM.DeclaredAccessibility) == false)
+                        || validateAccessibility(ctorM.DeclaredAccessibility) == false
+                    )
                     {
                         continue;
                     }
@@ -1042,8 +1043,9 @@ namespace EncosyTower.SourceGen.Generators.Data
             foreach (var m in members)
             {
                 if (m is not IMethodSymbol method
-                    || method.DeclaredAccessibility != Accessibility.Public
-                    || method.Parameters.Length != 1)
+                    || validateAccessibility(method.DeclaredAccessibility) == false
+                    || method.Parameters.Length != 1
+                )
                 {
                     continue;
                 }
