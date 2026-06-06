@@ -18,7 +18,7 @@ MonoBehaviour:
         _kind: Enemy
         _subId: 1
       _rarity: 1
-    _name: Wolf
+    _name: 3
     _type: 0
     _stat:
       _hp: 1
@@ -28,7 +28,7 @@ MonoBehaviour:
         _kind: Enemy
         _subId: 2
       _rarity: 1
-    _name: Goblin
+    _name: 4
     _type: 0
     _stat:
       _hp: 2
@@ -38,7 +38,7 @@ MonoBehaviour:
         _kind: Enemy
         _subId: 2
       _rarity: 2
-    _name: Hob Goblin
+    _name: 5
     _type: 1
     _stat:
       _hp: 3
@@ -48,7 +48,7 @@ MonoBehaviour:
         _kind: Enemy
         _subId: 2
       _rarity: 3
-    _name: King Goblin
+    _name: 6
     _type: 2
     _stat:
       _hp: 5

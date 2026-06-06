@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: sample_database_asset
   m_EditorClassIdentifier: 
   _tables:
+  - {fileID: 11400000, guid: 635dfc255853d0045aeba340617f5fd0, type: 2}
   - {fileID: 11400000, guid: 1c0b13c9416779643a79a60d24136ff4, type: 2}
   - {fileID: 11400000, guid: a8a134dde717ca94da6ca38e3a4f6620, type: 2}
   _redundantTabless: []

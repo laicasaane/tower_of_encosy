@@ -16,7 +16,7 @@ MonoBehaviour:
   - _id:
       _kind: Hero
       _subId: 1
-    _name: Richard
+    _name: 1
     _stat:
       _hp: 10
       _atk: 1
@@ -36,7 +36,7 @@ MonoBehaviour:
   - _id:
       _kind: Hero
       _subId: 2
-    _name: Maverick
+    _name: 2
     _stat:
       _hp: 8
       _atk: 2

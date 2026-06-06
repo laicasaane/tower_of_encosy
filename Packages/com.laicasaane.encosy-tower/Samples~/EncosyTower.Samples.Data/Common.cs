@@ -2,6 +2,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EncosyTower.Data;
+using EncosyTower.Ids;
+using EncosyTower.StringIds;
 using EncosyTower.TypeWraps;
 using EncosyTower.UnionIds;
 
@@ -133,5 +135,23 @@ namespace EncosyTower.Samples.Data
 
         public readonly override string ToString()
             => $"[{_level}] = {_multiplier}";
+    }
+
+    public readonly struct UIntToStringIdConverter
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static StringId Convert(uint value)
+        {
+            return (StringId)((Id)value);
+        }
+    }
+
+    public readonly struct StringIdToUIntConverter
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint Convert(StringId value)
+        {
+            return (uint)((Id)value);
+        }
     }
 }
