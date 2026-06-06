@@ -277,8 +277,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     }
                 }
 
-                var idType = baseType.TypeArguments[0];
                 var dataType = baseType.TypeArguments[1];
+                var idType = FindCorrectIdType(dataType, baseType.TypeArguments[0]);
                 var idTypeFullName = idType.ToFullName();
                 var dataTypeFullName = dataType.ToFullName();
                 var tableTypeName = tableType.Name;
@@ -320,6 +320,63 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     });
                 }
             }
+        }
+
+        private static ITypeSymbol FindCorrectIdType(ITypeSymbol dataType, ITypeSymbol candidateIdType)
+        {
+            ISymbol member = null;
+            var members = dataType.GetMembers();
+
+            foreach (var candidate in members)
+            {
+                if (candidate is IPropertySymbol && candidate.Name.Equals("Id", StringComparison.Ordinal))
+                {
+                    member = candidate;
+                    break;
+                }
+
+                if (candidate is IFieldSymbol && candidate.Name.Equals("_id", StringComparison.Ordinal))
+                {
+                    member = candidate;
+                    break;
+                }
+            }
+
+            if (member == null)
+            {
+                return candidateIdType;
+            }
+
+            if (member is IFieldSymbol field)
+            {
+                return field.Type;
+            }
+
+            var attributes = member.GetAttributes();
+            ITypeSymbol correctIdType = default;
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute.ConstructorArguments.Length > 1
+                    && attribute.AttributeClass.HasFullName(GENERATED_PROPERTY_FROM_FIELD)
+                    && attribute.ConstructorArguments[1].Value is ITypeSymbol found1
+                )
+                {
+                    correctIdType = found1;
+                    break;
+                }
+
+                if (attribute.ConstructorArguments.Length > 0
+                    && attribute.AttributeClass.HasFullName(DATA_PROPERTY_ATTRIBUTE)
+                    && attribute.ConstructorArguments[0].Value is ITypeSymbol found2
+                )
+                {
+                    correctIdType = found2;
+                    break;
+                }
+            }
+
+            return correctIdType ?? candidateIdType;
         }
 
         private static void ProcessTableInfoList(
@@ -668,84 +725,93 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         propertyMap.Add(member.Name, property);
                     }
 
-                    var genPropAttr = property.GetAttribute(GENERATED_PROPERTY_FROM_FIELD);
+                    var attributes = property.GetAttributes();
 
-                    if (genPropAttr != null
-                        && genPropAttr.ConstructorArguments.Length > 1
-                        && genPropAttr.ConstructorArguments[0].Value is string fieldName
-                        && genPropAttr.ConstructorArguments[1].Value is ITypeSymbol genFieldType
-                    )
+                    foreach (var attribute in attributes)
                     {
-                        properties.Add(new MemberInfo {
-                            propertyName = property.Name,
-                            fieldName = fieldName,
-                            member = property,
-                            fieldType = genFieldType,
-                            isGenerated = true,
-                        });
-                        continue;
-                    }
-
-                    var dataPropAttr = property.GetAttribute(DATA_PROPERTY_ATTRIBUTE);
-
-                    if (dataPropAttr != null)
-                    {
-                        ITypeSymbol fieldType;
-
-                        if (dataPropAttr.ConstructorArguments.Length < 1
-                            || dataPropAttr.ConstructorArguments[0].Value is not ITypeSymbol ft
+                        if (attribute.AttributeClass.HasFullName(GENERATED_PROPERTY_FROM_FIELD)
+                            && attribute.ConstructorArguments.Length > 1
+                            && attribute.ConstructorArguments[0].Value is string fieldName
+                            && attribute.ConstructorArguments[1].Value is ITypeSymbol genFieldType
                         )
                         {
-                            fieldType = property.Type;
-                        }
-                        else
-                        {
-                            fieldType = ft;
+                            properties.Add(new MemberInfo {
+                                propertyName = property.Name,
+                                fieldName = fieldName,
+                                member = property,
+                                fieldType = genFieldType,
+                                isGenerated = true,
+                            });
+                            continue;
                         }
 
-                        fields.Add(new MemberInfo {
-                            propertyName = property.Name,
-                            fieldName = property.ToPrivateFieldName(),
-                            member = property,
-                            fieldType = fieldType,
-                        });
-                        continue;
+                        if (attribute.AttributeClass.HasFullName(DATA_PROPERTY_ATTRIBUTE))
+                        {
+                            ITypeSymbol fieldType;
+
+                            if (attribute.ConstructorArguments.Length < 1
+                                || attribute.ConstructorArguments[0].Value is not ITypeSymbol ft
+                            )
+                            {
+                                fieldType = property.Type;
+                            }
+                            else
+                            {
+                                fieldType = ft;
+                            }
+
+                            fields.Add(new MemberInfo {
+                                propertyName = property.Name,
+                                fieldName = property.ToPrivateFieldName(),
+                                member = property,
+                                fieldType = fieldType,
+                            });
+                            continue;
+                        }
                     }
+
+                    continue;
                 }
-                else if (member is IFieldSymbol field)
+
+                if (member is IFieldSymbol field)
                 {
                     if (fieldMap.ContainsKey(member.Name) == false)
                     {
                         fieldMap.Add(member.Name, field);
                     }
 
-                    var genFieldAttr = field.GetAttribute(GENERATED_FIELD_FROM_PROPERTY);
+                    var attributes = field.GetAttributes();
 
-                    if (genFieldAttr != null
-                        && genFieldAttr.ConstructorArguments.Length > 0
-                        && genFieldAttr.ConstructorArguments[0].Value is string propName
-                    )
+                    foreach (var attribute in attributes)
                     {
-                        fields.Add(new MemberInfo {
-                            propertyName = propName,
-                            fieldName = field.Name,
-                            member = field,
-                            fieldType = field.Type,
-                            isGenerated = true,
-                        });
-                        continue;
+                        if (attribute.AttributeClass.HasFullName(GENERATED_FIELD_FROM_PROPERTY)
+                            && attribute.ConstructorArguments.Length > 0
+                            && attribute.ConstructorArguments[0].Value is string propName
+                        )
+                        {
+                            fields.Add(new MemberInfo {
+                                propertyName = propName,
+                                fieldName = field.Name,
+                                member = field,
+                                fieldType = field.Type,
+                                isGenerated = true,
+                            });
+                            continue;
+                        }
+
+                        if (attribute.AttributeClass.HasFullName(SERIALIZE_FIELD_ATTRIBUTE))
+                        {
+                            fields.Add(new MemberInfo {
+                                propertyName = field.ToPropertyName(),
+                                fieldName = field.Name,
+                                member = field,
+                                fieldType = field.Type,
+                            });
+                            continue;
+                        }
                     }
 
-                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE))
-                    {
-                        fields.Add(new MemberInfo {
-                            propertyName = field.ToPropertyName(),
-                            fieldName = field.Name,
-                            member = field,
-                            fieldType = field.Type,
-                        });
-                        continue;
-                    }
+                    continue;
                 }
             }
 
@@ -770,10 +836,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 uniqueFieldNames.Add(member.fieldName);
                 propBuilder.Add(BuildMemberModel(
-                      member.propertyName
-                    , member.member
+                      member
                     , sourceMemberSymbol
-                    , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
                     , queue
@@ -798,10 +862,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 uniqueFieldNames.Add(member.fieldName);
                 fieldBuilder.Add(BuildMemberModel(
-                      member.propertyName
-                    , member.member
+                      member
                     , generatedFromMember
-                    , member.fieldType
                     , dbConverterMap
                     , tableConverterMap
                     , queue
@@ -815,10 +877,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         }
 
         private static MemberSpec BuildMemberModel(
-              string propertyName
-            , ISymbol memberSymbol
+              MemberInfo member
             , ISymbol sourceMemberSymbol
-            , ITypeSymbol fieldType
             , Dictionary<string, ConverterSpec> dbConverterMap
             , Dictionary<string, ConverterSpec> tableConverterMap
             , Queue<ITypeSymbol> queue
@@ -826,6 +886,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , ResultTypes resultTypes
         )
         {
+            var propertyName = member.propertyName;
+            var memberSymbol = member.member;
+            var fieldType = member.fieldType;
+
             resultTypes.Clear();
             TryAddToResultTypes(fieldType, ignoredTypes, resultTypes);
 
@@ -888,10 +952,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol);
             }
 
+            var typeModel = MakeTypeModel(fieldType);
             return new MemberSpec {
                 propertyName = propertyName,
                 manualAuthoring = manualAuthoring,
-                type = MakeTypeModel(fieldType),
+                type = typeModel,
                 collection = collection,
                 converter = converter,
                 sheetConverter = sheetConverter,

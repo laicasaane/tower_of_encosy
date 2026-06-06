@@ -21,6 +21,7 @@
         public const string DATA_NAMESPACE = "EncosyTower.Data";
         public const string IDATA = $"global::{DATA_NAMESPACE}.IData";
         public const string DATA_ATTRIBUTE = $"{DATA_NAMESPACE}.DataAttribute";
+        public const string PROPERTY_TYPE_ATTRIBUTE = $"global::{DATA_NAMESPACE}.PropertyTypeAttribute";
         public const string DATA_PROPERTY_ATTRIBUTE = $"global::{DATA_NAMESPACE}.DataPropertyAttribute";
         public const string DATA_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataConverterAttribute";
         public const string DATA_MANUAL_AUTHORING_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataManualAuthoringAttribute";

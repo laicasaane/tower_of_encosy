@@ -4,14 +4,14 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 {
     public struct SheetSpec : IEquatable<SheetSpec>
     {
-        public string hintName;
+        public string sheetName;
         public string idTypeFullName;
         public string idTypeSimpleName;
         public string dataTypeFullName;
         public string dataTypeSimpleName;
         public string tableTypeFullName;
-        public string sheetName;
         public EquatableArray<string> nestedDataTypeFullNames;
+        public string hintName;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(idTypeFullName) == false
