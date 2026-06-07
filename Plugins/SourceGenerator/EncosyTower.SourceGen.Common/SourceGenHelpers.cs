@@ -30,7 +30,7 @@ namespace EncosyTower.SourceGen
         public struct SourceGenConfig : IEquatable<SourceGenConfig>
         {
             public const string OUTPUT_PATH_ADDITIONAL_FILE
-                = "encosy-tower-sourcegen-output-path.EncosyTower.SourceGen.Generators.additionalfile";
+                = "sourcegen-output-path.EncosyTower.SourceGen.Generators.additionalfile";
 
             public string projectPath;
             public bool outputSourceGenFiles;
