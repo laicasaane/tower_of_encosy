@@ -28,11 +28,11 @@ namespace EncosyTower.SourceGen.Generators.Variants
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var hintName = $"{decl.fileHintName}.g.cs";
-            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
-
             try
             {
+                var hintName = $"{decl.fileHintName}.g.cs";
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , PrintAdditionalUsings()
@@ -40,7 +40,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     , string.Empty
                     , hintName
                     , sourceFilePath
-                    , decl.location.ToLocation()
                     , projectPath
                 );
             }
@@ -51,7 +50,11 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, decl.location.ToLocation(), e.ToUnityPrintableString()));
+                context.ReportDiagnostic(Diagnostic.Create(
+                      errorDescriptor
+                    , decl.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
 
@@ -111,11 +114,11 @@ namespace EncosyTower.SourceGen.Generators.Variants
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var hintName = $"InternalVariants__{assemblyName.ToValidIdentifier()}.g.cs";
-            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
-
             try
             {
+                var hintName = $"InternalVariants__{assemblyName.ToValidIdentifier()}.g.cs";
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , PrintAdditionalUsings()
@@ -123,7 +126,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     , string.Empty
                     , hintName
                     , sourceFilePath
-                    , Location.None
                     , projectPath
                 );
             }
@@ -134,7 +136,11 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, Location.None, e.ToUnityPrintableString()));
+                context.ReportDiagnostic(Diagnostic.Create(
+                      errorDescriptor
+                    , Location.None
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
 

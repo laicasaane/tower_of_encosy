@@ -75,7 +75,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         , model.closingSource
                         , model.containerHintName
                         , filePath
-                        , model.location.ToLocation()
                         , projectPath
                         , printer
                     );
@@ -83,6 +82,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 foreach (var sheet in model.sheets)
                 {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+
                     printer.Clear();
                     printer.PrintLineIf(databaseAuthoring, DEFINE_DATABASE_AUTHORING, DEFINE_NO_DATABASE_AUTHORING);
                     printer.PrintLineIf(bakingSheet, DEFINE_BAKING_SHEET, DEFINE_NO_BAKING_SHEET);
@@ -97,7 +98,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         , model.closingSource
                         , sheet.hintName
                         , filePath
-                        , model.location.ToLocation()
                         , projectPath
                         , printer
                     );
@@ -105,6 +105,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
             catch (Exception ex)
             {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
                     , model.location.ToLocation()

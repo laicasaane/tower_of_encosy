@@ -14,6 +14,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         private const string MONO_BINDER_ATTRIBUTE_METADATA =
             "EncosyTower.Mvvm.ViewBinding.Components.MonoBinderAttribute";
 
+        private static readonly DiagnosticDescriptor s_errorDescriptor = new(
+              id: "SG_MONO_BINDER_UNKNOWN_0001"
+            , title: "Mono Binder Generator Error"
+            , messageFormat: "This error indicates a bug in the Mono Binder source generators. Error message: '{0}'."
+            , category: "EncosyTower.Mvvm"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: ""
+        );
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
@@ -37,6 +47,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
+                    , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -46,6 +57,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , MonoBinderSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
@@ -55,14 +67,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = declaration.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource
                     , declaration.WriteCode()
                     , declaration.closingSource
                     , declaration.hintName
-                    , declaration.sourceFilePath
-                    , declaration.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }
@@ -72,6 +87,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 {
                     throw;
                 }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , Location.None
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
     }

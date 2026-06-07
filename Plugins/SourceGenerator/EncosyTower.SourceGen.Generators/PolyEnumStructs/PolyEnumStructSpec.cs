@@ -10,7 +10,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         public string typeNamespace;
         public string typeIdentifier;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public InterfaceSpec interfaceDef;

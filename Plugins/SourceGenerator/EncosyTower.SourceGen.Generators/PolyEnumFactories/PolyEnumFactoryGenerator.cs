@@ -113,9 +113,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             var semanticModel = context.SemanticModel;
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = typeSyntax.SyntaxTree;
-            var fileTypeName = wrapperSymbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, typeSyntax, fileTypeName);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
+            var hintName = syntaxTree.GetHintName(typeSyntax, wrapperSymbol.ToFileName());
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   typeSyntax
@@ -139,7 +137,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 enumStructIsReadOnly = enumStructSymbol.IsReadOnly,
                 enumStructSize = 0,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 parentIsNamespace = typeSyntax.Parent is BaseNamespaceDeclarationSyntax,
@@ -714,17 +711,46 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            context.OutputSource(
-                  outputSourceGenFiles
-                , candidate.openingSource
-                , candidate.WriteCode(compilation)
-                , candidate.closingSource
-                , candidate.hintName
-                , candidate.sourceFilePath
-                , candidate.location.ToLocation()
-                , projectPath
-            );
+            try
+            {
+                var assemblyName = compilation.assemblyName;
+                var hintName = candidate.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , candidate.openingSource
+                    , candidate.WriteCode(compilation)
+                    , candidate.closingSource
+                    , candidate.hintName
+                    , sourceFilePath
+                    , projectPath
+                );
+            }
+            catch (Exception e)
+            {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , candidate.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
+            }
         }
+
+        private static readonly DiagnosticDescriptor s_errorDescriptor
+            = new("SG_POLY_ENUM_FACTORY_UNKNOWN_0001"
+                , "Poly Enum Factory Generator Error"
+                , "This error indicates a bug in the Poly Enum Factory source generators. Error message: '{0}'."
+                , NAMESPACE
+                , DiagnosticSeverity.Error
+                , isEnabledByDefault: true
+                , description: ""
+            );
 
         private static void PrintAdditionalUsings(ref Printer p)
         {

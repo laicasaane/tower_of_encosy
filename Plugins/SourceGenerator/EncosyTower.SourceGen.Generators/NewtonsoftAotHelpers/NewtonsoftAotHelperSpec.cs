@@ -9,7 +9,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
         public string openingSource;
         public string closingSource;
         public string typeName;
-        public string fileHintName;
+        public string hintName;
         public string baseTypeFullName;
         public string namespaceName;
         public EquatableArray<AotTypeSpec> typeCandidates;
@@ -22,7 +22,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
         public readonly bool Equals(NewtonsoftAotHelperSpec other)
             => string.Equals(typeName, other.typeName, StringComparison.Ordinal)
-            && string.Equals(fileHintName, other.fileHintName, StringComparison.Ordinal)
+            && string.Equals(hintName, other.hintName, StringComparison.Ordinal)
             && string.Equals(baseTypeFullName, other.baseTypeFullName, StringComparison.Ordinal)
             && string.Equals(namespaceName, other.namespaceName, StringComparison.Ordinal)
             && typeCandidates.Equals(other.typeCandidates)
@@ -36,7 +36,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             => obj is NewtonsoftAotHelperSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(typeName, fileHintName, baseTypeFullName, namespaceName)
+            => HashValue.Combine(typeName, hintName, baseTypeFullName, namespaceName)
             .Add(typeCandidates.GetHashCode())
             .Add(containingTypes.GetHashCode())
             .Add(isStatic)

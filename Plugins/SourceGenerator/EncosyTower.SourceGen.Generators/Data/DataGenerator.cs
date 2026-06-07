@@ -32,6 +32,7 @@ namespace EncosyTower.SourceGen.Generators.Data
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
+                    , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -41,6 +42,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , DataSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
@@ -55,19 +57,27 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = declaration.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource
                     , declaration.WriteCode()
                     , declaration.closingSource
                     , declaration.hintName
-                    , declaration.sourceFilePath
-                    , declaration.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }
             catch (Exception e)
             {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
                     , declaration.location.ToLocation()

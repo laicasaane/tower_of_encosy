@@ -13,7 +13,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         public string openingSource;
         public string closingSource;
         public string hintName;
-        public string sourceFilePath;
         public string typeName;
         public string typeKeyword;
         public bool generateInterface;
@@ -62,19 +61,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             );
 
             var syntaxTree = syntax.SyntaxTree;
-            var assemblyName = context.SemanticModel.Compilation.AssemblyName;
             var fileTypeName = symbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  UserDataGenerator.GENERATOR_NAME
-                , syntax
-                , fileTypeName
-            );
-
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  assemblyName
-                , UserDataGenerator.GENERATOR_NAME
-                , fileTypeName
-            );
+            var hintName = syntaxTree.GetHintName(syntax, fileTypeName);
 
             return new UserDataSpec {
                 location = LocationInfo.From(syntax.GetLocation()),
@@ -83,7 +71,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 openingSource = openingSource,
                 closingSource = closingSource,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 generateInterface = generateInterface,
                 propertyId = propertyId,
                 propertyVersion = propertyVersion,

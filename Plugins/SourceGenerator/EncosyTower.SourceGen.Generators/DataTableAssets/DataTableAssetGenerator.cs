@@ -32,6 +32,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
+                    , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -41,6 +42,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , DataTableAssetSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
@@ -50,14 +52,17 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = declaration.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource
                     , declaration.WriteCode()
                     , declaration.closingSource
                     , declaration.hintName
-                    , declaration.sourceFilePath
-                    , declaration.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

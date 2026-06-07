@@ -14,7 +14,6 @@ namespace EncosyTower.SourceGen.Generators.Data
         public string baseTypeName;
         public string accessibilityKeyword;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public string idPropertyTypeName;

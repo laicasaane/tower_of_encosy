@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,9 +18,23 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         private const string BINDING_PROPERTY_ATTRIBUTE_FULL = $"{NAMESPACE}.ViewBinding.BindingPropertyAttribute";
         private const string ADAPTER_ATTRIBUTE_FULL = $"{NAMESPACE}.ViewBinding.AdapterAttribute";
 
+        private static readonly DiagnosticDescriptor s_errorDescriptor = new(
+              id: "SG_INTERNAL_STRING_ADAPTERS_UNKNOWN_0001"
+            , title: "Internal String Adapter Generator Error"
+            , messageFormat: "This error indicates a bug in the Internal String Adapter source generators. Error message: '{0}'."
+            , category: "EncosyTower.Mvvm"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: ""
+        );
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
+
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+
             var obsCandidatesProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       OBSERVABLE_PROPERTY_ATTRIBUTE_FULL
@@ -80,18 +95,18 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
                 });
 
             var combined = allCandidatesFlat
-                .Combine(existingAdaptersProvider.Collect())
-                .Combine(context.CompilationProvider.Select(static (c, _) => c.Assembly.Name))
-                .Combine(projectPathProvider);
+                .Combine(compilationProvider)
+                .Combine(projectPathProvider)
+                .Combine(existingAdaptersProvider.Collect());
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
-                    , source.Left.Right         // assemblyName
-                    , source.Left.Left.Left     // merged candidates
-                    , source.Left.Left.Right    // existingAdapterTypeNames
-                    , source.Right.projectPath
-                    , source.Right.outputSourceGenFiles
+                    , source.Left.Left.Right
+                    , source.Left.Left.Left
+                    , source.Right
+                    , source.Left.Right.projectPath
+                    , source.Left.Right.outputSourceGenFiles
                 );
             });
         }
@@ -269,7 +284,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , string assemblyName
+            , CompilationInfo compilation
             , ImmutableArray<StringAdapterSpec> candidates
             , ImmutableArray<string> existingAdapterTypeNames
             , string projectPath
@@ -283,20 +298,35 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var fileName = $"InternalStringAdapters_{assemblyName}";
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(string.Empty) & 0x7fffffff;
-            var hintName = $"{fileName}_{stableHashCode}_0.g.cs";
-            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+            try
+            {
+                var assemblyName = compilation.assemblyName;
+                var fileName = "InternalStringAdapters";
+                var hintName = SourceGenHelpers.BuildHintName(assemblyName, fileName, string.Empty, 0);
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
-            context.OutputSource(
-                  outputSourceGenFiles
-                , PrintAdditionalUsings()
-                , WriteAdapter(candidates, existingAdapterTypeNames, assemblyName)
-                , string.Empty
-                , hintName
-                , sourceFilePath
-                , Location.None
-            );
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , PrintAdditionalUsings()
+                    , WriteAdapter(candidates, existingAdapterTypeNames, assemblyName)
+                    , string.Empty
+                    , hintName
+                    , sourceFilePath
+                );
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , Location.None
+                    , ex.ToUnityPrintableString()
+                ));
+            }
         }
     }
 }

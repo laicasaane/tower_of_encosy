@@ -34,6 +34,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
+                    , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -43,6 +44,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , ObservablePropertySpec declaration
             , string projectPath
             , bool outputSourceGenFiles
@@ -52,6 +54,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = declaration.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 var source = (declaration.fieldRefs.Count > 0 || declaration.propRefs.Count > 0)
                     ? declaration.WriteCode()
                     : declaration.WriteCodeWithoutMember();
@@ -62,8 +68,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     , source
                     , declaration.closingSource
                     , declaration.hintName
-                    , declaration.sourceFilePath
-                    , declaration.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

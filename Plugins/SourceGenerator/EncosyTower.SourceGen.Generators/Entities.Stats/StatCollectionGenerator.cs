@@ -15,13 +15,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string STAT_COLLECTION_ATTRIBUTE = $"global::{NAMESPACE}.StatCollectionAttribute";
         private const string STAT_COLLECTION_ATTRIBUTE_METADATA = $"{NAMESPACE}.StatCollectionAttribute";
         private const string STAT_SYSTEM_ATTRIBUTE = $"global::{NAMESPACE}.StatSystemAttribute";
-        private const string GENERATOR_NAME = nameof(StatCollectionGenerator);
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
-            var isValidProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE).isValid);
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   STAT_COLLECTION_ATTRIBUTE_METADATA
@@ -30,15 +29,15 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             ).Where(static t => t.IsValid);
 
             var combined = candidateProvider
-                .Combine(isValidProvider)
-                .Where(static t => t.Right)
-                .Select(static (t, _) => t.Left)
-                .Combine(projectPathProvider);
+                .Combine(compilationProvider)
+                .Combine(projectPathProvider)
+                .Where(static t => t.Left.Right.isValid);
 
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
-                    , source.Left
+                    , source.Left.Right
+                    , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
                 );
@@ -81,9 +80,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
             var typeIdentifier = structSymbol.ToValidIdentifier();
-            var fileTypeName = structSymbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
+            var hintName = syntaxTree.GetHintName(syntax, structSymbol.ToFileName());
             var statSystemFullTypeName = statSystemTypeSymbol.ToFullName();
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
@@ -100,7 +97,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 typeIdentifier = typeIdentifier,
                 statSystemFullTypeName = statSystemFullTypeName,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 location = LocationInfo.From(syntax.GetLocation()),
@@ -253,6 +249,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , StatCollectionSpec candidate
             , string projectPath
             , bool outputSourceGenFiles
@@ -267,14 +264,17 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = candidate.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource
                     , candidate.WriteCode()
                     , candidate.closingSource
                     , candidate.hintName
-                    , candidate.sourceFilePath
-                    , candidate.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

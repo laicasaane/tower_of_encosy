@@ -38,7 +38,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , dataTypeSimpleName
                 , tableTypeFullName
                 , sheetName
-            )
-            .Add(nestedDataTypeFullNames.GetHashCode());
+                , nestedDataTypeFullNames
+            );
     }
 }

@@ -24,9 +24,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             var helperProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       ATTRIBUTE_METADATA
-                    , static (node, _) => node is TypeDeclarationSyntax s
-                        && s.Kind() is SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration
-                    , GetHelperInfo
+                    , ValidateNode
+                    , BuildModel
                 )
                 .Where(static t => t.IsValid);
 
@@ -35,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 .Combine(projectPathProvider)
                 .Where(static t => t.Left.Right.isValid);
 
-            context.RegisterSourceOutput(combined, (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
                     , source.Left.Right
@@ -46,14 +45,21 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             });
         }
 
-        private static NewtonsoftAotHelperSpec GetHelperInfo(
+        private static bool ValidateNode(SyntaxNode node, CancellationToken _)
+        {
+            return node is TypeDeclarationSyntax s
+                && s.Kind() is SyntaxKind.ClassDeclaration or SyntaxKind.StructDeclaration;
+        }
+
+        private static NewtonsoftAotHelperSpec BuildModel(
               GeneratorAttributeSyntaxContext context
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.TargetSymbol is not INamedTypeSymbol symbol
+            if (context.TargetNode is not TypeDeclarationSyntax syntax
+                || context.TargetSymbol is not INamedTypeSymbol symbol
                 || context.Attributes.Length < 1
             )
             {
@@ -94,12 +100,14 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
+            var hintName = syntax.SyntaxTree.GetHintName(context.TargetNode, symbol.ToFileName());
+
             return new NewtonsoftAotHelperSpec {
                 location = LocationInfo.From(context.TargetNode.GetLocation()),
                 openingSource = openingSource,
                 closingSource = closingSource,
                 typeName = symbol.Name,
-                fileHintName = symbol.ToFileName(),
+                hintName = hintName,
                 baseTypeFullName = baseType.ToFullName(),
                 namespaceName = namespaceName,
                 typeCandidates = typeCandidatesBuilder.ToImmutable().AsEquatableArray(),
@@ -323,15 +331,9 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
             try
             {
-                var locationFilePath = helperInfo.location.filePath;
-                var stableHashCode = SourceGenHelpers.GetStableHashCode(locationFilePath) & 0x7fffffff;
-                var lineNumber = helperInfo.location.startLine;
-                var hintName = $"{helperInfo.fileHintName}_{stableHashCode}_{lineNumber}.g.cs";
-                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(
-                      compilation.assemblyName
-                    , hintName
-                    , projectPath
-                );
+                var assemblyName = compilation.assemblyName;
+                var hintName = helperInfo.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                 context.OutputSource(
                       outputSourceGenFiles
@@ -340,7 +342,6 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                     , helperInfo.closingSource
                     , hintName
                     , sourceFilePath
-                    , helperInfo.location.ToLocation()
                     , projectPath
                 );
             }
@@ -350,8 +351,24 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 {
                     throw;
                 }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , helperInfo.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
+
+        private static readonly DiagnosticDescriptor s_errorDescriptor
+            = new("SG_NEWTONSOFT_JSON_AOT_HELPER_UNKNOWN_0001"
+                , "Newtonsoft Json Aot Helper Generator Error"
+                , "This error indicates a bug in the Newtonsoft Json Aot Helper source generators. Error message: '{0}'."
+                , NAMESPACE
+                , DiagnosticSeverity.Error
+                , isEnabledByDefault: true
+                , description: ""
+            );
 
         private static void PrintAdditionalUsings(ref Printer p)
         {

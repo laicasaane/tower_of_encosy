@@ -137,13 +137,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             );
 
             var syntaxTree = typeSyntax.SyntaxTree;
-            var fileTypeName = typeSymbol.ToFileName();
-
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  DatabaseGenerator.GENERATOR_NAME
-                , typeSyntax
-                , fileTypeName
-            );
+            var hintName = syntaxTree.GetHintName(typeSyntax, typeSymbol.ToFileName());
 
             var location = LocationInfo.From(
                 typeSymbol.Locations.Length > 0

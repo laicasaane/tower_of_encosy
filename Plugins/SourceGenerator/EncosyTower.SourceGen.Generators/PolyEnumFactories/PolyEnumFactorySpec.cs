@@ -17,7 +17,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         public string enumStructNamespace;
         public string fieldName;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public EquatableArray<CaseSpec> cases;

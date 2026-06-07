@@ -71,7 +71,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 return default;
             }
 
-            var fileHintName = symbol.ToFileName();
             var syntaxTree = context.TargetNode.SyntaxTree;
             var containingNs = symbol.ContainingNamespace;
 
@@ -84,8 +83,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     ? containingNs.ToDisplayString()
                     : string.Empty,
                 containingTypeDeclarations = symbol.GetContainingTypes(),
-                fileHintName = fileHintName,
-                sourceHintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, context.TargetNode, fileHintName),
+                hintName = syntaxTree.GetHintName(context.TargetNode, symbol.ToFileName()),
             };
         }
 
@@ -251,170 +249,190 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var accessDeclarations = new List<UserDataAccessorDeclaration>(accessorInfos.Length);
-
-            for (var i = 0; i < accessorInfos.Length; i++)
+            try
             {
-                var aInfo = accessorInfos[i];
+                var accessDeclarations = new List<UserDataAccessorDeclaration>(accessorInfos.Length);
 
-                if (string.IsNullOrEmpty(aInfo.vaultMetadataName) == false
-                    && string.Equals(aInfo.vaultMetadataName, vaultInfo.metadataName, StringComparison.Ordinal) == false
-                )
+                for (var i = 0; i < accessorInfos.Length; i++)
                 {
-                    continue;
+                    var aInfo = accessorInfos[i];
+
+                    if (string.IsNullOrEmpty(aInfo.vaultMetadataName) == false
+                        && string.Equals(aInfo.vaultMetadataName, vaultInfo.metadataName, StringComparison.Ordinal) == false
+                    )
+                    {
+                        continue;
+                    }
+
+                    var accessDeclaration = new UserDataAccessorDeclaration(aInfo);
+
+                    if (accessDeclaration.IsValid)
+                    {
+                        accessDeclarations.Add(accessDeclaration);
+                    }
                 }
 
-                var accessDeclaration = new UserDataAccessorDeclaration(aInfo);
-
-                if (accessDeclaration.IsValid)
+                if (accessDeclarations.Count < 1)
                 {
-                    accessDeclarations.Add(accessDeclaration);
+                    return;
                 }
-            }
 
-            if (accessDeclarations.Count < 1)
-            {
-                return;
-            }
+                accessDeclarations.Sort(static (x, y) => {
+                    return string.Compare(x.SymbolName, y.SymbolName, StringComparison.Ordinal);
+                });
 
-            accessDeclarations.Sort(static (x, y) => {
-                return string.Compare(x.SymbolName, y.SymbolName, StringComparison.Ordinal);
-            });
-
-            var declaration = new UserDataVaultDeclaration(
+                var declaration = new UserDataVaultDeclaration(
                   vaultInfo.className
                 , vaultInfo.isStatic
                 , accessDeclarations
             );
 
-            var openingPrinter = Printer.DefaultLarge;
-            PrinterAction printUsings = compilation.references.unitask
+                var openingPrinter = Printer.DefaultLarge;
+                PrinterAction printUsings = compilation.references.unitask
                 ? PrintUsingUniTask
                 : PrintUsingAwaitable;
 
-            printUsings(ref openingPrinter);
+                printUsings(ref openingPrinter);
 
-            var hasNamespace = string.IsNullOrEmpty(vaultInfo.namespaceName) == false;
+                var hasNamespace = string.IsNullOrEmpty(vaultInfo.namespaceName) == false;
 
-            if (hasNamespace)
-            {
-                openingPrinter.PrintLine($"namespace {vaultInfo.namespaceName}");
-                openingPrinter.OpenScope();
+                if (hasNamespace)
+                {
+                    openingPrinter.PrintLine($"namespace {vaultInfo.namespaceName}");
+                    openingPrinter.OpenScope();
+                }
+
+                var containingTypes = vaultInfo.containingTypeDeclarations;
+
+                for (var i = 0; i < containingTypes.Count; i++)
+                {
+                    openingPrinter.PrintLine(containingTypes[i]);
+                    openingPrinter.OpenScope();
+                }
+
+                var openingSource = openingPrinter.Result;
+                var closingPrinter = Printer.DefaultLarge;
+                closingPrinter.PrintEndLine();
+
+                var closingDepth = containingTypes.Count + (hasNamespace ? 1 : 0);
+
+                for (var i = 0; i < closingDepth; i++)
+                {
+                    closingPrinter = closingPrinter.DecreasedIndent();
+                    closingPrinter.PrintLine("}");
+                }
+
+                var assemblyName = compilation.assemblyName;
+                var hintName = vaultInfo.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , openingSource
+                    , declaration.WriteCode()
+                    , closingPrinter.Result
+                    , vaultInfo.hintName
+                    , sourceFilePath
+                    , projectPath
+                );
             }
-
-            var containingTypes = vaultInfo.containingTypeDeclarations;
-
-            for (var i = 0; i < containingTypes.Count; i++)
+            catch (Exception e)
             {
-                openingPrinter.PrintLine(containingTypes[i]);
-                openingPrinter.OpenScope();
-            }
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
 
-            var openingSource = openingPrinter.Result;
-            var closingPrinter = Printer.DefaultLarge;
-            closingPrinter.PrintEndLine();
-
-            var closingDepth = containingTypes.Count + (hasNamespace ? 1 : 0);
-
-            for (var i = 0; i < closingDepth; i++)
-            {
-                closingPrinter = closingPrinter.DecreasedIndent();
-                closingPrinter.PrintLine("}");
-            }
-
-            var closingSource = closingPrinter.Result;
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(vaultInfo.location.filePath) & 0x7fffffff;
-            var fileHintName = vaultInfo.fileHintName;
-            var sourceFileName = $"{fileHintName}_{stableHashCode}_0.g.cs";
-            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(compilation.assemblyName, sourceFileName, projectPath);
-
-            context.OutputSource(
-                  outputSourceGenFiles
-                , openingSource
-                , declaration.WriteCode()
-                , closingSource
-                , vaultInfo.sourceHintName
-                , sourceFilePath
-                , vaultInfo.location.ToLocation()
-                , projectPath
-            );
-
-            return;
-
-            static void PrintUsingUniTask(ref Printer p)
-            {
-                p.PrintEndLine();
-                p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-                p.PrintEndLine();
-                p.PrintLine("using UnityTask = global::Cysharp.Threading.Tasks.UniTask;");
-                p.PrintLine("using UnityTaskᐸboolᐳ = global::Cysharp.Threading.Tasks.UniTask<bool>;");
-                PrintAdditionalUsings(ref p);
-                p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-                p.PrintEndLine();
-            }
-
-            static void PrintUsingAwaitable(ref Printer p)
-            {
-                p.PrintEndLine();
-                p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-                p.PrintEndLine();
-                p.PrintLine("using UnityTask = global::UnityEngine.Awaitable;");
-                p.PrintLine("using UnityTaskᐸboolᐳ = global::UnityEngine.Awaitable<bool>;");
-                PrintAdditionalUsings(ref p);
-                p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
-                p.PrintEndLine();
-            }
-
-            static void PrintAdditionalUsings(ref Printer p)
-            {
-                p.PrintLine("using CancellationToken = global::System.Threading.CancellationToken;");
-                p.PrintLine("using DoesNotReturnIfAttribute = global::System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;");
-                p.PrintLine("using EncryptionBase = global::EncosyTower.Encryption.EncryptionBase;");
-                p.PrintLine("using ExcludeFromCodeCoverageAttribute = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
-                p.PrintLine("using HideInCallstackAttribute = global::UnityEngine.HideInCallstackAttribute;");
-                p.PrintLine("using GeneratedCodeAttribute = global::System.CodeDom.Compiler.GeneratedCodeAttribute;");
-                p.PrintLine("using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;");
-                p.PrintLine("using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;");
-                p.PrintLine("using NotNullAttribute = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
-                p.PrintLine("using SaveDestination = global::EncosyTower.UserDataVaults.SaveDestination;");
-                p.PrintLine("using SerializableAttribute = global::System.SerializableAttribute;");
-                p.PrintLine("using SerializeField = global::UnityEngine.SerializeField;");
-                p.PrintLine("using SpanᐸStringIdᐸstringᐳᐳ = global::System.Span<global::EncosyTower.StringIds.StringId<string>>;");
-                p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
-                p.PrintLine("using SpanᐸIUserDataAccessorᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
-                p.PrintLine("using StackTraceHiddenAttribute = global::System.Diagnostics.StackTraceHiddenAttribute;");
-                p.PrintLine("using StringIdᐸstringᐳ = global::EncosyTower.StringIds.StringId<string>;");
-                p.PrintLine("using StringVault = global::EncosyTower.StringIds.StringVault;");
-                p.PrintLine("using SourcePriority = global::EncosyTower.UserDataVaults.SourcePriority;");
-                p.PrintLine("using ThrowHelper = global::EncosyTower.Debugging.ThrowHelper;");
-                p.PrintLine("using UnityTasks = global::EncosyTower.Tasks.UnityTasks;");
-                p.PrintLine("using UserDataStoreArgs = global::EncosyTower.UserDataVaults.UserDataStoreArgs;");
-                p.PrintLine("using UserDataVaultBase = global::EncosyTower.UserDataVaults.UserDataVaultBase;");
-                p.PrintEndLine();
-
-                p.PrintLine("using IDeinitializable = global::EncosyTower.Initialization.IDeinitializable;");
-                p.PrintLine("using IDisposable = global::System.IDisposable;");
-                p.PrintLine("using IEnumerable = global::System.Collections.IEnumerable;");
-                p.PrintLine("using IEnumerator = global::System.Collections.IEnumerator;");
-                p.PrintLine("using IEnumerableᐸStringIdᐸstringᐳᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.StringIds.StringId<string>>;");
-                p.PrintLine("using IEnumeratorᐸStringIdᐸstringᐳᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.StringIds.StringId<string>>;");
-                p.PrintLine("using IEnumerableᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserData>;");
-                p.PrintLine("using IEnumeratorᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserData>;");
-                p.PrintLine("using IEnumerableᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
-                p.PrintLine("using IEnumeratorᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
-                p.PrintLine("using IInitializable = global::EncosyTower.Initialization.IInitializable;");
-                p.PrintLine("using IIsCreated = global::EncosyTower.Common.IIsCreated;");
-                p.PrintLine("using ILogger = global::EncosyTower.Logging.ILogger;");
-                p.PrintLine("using IUserData = global::EncosyTower.UserDataVaults.IUserData;");
-                p.PrintLine("using IUserDataAccessor = global::EncosyTower.UserDataVaults.IUserDataAccessor;");
-                p.PrintLine("using IUserDataAccessorCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorCollection;");
-                p.PrintLine("using IUserDataAccessorReadOnlyCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorReadOnlyCollection;");
-                p.PrintLine("using IUserDataCollection = global::EncosyTower.UserDataVaults.IUserDataCollection;");
-                p.PrintLine("using IUserDataDirectory = global::EncosyTower.UserDataVaults.IUserDataDirectory;");
-                p.PrintLine("using IUserDataStringIdCollection = global::EncosyTower.UserDataVaults.IUserDataStringIdCollection;");
-                p.PrintEndLine();
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , vaultInfo.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
 
+        private static readonly DiagnosticDescriptor s_errorDescriptor = new(
+              id: "SG_USER_DATA_VAULT_UNKNOWN_0001"
+            , title: "User Data Vault Generator Error"
+            , messageFormat: "This error indicates a bug in the User Data Vault source generator. Error message: '{0}'."
+            , category: USER_DATA_ATTRIBUTE
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: ""
+        );
+
+        private static void PrintUsingUniTask(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using UnityTask = global::Cysharp.Threading.Tasks.UniTask;");
+            p.PrintLine("using UnityTaskᐸboolᐳ = global::Cysharp.Threading.Tasks.UniTask<bool>;");
+            PrintAdditionalUsings(ref p);
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+        }
+
+        private static void PrintUsingAwaitable(ref Printer p)
+        {
+            p.PrintEndLine();
+            p.Print("#pragma warning disable CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+            p.PrintLine("using UnityTask = global::UnityEngine.Awaitable;");
+            p.PrintLine("using UnityTaskᐸboolᐳ = global::UnityEngine.Awaitable<bool>;");
+            PrintAdditionalUsings(ref p);
+            p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
+            p.PrintEndLine();
+        }
+
+        private static void PrintAdditionalUsings(ref Printer p)
+        {
+            p.PrintLine("using CancellationToken = global::System.Threading.CancellationToken;");
+            p.PrintLine("using DoesNotReturnIfAttribute = global::System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;");
+            p.PrintLine("using EncryptionBase = global::EncosyTower.Encryption.EncryptionBase;");
+            p.PrintLine("using ExcludeFromCodeCoverageAttribute = global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute;");
+            p.PrintLine("using HideInCallstackAttribute = global::UnityEngine.HideInCallstackAttribute;");
+            p.PrintLine("using GeneratedCodeAttribute = global::System.CodeDom.Compiler.GeneratedCodeAttribute;");
+            p.PrintLine("using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;");
+            p.PrintLine("using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;");
+            p.PrintLine("using NotNullAttribute = global::System.Diagnostics.CodeAnalysis.NotNullAttribute;");
+            p.PrintLine("using SaveDestination = global::EncosyTower.UserDataVaults.SaveDestination;");
+            p.PrintLine("using SerializableAttribute = global::System.SerializableAttribute;");
+            p.PrintLine("using SerializeField = global::UnityEngine.SerializeField;");
+            p.PrintLine("using SpanᐸStringIdᐸstringᐳᐳ = global::System.Span<global::EncosyTower.StringIds.StringId<string>>;");
+            p.PrintLine("using SpanᐸIUserDataᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserData>;");
+            p.PrintLine("using SpanᐸIUserDataAccessorᐳ = global::System.Span<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
+            p.PrintLine("using StackTraceHiddenAttribute = global::System.Diagnostics.StackTraceHiddenAttribute;");
+            p.PrintLine("using StringIdᐸstringᐳ = global::EncosyTower.StringIds.StringId<string>;");
+            p.PrintLine("using StringVault = global::EncosyTower.StringIds.StringVault;");
+            p.PrintLine("using SourcePriority = global::EncosyTower.UserDataVaults.SourcePriority;");
+            p.PrintLine("using ThrowHelper = global::EncosyTower.Debugging.ThrowHelper;");
+            p.PrintLine("using UnityTasks = global::EncosyTower.Tasks.UnityTasks;");
+            p.PrintLine("using UserDataStoreArgs = global::EncosyTower.UserDataVaults.UserDataStoreArgs;");
+            p.PrintLine("using UserDataVaultBase = global::EncosyTower.UserDataVaults.UserDataVaultBase;");
+            p.PrintEndLine();
+
+            p.PrintLine("using IDeinitializable = global::EncosyTower.Initialization.IDeinitializable;");
+            p.PrintLine("using IDisposable = global::System.IDisposable;");
+            p.PrintLine("using IEnumerable = global::System.Collections.IEnumerable;");
+            p.PrintLine("using IEnumerator = global::System.Collections.IEnumerator;");
+            p.PrintLine("using IEnumerableᐸStringIdᐸstringᐳᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.StringIds.StringId<string>>;");
+            p.PrintLine("using IEnumeratorᐸStringIdᐸstringᐳᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.StringIds.StringId<string>>;");
+            p.PrintLine("using IEnumerableᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserData>;");
+            p.PrintLine("using IEnumeratorᐸIUserDataᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserData>;");
+            p.PrintLine("using IEnumerableᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerable<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
+            p.PrintLine("using IEnumeratorᐸIUserDataAccessorᐳ = global::System.Collections.Generic.IEnumerator<global::EncosyTower.UserDataVaults.IUserDataAccessor>;");
+            p.PrintLine("using IInitializable = global::EncosyTower.Initialization.IInitializable;");
+            p.PrintLine("using IIsCreated = global::EncosyTower.Common.IIsCreated;");
+            p.PrintLine("using ILogger = global::EncosyTower.Logging.ILogger;");
+            p.PrintLine("using IUserData = global::EncosyTower.UserDataVaults.IUserData;");
+            p.PrintLine("using IUserDataAccessor = global::EncosyTower.UserDataVaults.IUserDataAccessor;");
+            p.PrintLine("using IUserDataAccessorCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorCollection;");
+            p.PrintLine("using IUserDataAccessorReadOnlyCollection = global::EncosyTower.UserDataVaults.IUserDataAccessorReadOnlyCollection;");
+            p.PrintLine("using IUserDataCollection = global::EncosyTower.UserDataVaults.IUserDataCollection;");
+            p.PrintLine("using IUserDataDirectory = global::EncosyTower.UserDataVaults.IUserDataDirectory;");
+            p.PrintLine("using IUserDataStringIdCollection = global::EncosyTower.UserDataVaults.IUserDataStringIdCollection;");
+            p.PrintEndLine();
+        }
     }
 }

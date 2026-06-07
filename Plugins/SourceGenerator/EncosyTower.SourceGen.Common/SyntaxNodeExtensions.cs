@@ -22,41 +22,20 @@ namespace EncosyTower.SourceGen
         public static int GetStableHashCode(this SyntaxTree syntaxTree)
             => SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
 
-        public static string GetGeneratedSourceFileName(
-              this SyntaxTree syntaxTree
-            , string generatorName
-            , SyntaxNode node
-            , string typeName
-        )
-            => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLineNumber(), typeName);
+        public static string GetHintName( this SyntaxTree syntaxTree, SyntaxNode node, string fileName)
+            => GetHintName(syntaxTree, node.GetLineNumber(), fileName);
 
-        public static string GetGeneratedSourceFileName(
-              this SyntaxTree syntaxTree
-            , string generatorName
-            , int salting
-            , string typeName
-        )
+        public static string GetHintName(this SyntaxTree syntaxTree, int salting, string fileName)
         {
             var stableHashCode = syntaxTree.GetStableHashCode();
             var postfix = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(typeName) == false)
+            if (string.IsNullOrWhiteSpace(fileName) == false)
             {
-                postfix = $"{typeName}{postfix}";
+                postfix = $"{fileName}{postfix}";
             }
 
             return $"{postfix}_{stableHashCode}_{salting}.g.cs";
-        }
-
-        public static string GetGeneratedSourceFilePath(
-              this SyntaxTree syntaxTree
-            , string assemblyName
-            , string generatorName
-            , string typeName
-        )
-        {
-            var fileName = GetGeneratedSourceFileName(syntaxTree, generatorName, 0, typeName);
-            return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
         }
 
         public static bool HasModifier(this MemberDeclarationSyntax cls, SyntaxKind modifier)

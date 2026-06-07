@@ -102,13 +102,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 maxUserDataSize = 1;
             }
 
-            var semanticModel = context.SemanticModel;
-            var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
             var typeIdentifier = typeSymbol.ToValidIdentifier();
             var fileTypeName = typeSymbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
+            var hintName = syntaxTree.GetHintName(syntax, fileTypeName);
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   syntax
@@ -124,7 +121,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 syntaxKeyword = syntax.Keyword.ValueText,
                 typeIdentifier = typeIdentifier,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 maxDataSize = Math.Max((int)maxDataSize, 1),
@@ -176,14 +172,17 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = candidate.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource
                     , candidate.WriteCode(compilation.references)
                     , candidate.closingSource
                     , candidate.hintName
-                    , candidate.sourceFilePath
-                    , candidate.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

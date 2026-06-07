@@ -23,12 +23,12 @@ namespace EncosyTower.SourceGen.Generators.Variants
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var hintName = $"{GENERATOR_NAME_STRUCT}__{fileHintName}.g.cs";
-            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
-            var variantName = $"ETV.Variant<{fullTypeName}>";
-
             try
             {
+                var hintName = $"{GENERATOR_NAME_STRUCT}__{fileHintName}.g.cs";
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+                var variantName = $"ETV.Variant<{fullTypeName}>";
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , openingSource
@@ -36,7 +36,6 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     , closingSource
                     , hintName
                     , sourceFilePath
-                    , location.ToLocation()
                     , projectPath
                 );
             }
@@ -47,7 +46,11 @@ namespace EncosyTower.SourceGen.Generators.Variants
                     throw;
                 }
 
-                context.ReportDiagnostic(Diagnostic.Create(errorDescriptor, location.ToLocation(), e.ToUnityPrintableString()));
+                context.ReportDiagnostic(Diagnostic.Create(
+                      errorDescriptor
+                    , location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
 

@@ -134,17 +134,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  GENERATOR_NAME
-                , typeSyntax
-                , typeValidIdentifier
-            );
-
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  semanticModel.Compilation.AssemblyName
-                , GENERATOR_NAME
-                , typeValidIdentifier
-            );
+            var hintName = syntaxTree.GetHintName(typeSyntax, typeValidIdentifier);
 
             if (fieldPolicyAttrib != null)
             {
@@ -651,7 +641,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                 baseTypeName = baseTypeName,
                 accessibilityKeyword = typeSymbol.DeclaredAccessibility.ToKeyword(),
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 idPropertyTypeName = idPropertyTypeName,

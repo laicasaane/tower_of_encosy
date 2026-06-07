@@ -9,7 +9,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         public string typeIdentifier;
         public string statSystemFullTypeName;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public LocationInfo location;

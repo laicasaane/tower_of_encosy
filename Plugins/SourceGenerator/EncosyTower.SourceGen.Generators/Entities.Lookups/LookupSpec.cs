@@ -45,7 +45,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
         public LocationInfo location;
         public string structName;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public string interfaceLookupRO;

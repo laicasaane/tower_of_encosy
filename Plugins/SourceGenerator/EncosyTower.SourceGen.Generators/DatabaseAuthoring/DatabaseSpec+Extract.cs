@@ -49,12 +49,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             );
 
             var syntaxTree = authoringTypeSyntax.SyntaxTree;
-            var containerHintName = GetHintName(
-                  syntaxTree
-                , GENERATOR_NAME
-                , authoringTypeSyntax
-                , $"{databaseIdentifier}_SheetContainer"
-            );
+            var fileName = $"{databaseIdentifier}_SheetContainer";
+            var containerHintName = syntaxTree.GetHintName(authoringTypeSyntax, fileName);
 
             var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
             var ignoredTypes = new IgnoredTypes();
@@ -494,17 +490,12 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                         processedTableTypes.Add(baseSheetNamePerInfo);
 
-                        var sheetHintName = GetHintName(
-                          syntaxTree
-                        , GENERATOR_NAME
-                        , typeSyntax
-                        , $"{databaseIdentifier}_{baseSheetNamePerInfo}"
-                    );
-
+                        var fileName = $"{databaseIdentifier}_{baseSheetNamePerInfo}";
+                        var hintName = syntaxTree.GetHintName(typeSyntax, fileName);
                         var nestedFullNames = BuildNestedDataTypeFullNames(tableInfo, dataMap);
 
                         sheetList.Add(new SheetSpec {
-                            hintName = sheetHintName,
+                            hintName = hintName,
                             idTypeFullName = tableInfo.idTypeFullName,
                             idTypeSimpleName = tableInfo.idType.Name,
                             dataTypeFullName = tableInfo.dataTypeFullName,
@@ -520,14 +511,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static bool IsSupportedTypeSyntax(TypeDeclarationSyntax syntax)
             => syntax.IsKind(SyntaxKind.ClassDeclaration) || syntax.IsKind(SyntaxKind.StructDeclaration);
-
-        private static string GetHintName(SyntaxTree syntaxTree, string _, SyntaxNode node, string typeName)
-        {
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
-            var postfix = string.IsNullOrWhiteSpace(typeName) ? string.Empty : typeName;
-            var salting = node.GetLineNumber();
-            return $"{postfix}_{stableHashCode}_{salting}.g.cs";
-        }
 
         private static void CollectHorizontalLists(
               ISymbol member

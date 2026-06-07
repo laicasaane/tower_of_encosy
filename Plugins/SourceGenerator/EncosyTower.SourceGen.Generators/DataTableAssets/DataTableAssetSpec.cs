@@ -14,7 +14,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
         public string openingSource;
         public string closingSource;
         public string hintName;
-        public string sourceFilePath;
         public string idTypeName;
         public string dataTypeName;
         public string convertedIdTypeName;
@@ -181,21 +180,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var syntaxTree = classSyntax.SyntaxTree;
-            var fileTypeName = symbol.ToFileName();
-            var compilation = context.SemanticModel.Compilation;
-
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  GENERATOR_NAME
-                , classSyntax
-                , fileTypeName
-            );
-
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  compilation.Assembly.Name
-                , GENERATOR_NAME
-                , fileTypeName
-            );
+            var hintName = classSyntax.SyntaxTree.GetHintName(classSyntax, symbol.ToFileName());
 
             return new DataTableAssetSpec {
                 location = LocationInfo.From(classSyntax.GetLocation()),
@@ -203,7 +188,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 openingSource = openingSource,
                 closingSource = closingSource,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 idTypeName = idTypeName,
                 dataTypeName = dataTypeName,
                 convertedIdTypeName = convertedIdTypeName,

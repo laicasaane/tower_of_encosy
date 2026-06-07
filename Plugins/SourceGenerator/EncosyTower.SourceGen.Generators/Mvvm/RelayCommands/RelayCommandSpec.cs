@@ -15,7 +15,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
         public string className;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public EquatableArray<MemberSpec> memberRefs;
@@ -76,19 +75,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             var className = classNameBuilder.ToString();
             var semanticModel = context.SemanticModel;
             var syntaxTree = classSyntax.SyntaxTree;
-            var fileTypeName = classSymbol.ToFileName();
-
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  RelayCommandGenerator.GENERATOR_NAME
-                , classSyntax
-                , fileTypeName
-            );
-
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  semanticModel.Compilation.AssemblyName
-                , RelayCommandGenerator.GENERATOR_NAME
-                , fileTypeName
-            );
+            var hintName = syntaxTree.GetHintName(classSyntax, classSymbol.ToFileName());
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   classSyntax
@@ -259,7 +246,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 className = className,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 memberRefs = finalBuilder.ToImmutable().AsEquatableArray(),

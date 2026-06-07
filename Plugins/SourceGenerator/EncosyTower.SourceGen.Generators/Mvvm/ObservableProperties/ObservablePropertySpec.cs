@@ -30,7 +30,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
         public string className;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public bool isBaseObservableObject;
@@ -118,19 +117,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             var className = classNameSb.ToString();
             var semanticModel = context.SemanticModel;
             var syntaxTree = classSyntax.SyntaxTree;
-            var fileTypeName = classSymbol.ToFileName();
-
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  ObservablePropertyGenerator.GENERATOR_NAME
-                , classSyntax
-                , fileTypeName
-            );
-
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  semanticModel.Compilation.AssemblyName
-                , ObservablePropertyGenerator.GENERATOR_NAME
-                , fileTypeName
-            );
+            var hintName = syntaxTree.GetHintName(classSyntax, classSymbol.ToFileName());
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   classSyntax
@@ -401,7 +388,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 className = className,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 isBaseObservableObject = isBaseObservableObject,

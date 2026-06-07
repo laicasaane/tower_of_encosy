@@ -73,9 +73,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = structSyntax.SyntaxTree;
             var typeIdentifier = structSymbol.ToValidIdentifier();
-            var fileTypeName = structSymbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, structSyntax, fileTypeName);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
+            var hintName = syntaxTree.GetHintName(structSyntax, structSymbol.ToFileName());
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   structSyntax
@@ -107,7 +105,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 typeNamespace = structSymbol.ContainingNamespace.ToDisplayString(),
                 typeIdentifier = typeIdentifier,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 location = LocationInfo.From(structSyntax.GetLocation()),
@@ -152,17 +149,46 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            context.OutputSource(
-                  outputSourceGenFiles
-                , candidate.openingSource
-                , candidate.WriteCode(compilation)
-                , candidate.closingSource
-                , candidate.hintName
-                , candidate.sourceFilePath
-                , candidate.location.ToLocation()
-                , projectPath
-            );
+            try
+            {
+                var assemblyName = compilation.assemblyName;
+                var hintName = candidate.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
+                context.OutputSource(
+                      outputSourceGenFiles
+                    , candidate.openingSource
+                    , candidate.WriteCode(compilation)
+                    , candidate.closingSource
+                    , candidate.hintName
+                    , sourceFilePath
+                    , projectPath
+                );
+            }
+            catch (Exception e)
+            {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , candidate.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
+            }
         }
+
+        private static readonly DiagnosticDescriptor s_errorDescriptor
+            = new("SG_POLY_ENUM_STRUCT_UNKNOWN_0001"
+                , "Poly Enum Struct Generator Error"
+                , "This error indicates a bug in the Poly Enum Struct source generators. Error message: '{0}'."
+                , NAMESPACE
+                , DiagnosticSeverity.Error
+                , isEnabledByDefault: true
+                , description: ""
+            );
 
         private static void PrintAdditionalUsings(ref Printer p)
         {

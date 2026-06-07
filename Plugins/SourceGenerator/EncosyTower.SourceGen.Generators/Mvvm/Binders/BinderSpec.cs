@@ -23,7 +23,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
         public string openingSource;
         public string closingSource;
         public string hintName;
-        public string sourceFilePath;
         public string className;
         public string simpleTypeName;
         public string typeIdentifier;
@@ -301,24 +300,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
             nonVariantTypesBuilder.AddRange(nonVariantTypeFilter.Values);
 
             var syntaxTree = classSyntax.SyntaxTree;
-            var fileTypeName = symbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  BinderGenerator.GENERATOR_NAME
-                , classSyntax
-                , fileTypeName
-            );
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  semanticModel.Compilation.Assembly.Name
-                , BinderGenerator.GENERATOR_NAME
-                , fileTypeName
-            );
+            var hintName = syntaxTree.GetHintName(classSyntax, symbol.ToFileName());
 
             return new BinderSpec {
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 openingSource = openingSource,
                 closingSource = closingSource,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 className = className,
                 simpleTypeName = classSyntax.Identifier.Text,
                 typeIdentifier = symbol.ToValidIdentifier(),

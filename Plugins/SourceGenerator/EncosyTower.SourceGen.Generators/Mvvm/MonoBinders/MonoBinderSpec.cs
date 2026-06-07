@@ -23,7 +23,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         public string openingSource;
         public string closingSource;
         public string hintName;
-        public string sourceFilePath;
         public string userClassName;
         public string userNamespace;
         public string componentFullTypeName;
@@ -51,13 +50,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             token.ThrowIfCancellationRequested();
 
             if (context.TargetNode is not ClassDeclarationSyntax classSyntax
-                || context.TargetSymbol is not INamedTypeSymbol userClassSymbol
+                || context.TargetSymbol is not INamedTypeSymbol classSymbol
             )
             {
                 return default;
             }
 
-            var monoBinderAttr = userClassSymbol.GetAttribute(MONO_BINDER_ATTRIBUTE);
+            var monoBinderAttr = classSymbol.GetAttribute(MONO_BINDER_ATTRIBUTE);
 
             if (monoBinderAttr is null
                 || monoBinderAttr.ConstructorArguments.Length < 1
@@ -92,7 +91,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             );
 
             var userClassName = classSyntax.Identifier.Text;
-            var userNamespace = userClassSymbol.ContainingNamespace is { IsGlobalNamespace: false } ns
+            var userNamespace = classSymbol.ContainingNamespace is { IsGlobalNamespace: false } ns
                 ? ns.ToDisplayString()
                 : string.Empty;
 
@@ -101,7 +100,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var compilation = context.SemanticModel.Compilation;
             var excludedMembers = new HashSet<string>(StringComparer.Ordinal);
 
-            foreach (var attrData in userClassSymbol.GetAttributes(MONO_BINDING_EXCLUDE_ATTRIBUTE))
+            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_EXCLUDE_ATTRIBUTE))
             {
                 if (attrData.ConstructorArguments.Length < 1
                     || attrData.ConstructorArguments[0].Value is not string excludedName
@@ -116,7 +115,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             INamedTypeSymbol excludedParentType = null;
             {
-                var excludeParentAttr = userClassSymbol.GetAttribute(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE);
+                var excludeParentAttr = classSymbol.GetAttribute(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE);
 
                 if (excludeParentAttr != null
                     && excludeParentAttr.ConstructorArguments.Length >= 1
@@ -130,7 +129,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var explicitProps = new Dictionary<string, (bool useCustomSetter, string label)>(StringComparer.Ordinal);
             var explicitCmds = new Dictionary<string, (string wrapperTypeName, string label)>(StringComparer.Ordinal);
 
-            foreach (var attrData in userClassSymbol.GetAttributes(MONO_BINDING_PROP_ATTRIBUTE))
+            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_PROP_ATTRIBUTE))
             {
                 if (attrData.ConstructorArguments.Length < 1
                     || attrData.ConstructorArguments[0].Value is not string memberName
@@ -159,7 +158,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 explicitProps[memberName] = (useCustomSetter, labelOverride);
             }
 
-            foreach (var attrData in userClassSymbol.GetAttributes(MONO_BINDING_CMD_ATTRIBUTE))
+            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_CMD_ATTRIBUTE))
             {
                 if (attrData.ConstructorArguments.Length < 1
                     || attrData.ConstructorArguments[0].Value is not string memberName
@@ -382,13 +381,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var monoBinderBaseSymbol = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBinder`1");
             var monoBindingPropBaseSymbol = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBindingProperty`1");
             var monoBindingCmdBaseSymbol = compilation.GetTypeByMetadataName("EncosyTower.Mvvm.ViewBinding.Components.MonoBindingCommand`1");
-            var isOuterClassSealed = userClassSymbol.IsSealed;
-            var outerTypeIdentifier = userClassSymbol.ToValidIdentifier();
+            var isOuterClassSealed = classSymbol.IsSealed;
+            var outerTypeIdentifier = classSymbol.ToValidIdentifier();
             var hasOnBindPropertyFailedMethod = false;
             var hasOnBindCommandFailedMethod = false;
 
             {
-                var walkType = userClassSymbol;
+                var walkType = classSymbol;
                 var isCurrentType = true;
 
                 while (walkType != null)
@@ -435,7 +434,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             using var tempOuterPropMethods = ImmutableArrayBuilder<OuterBinderPropertyScanEntry>.Rent();
             using var tempOuterCmdMethods = ImmutableArrayBuilder<OuterBinderCommandScanEntry>.Rent();
 
-            foreach (var outerMember in userClassSymbol.GetMembers())
+            foreach (var outerMember in classSymbol.GetMembers())
             {
                 if (outerMember is IMethodSymbol outerMethod)
                 {
@@ -591,25 +590,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var syntaxTree = classSyntax.SyntaxTree;
-            var fileTypeName = userClassSymbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(
-                  MonoBinderGenerator.GENERATOR_NAME
-                , classSyntax
-                , fileTypeName
-            );
-
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                  compilation.Assembly.Name
-                , MonoBinderGenerator.GENERATOR_NAME
-                , fileTypeName
-            );
+            var hintName = syntaxTree.GetHintName( classSyntax, classSymbol.ToFileName());
 
             return new MonoBinderSpec {
                 location = LocationInfo.From(classSyntax.GetLocation()),
                 openingSource = openingSource,
                 closingSource = closingSource,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 userClassName = userClassName,
                 userNamespace = userNamespace,
                 componentFullTypeName = componentFullTypeName,

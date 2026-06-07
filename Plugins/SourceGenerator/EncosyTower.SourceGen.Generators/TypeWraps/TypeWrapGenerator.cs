@@ -101,17 +101,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                         var syntaxTree = structSyntax.SyntaxTree;
                         var fileTypeName = symbol.ToFileName();
-                        var hintName = syntaxTree.GetGeneratedSourceFileName(
-                              GENERATOR_NAME
-                            , structSyntax
-                            , fileTypeName
-                        );
-
-                        var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                              semanticModel.Compilation.AssemblyName
-                            , GENERATOR_NAME
-                            , fileTypeName
-                        );
+                        var hintName = syntaxTree.GetHintName(structSyntax, fileTypeName);
 
                         TypeCreationHelpers.GenerateOpeningAndClosingSource(
                               structSyntax
@@ -124,7 +114,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         return new TypeWrapSpec(
                               LocationInfo.From(candidate.syntax.GetLocation())
                             , hintName
-                            , sourceFilePath
                             , openingSource
                             , closingSource
                             , candidate.symbol
@@ -152,17 +141,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                         var syntaxTree = classSyntax.SyntaxTree;
                         var fileTypeName = symbol.ToFileName();
-                        var hintName = syntaxTree.GetGeneratedSourceFileName(
-                              GENERATOR_NAME
-                            , classSyntax
-                            , fileTypeName
-                        );
-
-                        var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                              semanticModel.Compilation.AssemblyName
-                            , GENERATOR_NAME
-                            , fileTypeName
-                        );
+                        var hintName = syntaxTree.GetHintName(classSyntax, fileTypeName);
 
                         TypeCreationHelpers.GenerateOpeningAndClosingSource(
                               classSyntax
@@ -175,7 +154,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         return new TypeWrapSpec(
                               LocationInfo.From(candidate.syntax.GetLocation())
                             , hintName
-                            , sourceFilePath
                             , openingSource
                             , closingSource
                             , candidate.symbol
@@ -232,17 +210,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 var syntaxTree = recordSyntax.SyntaxTree;
                 var fileTypeName = symbol.ToFileName();
-                var hintName = syntaxTree.GetGeneratedSourceFileName(
-                      GENERATOR_NAME
-                    , recordSyntax
-                    , fileTypeName
-                );
-
-                var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(
-                      semanticModel.Compilation.AssemblyName
-                    , GENERATOR_NAME
-                    , fileTypeName
-                );
+                var hintName = syntaxTree.GetHintName(recordSyntax, fileTypeName);
 
                 TypeCreationHelpers.GenerateOpeningAndClosingSource(
                       recordSyntax
@@ -255,7 +223,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 return new TypeWrapSpec(
                       LocationInfo.From(candidate.syntax.GetLocation())
                     , hintName
-                    , sourceFilePath
                     , openingSource
                     , closingSource
                     , candidate.symbol
@@ -536,7 +503,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationInfo _
+            , CompilationInfo compilation
             , TypeWrapSpec declaration
             , string projectPath
             , bool outputSourceGenFiles
@@ -551,14 +518,17 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = declaration.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource
                     , declaration.WriteCode()
                     , declaration.closingSource
                     , declaration.hintName
-                    , declaration.sourceFilePath
-                    , declaration.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

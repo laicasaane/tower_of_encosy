@@ -146,9 +146,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             var semanticModel = context.SemanticModel;
             var assemblyName = semanticModel.Compilation.AssemblyName;
             var syntaxTree = syntax.SyntaxTree;
-            var fileTypeName = structSymbol.ToFileName();
-            var hintName = syntaxTree.GetGeneratedSourceFileName(GENERATOR_NAME, syntax, fileTypeName);
-            var sourceFilePath = syntaxTree.GetGeneratedSourceFilePath(assemblyName, GENERATOR_NAME, fileTypeName);
+            var hintName = syntaxTree.GetHintName(syntax, structSymbol.ToFileName());
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   syntax
@@ -163,7 +161,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             return new LookupSpec {
                 structName = structSymbol.Name,
                 hintName = hintName,
-                sourceFilePath = sourceFilePath,
                 openingSource = openingSource,
                 closingSource = closingSource,
                 interfaceLookupRO = interfaceLookupRO,
@@ -251,7 +248,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , CompilationInfo _
+            , CompilationInfo compilation
             , LookupSpec candidate
             , string projectPath
             , bool outputSourceGenFiles
@@ -266,6 +263,10 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = candidate.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 var writer = LookupCodeWriter.GetWriter(candidate.kind);
 
                 context.OutputSource(
@@ -274,8 +275,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                     , writer.Write(candidate)
                     , candidate.closingSource
                     , candidate.hintName
-                    , candidate.sourceFilePath
-                    , candidate.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

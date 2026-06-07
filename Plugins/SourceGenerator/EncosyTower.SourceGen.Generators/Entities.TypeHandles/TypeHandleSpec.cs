@@ -44,7 +44,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
         public LocationInfo location;
         public string structName;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public EquatableArray<TypeRefSpec> typeRefs;

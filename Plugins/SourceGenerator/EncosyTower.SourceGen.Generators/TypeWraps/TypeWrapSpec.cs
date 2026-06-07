@@ -12,7 +12,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
         public LocationInfo location;
         public string hintName;
-        public string sourceFilePath;
         public string openingSource;
         public string closingSource;
         public string typeName;
@@ -53,7 +52,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
         public TypeWrapSpec(
               LocationInfo location
             , string hintName
-            , string sourceFilePath
             , string openingSource
             , string closingSource
             , INamedTypeSymbol symbol
@@ -75,7 +73,6 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             this.location = location;
             this.hintName = hintName;
-            this.sourceFilePath = sourceFilePath;
             this.openingSource = openingSource;
             this.closingSource = closingSource;
             this.typeName = typeName;

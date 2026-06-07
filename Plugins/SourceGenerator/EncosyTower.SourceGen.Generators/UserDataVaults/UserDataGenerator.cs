@@ -36,6 +36,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             context.RegisterSourceOutput(combined, static (sourceProductionContext, source) => {
                 GenerateOutput(
                       sourceProductionContext
+                    , source.Left.Right
                     , source.Left.Left
                     , source.Right.projectPath
                     , source.Right.outputSourceGenFiles
@@ -45,6 +46,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void GenerateOutput(
               SourceProductionContext context
+            , CompilationInfo compilation
             , UserDataSpec spec
             , string projectPath
             , bool outputSourceGenFiles
@@ -59,14 +61,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             try
             {
+                var assemblyName = compilation.assemblyName;
+                var hintName = spec.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+
                 context.OutputSource(
                       outputSourceGenFiles
                     , spec.openingSource
                     , spec.WriteCode()
                     , spec.closingSource
                     , spec.hintName
-                    , spec.sourceFilePath
-                    , spec.location.ToLocation()
+                    , sourceFilePath
                     , projectPath
                 );
             }

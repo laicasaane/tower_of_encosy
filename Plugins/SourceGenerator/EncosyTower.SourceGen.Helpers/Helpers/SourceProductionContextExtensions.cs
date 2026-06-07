@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.IO;
+using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen
 {
@@ -12,7 +13,6 @@ namespace EncosyTower.SourceGen
             , string closingSource
             , string hintName
             , string sourceFilePath
-            , Location location
             , string projectPath = null
             , Printer? overridePrinter = default
         )
@@ -27,16 +27,14 @@ namespace EncosyTower.SourceGen
 
             context.AddSource(hintName, outputSource);
 
-            if (outputSourceGenFiles)
+            if (outputSourceGenFiles == false || string.IsNullOrEmpty(projectPath))
             {
-                SourceGenHelpers.OutputSourceToFile(
-                      context
-                    , location
-                    , sourceFilePath
-                    , outputSource
-                    , projectPath
-                );
+                return;
             }
+
+            var directoryPath = Path.GetDirectoryName(sourceFilePath);
+            Directory.CreateDirectory(directoryPath);
+            File.WriteAllText(sourceFilePath, outputSource.ToString());
         }
     }
 }

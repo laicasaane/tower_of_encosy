@@ -16,6 +16,16 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
         public const string FLAGS_ATTRIBUTE = "global::System.FlagsAttribute";
         public const string GENERATOR_NAME = nameof(EnumExtensionsGenerator);
 
+        private static readonly DiagnosticDescriptor s_errorDescriptor = new(
+              id: "SG_ENUM_EXTENSIONS_FOR_UNKNOWN_0001"
+            , title: "Enum Extensions For Generator Error"
+            , messageFormat: "This error indicates a bug in the Enum Extensions For source generators. Error message: '{0}'."
+            , category: "EncosyTower.EnumExtensions"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: ""
+        );
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
@@ -143,7 +153,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                     , candidate.closingSource
                     , hintName
                     , sourceFilePath
-                    , candidate.location.ToLocation()
                     , projectPath
                 );
             }
@@ -153,6 +162,12 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 {
                     throw;
                 }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , candidate.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
 

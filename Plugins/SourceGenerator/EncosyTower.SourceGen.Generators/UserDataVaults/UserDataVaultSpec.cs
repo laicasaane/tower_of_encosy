@@ -10,8 +10,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
         public bool isStatic;
         public string namespaceName;
         public EquatableArray<string> containingTypeDeclarations;
-        public string fileHintName;
-        public string sourceHintName;
+        public string hintName;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(metadataName) == false;

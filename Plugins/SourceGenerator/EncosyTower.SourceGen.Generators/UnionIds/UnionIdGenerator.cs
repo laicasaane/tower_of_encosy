@@ -614,7 +614,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     , idInfo.closingSource
                     , hintName
                     , sourceFilePath
-                    , idInfo.location.ToLocation()
                     , projectPath
                 );
             }

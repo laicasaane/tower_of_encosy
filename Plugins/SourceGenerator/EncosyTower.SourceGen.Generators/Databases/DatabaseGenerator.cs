@@ -76,13 +76,17 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     , model.closingSource
                     , model.hintName
                     , sourceFilePath
-                    , model.location.ToLocation()
                     , projectPath
                     , printer
                 );
             }
             catch (Exception e)
             {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
                 context.ReportDiagnostic(Diagnostic.Create(
                       s_errorDescriptor
                     , model.location.ToLocation()

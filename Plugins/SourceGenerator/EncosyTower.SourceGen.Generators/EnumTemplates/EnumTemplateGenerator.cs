@@ -19,6 +19,16 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
         private const string TYPE_AS_MEMBER_ATTRIBUTE_METADATA = $"{NAMESPACE}.TypeAsEnumMemberForTemplateAttribute";
         public const string GENERATOR_NAME = nameof(EnumTemplateGenerator);
 
+        private static readonly DiagnosticDescriptor s_errorDescriptor = new(
+              id: "SG_ENUM_TEMPLATE_UNKNOWN_0001"
+            , title: "Enum Template Generator Error"
+            , messageFormat: "This error indicates a bug in the Enum Template source generators. Error message: '{0}'."
+            , category: "EncosyTower.EnumExtensions"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+            , description: ""
+        );
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
@@ -177,7 +187,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                     , templateCandidate.closingSource
                     , hintName
                     , sourceFilePath
-                    , templateCandidate.location.ToLocation()
                     , projectPath
                 );
             }
@@ -187,6 +196,12 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 {
                     throw;
                 }
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                      s_errorDescriptor
+                    , templateCandidate.location.ToLocation()
+                    , e.ToUnityPrintableString()
+                ));
             }
         }
     }

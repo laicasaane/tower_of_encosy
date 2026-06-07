@@ -95,45 +95,27 @@ namespace EncosyTower.SourceGen
 
         public static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)
         {
-            if (string.IsNullOrEmpty(projectPath))
-            {
-                return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
-            }
+            var tempFilePath = GetTempFilePath(assemblyName, hintName);
 
-            var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-            Directory.CreateDirectory(dir);
-            return $"{dir}{hintName}";
+            return string.IsNullOrEmpty(projectPath)
+                ? tempFilePath
+                : $"{projectPath}/{tempFilePath}";
         }
 
-        public static void OutputSourceToFile(
-              SourceProductionContext context
-            , Location locationToErrorAt
-            , string generatedSourceFilePath
-            , SourceText sourceTextForNewClass
-            , string projectPath = null
-            , string errorCode = "SGE000"
-            , string errorTitle = "Generator"
-            , string errorCategory = "Generator"
-        )
+        public static string BuildHintName(string assemblyName, string fileName, string toStableHash, int salting)
         {
-            if (string.IsNullOrEmpty(projectPath))
-                return;
+            var stableHashCode = GetStableHashCode(toStableHash) & 0x7fffffff;
+            return BuildHintName(assemblyName, fileName, stableHashCode, salting);
+        }
 
-            try
-            {
-                File.WriteAllText(generatedSourceFilePath, sourceTextForNewClass.ToString());
-            }
-            catch (IOException ioException)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
-                      errorCode
-                    , errorTitle
-                    , ioException.ToUnityPrintableString()
-                    , errorCategory
-                    , DiagnosticSeverity.Error
-                    , true
-                ), locationToErrorAt));
-            }
+        public static string BuildHintName(string assemblyName, string fileName, int stableHashCode, int salting)
+        {
+            return $"{fileName}_{assemblyName}_{stableHashCode}_{salting}.g.cs";
+        }
+
+        public static string GetTempFilePath(string assemblyName, string hintName)
+        {
+            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
         }
 
         // Stable version of String.GetHashCode
