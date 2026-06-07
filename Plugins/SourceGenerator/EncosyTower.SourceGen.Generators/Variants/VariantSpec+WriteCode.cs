@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME_STRUCT}__{fileHintName}.g.cs";
-            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
             var variantName = $"ETV.Variant<{fullTypeName}>";
 
             try

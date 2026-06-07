@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 {
     [Generator]
-    public sealed class InternalStringAdapterGenerator : IIncrementalGenerator
+    public sealed partial class InternalStringAdapterGenerator : IIncrementalGenerator
     {
         public const string NAMESPACE = "EncosyTower.Mvvm";
         public const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
@@ -283,9 +283,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var declaration = new InternalStringAdapterDeclaration(candidates, existingAdapterTypeNames);
+            var fileName = $"InternalStringAdapters_{assemblyName}";
+            var stableHashCode = SourceGenHelpers.GetStableHashCode(string.Empty) & 0x7fffffff;
+            var hintName = $"{fileName}_{stableHashCode}_0.g.cs";
+            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
-            declaration.GenerateAdapters(context, assemblyName, outputSourceGenFiles);
+            context.OutputSource(
+                  outputSourceGenFiles
+                , PrintAdditionalUsings()
+                , WriteAdapter(candidates, existingAdapterTypeNames, assemblyName)
+                , string.Empty
+                , hintName
+                , sourceFilePath
+                , Location.None
+            );
         }
     }
 }

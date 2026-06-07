@@ -1,9 +1,10 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 {
-    partial class InternalStringAdapterDeclaration
+    partial class InternalStringAdapterGenerator
     {
         private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
         private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
@@ -13,32 +14,38 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         private const string LABEL_ATTRIBUTE = "[ETA.Label(\"{0}\", \"{1}\")]";
         private const string VARIANT = "ETV.Variant";
         private const string CACHED_VARIANT_CONVERTER = "ETVC.CachedVariantConverter";
-        private const string GENERATOR_NAME = nameof(InternalStringAdapterGenerator);
 
-        public void GenerateAdapters(
-              SourceProductionContext context
+        public static string WriteAdapter(
+              ImmutableArray<StringAdapterSpec> candidates
+            , ImmutableArray<string> existingAdapterTypeNames
             , string assemblyName
-            , bool outputSourceGenFiles
         )
         {
-            var fileName = $"InternalStringAdapters_{assemblyName}";
-            var stableHashCode = SourceGenHelpers.GetStableHashCode(string.Empty) & 0x7fffffff;
-            var hintName = $"{fileName}_{stableHashCode}_0.g.cs";
-            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName);
+            var typeFiltered = new Dictionary<string, StringAdapterSpec>();
+            var typesToIgnore = new HashSet<string>(existingAdapterTypeNames, StringComparer.Ordinal);
 
-            context.OutputSource(
-                  outputSourceGenFiles
-                , PrintAdditionalUsings()
-                , WriteAdapter(Candidates, assemblyName)
-                , string.Empty
-                , hintName
-                , sourceFilePath
-                , Location.None
-            );
-        }
+            foreach (var candidate in candidates)
+            {
+                if (candidate.IsValid == false)
+                {
+                    continue;
+                }
 
-        private static string WriteAdapter(ImmutableArray<StringAdapterSpec> types, string assemblyName)
-        {
+                var typeName = candidate.fullTypeName;
+
+                if (typeName.ToUnionType().IsNativeUnionType()
+                    || typesToIgnore.Contains(typeName)
+                )
+                {
+                    continue;
+                }
+
+                if (typeFiltered.ContainsKey(typeName) == false)
+                {
+                    typeFiltered[typeName] = candidate;
+                }
+            }
+
             var p = Printer.DefaultLarge;
 
             p.PrintEndLine();
@@ -48,7 +55,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             p.PrintLine($"namespace EncosyTower.Mvvm.ViewBinding.__InternalStringAdapters.{assemblyName.ToValidIdentifier()}");
             p.OpenScope();
             {
-                foreach (var type in types)
+                foreach (var type in typeFiltered.Values)
                 {
                     var adapterTypeName = AdapterTypeName(type);
                     var typeName = type.fullTypeName;
@@ -81,10 +88,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             return p.Result;
         }
 
-        private static string AdapterTypeName(StringAdapterSpec typeRef)
-            => $"{typeRef.identifierName}ToStringAdapter";
-
-        private static string PrintAdditionalUsings()
+        public static string PrintAdditionalUsings()
         {
             var p = Printer.Default;
 
@@ -105,5 +109,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             return p.Result;
         }
+
+        private static string AdapterTypeName(StringAdapterSpec typeRef)
+            => $"{typeRef.identifierName}ToStringAdapter";
     }
 }

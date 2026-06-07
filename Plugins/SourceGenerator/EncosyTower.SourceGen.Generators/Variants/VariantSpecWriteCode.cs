@@ -27,7 +27,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
 
             var assemblyName = compilation.assemblyName;
             var hintName = $"{GENERATOR_NAME_REG}__AttributeVariants__{assemblyName.ToValidIdentifier()}.g.cs";
-            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
             try
             {
@@ -157,7 +157,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var hintName = $"{GENERATOR_NAME_REG}__Redundant__{declaration.fileHintName}.g.cs";
-            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
 
             try
             {

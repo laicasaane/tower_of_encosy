@@ -65,7 +65,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     printer.PrintLineIf(databaseAuthoring, DEFINE_DATABASE_AUTHORING, DEFINE_NO_DATABASE_AUTHORING);
                     printer.PrintLineIf(bakingSheet, DEFINE_BAKING_SHEET, DEFINE_NO_BAKING_SHEET);
 
-                    var containerFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, model.containerHintName);
+                    var hintName = model.containerHintName;
+                    var filePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                     context.OutputSource(
                           outputSourceGenFiles
@@ -73,7 +74,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         , model.WriteContainer()
                         , model.closingSource
                         , model.containerHintName
-                        , containerFilePath
+                        , filePath
                         , model.location.ToLocation()
                         , projectPath
                         , printer
@@ -86,7 +87,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     printer.PrintLineIf(databaseAuthoring, DEFINE_DATABASE_AUTHORING, DEFINE_NO_DATABASE_AUTHORING);
                     printer.PrintLineIf(bakingSheet, DEFINE_BAKING_SHEET, DEFINE_NO_BAKING_SHEET);
 
-                    var sheetFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, sheet.hintName);
+                    var hintName = sheet.hintName;
+                    var filePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                     context.OutputSource(
                           outputSourceGenFiles
@@ -94,7 +96,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                         , model.WriteSheet(in sheet)
                         , model.closingSource
                         , sheet.hintName
-                        , sheetFilePath
+                        , filePath
                         , model.location.ToLocation()
                         , projectPath
                         , printer

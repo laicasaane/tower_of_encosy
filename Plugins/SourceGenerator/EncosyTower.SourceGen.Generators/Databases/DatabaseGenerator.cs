@@ -54,7 +54,9 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
             try
             {
-                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, model.hintName, projectPath);
+                var assemblyName = compilation.assemblyName;
+                var hintName = model.hintName;
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
                 var printer = Printer.DefaultLarge;
 
                 {
