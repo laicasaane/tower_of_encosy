@@ -16,7 +16,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(AuthoringCompilationSpec.GetCompilation);
+                .Select(CompilationSpec.GetCompilation);
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -44,7 +44,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void GenerateOutput(
               SourceProductionContext context
-            , AuthoringCompilationSpec compilation
+            , CompilationSpec compilation
             , DatabaseSpec model
             , string projectPath
             , bool outputSourceGenFiles
