@@ -327,9 +327,11 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 var stableHashCode = SourceGenHelpers.GetStableHashCode(locationFilePath) & 0x7fffffff;
                 var lineNumber = helperInfo.location.startLine;
                 var hintName = $"{helperInfo.fileHintName}_{stableHashCode}_{lineNumber}.g.cs";
-
-                SourceGenHelpers.ProjectPath = projectPath;
-                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(
+                      compilation.assemblyName
+                    , hintName
+                    , projectPath
+                );
 
                 context.OutputSource(
                       outputSourceGenFiles

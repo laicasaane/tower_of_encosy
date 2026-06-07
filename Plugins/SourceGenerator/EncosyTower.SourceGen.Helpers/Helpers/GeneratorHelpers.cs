@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -258,34 +257,5 @@ namespace EncosyTower.SourceGen
                 <= uint.MaxValue => 4,
                 _ => 8,
             };
-
-        public static string BuildSourceFilePath(string assemblyName, string fileName)
-        {
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var dir = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(dir);
-                return $"{dir}{fileName}";
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
-        }
-
-        public static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)
-        {
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                if (projectPath is not null)
-                {
-                    var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
-                    Directory.CreateDirectory(dir);
-                    return $"{dir}{hintName}";
-                }
-
-                return BuildSourceFilePath(assemblyName, hintName);
-            }
-
-            return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
-        }
     }
 }

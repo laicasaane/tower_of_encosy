@@ -52,8 +52,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 var source = (declaration.fieldRefs.Count > 0 || declaration.propRefs.Count > 0)
                     ? declaration.WriteCode()
                     : declaration.WriteCodeWithoutMember();

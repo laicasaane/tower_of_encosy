@@ -591,8 +591,6 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-                ;
                 var assemblyName = compilation.assemblyName;
                 var declaration = new UnionIdDeclaration(
                       idInfo
@@ -607,7 +605,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 }
 
                 var hintName = $"{idInfo.fileHintName}.g.cs";
-                var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
+                var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                 context.OutputSource(
                       outputSourceGenFiles

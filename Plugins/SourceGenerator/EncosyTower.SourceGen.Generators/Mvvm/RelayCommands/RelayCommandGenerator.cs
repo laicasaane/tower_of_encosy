@@ -71,8 +71,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource

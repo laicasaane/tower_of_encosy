@@ -54,8 +54,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 var databaseAuthoring = compilation.databaseAuthoring;
                 var bakingSheet = compilation.bakingSheet;
                 var assemblyName = compilation.compilation.assemblyName;

@@ -27,31 +27,11 @@ namespace EncosyTower.SourceGen
 
         public const string NEWLINE = "\n";
 
-        public const string OUTPUT_PATH_ADDITIONAL_FILE
-            = "encosy-tower-sourcegen-output-path.EncosyTower.SourceGen.Generators.additionalfile";
-
-        private static string s_projectPath = string.Empty;
-
-        public static string ProjectPath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(s_projectPath))
-                {
-                    throw new Exception(
-                        "ProjectPath must set before use, this is also only permitted before 2020."
-                    );
-                }
-
-                return s_projectPath;
-            }
-            set => s_projectPath = value;
-        }
-
-        public static bool CanWriteToProjectPath => !string.IsNullOrEmpty(s_projectPath);
-
         public struct SourceGenConfig : IEquatable<SourceGenConfig>
         {
+            public const string OUTPUT_PATH_ADDITIONAL_FILE
+                = "encosy-tower-sourcegen-output-path.EncosyTower.SourceGen.Generators.additionalfile";
+
             public string projectPath;
             public bool outputSourceGenFiles;
 
@@ -83,7 +63,7 @@ namespace EncosyTower.SourceGen
 
                 for (var i = 0; i < texts.Length; i++)
                 {
-                    if (texts[i].Path.EndsWith(OUTPUT_PATH_ADDITIONAL_FILE))
+                    if (texts[i].Path.EndsWith(SourceGenConfig.OUTPUT_PATH_ADDITIONAL_FILE))
                     {
                         index = i;
                         break;
@@ -113,25 +93,47 @@ namespace EncosyTower.SourceGen
             return sourceGenConfigProvider;
         }
 
-        public static SourceText WithInitialLineDirectiveToGeneratedSource(
-              this SourceText sourceText
-            , string generatedSourceFilePath
-        )
+        public static string BuildSourceFilePath(string assemblyName, string hintName, string projectPath)
         {
-            var firstLine = sourceText.Lines.FirstOrDefault();
-            return sourceText.WithChanges(new TextChange(
-                  firstLine.Span
-                , $"#line 2 \"{generatedSourceFilePath}\"{NEWLINE}{firstLine}"
-            ));
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                return $"Temp/GeneratedCode/{assemblyName}/{hintName}";
+            }
+
+            var dir = $"{projectPath}/Temp/GeneratedCode/{assemblyName}/";
+            Directory.CreateDirectory(dir);
+            return $"{dir}{hintName}";
         }
 
-        public static SourceText WithIgnoreUnassignedVariableWarning(this SourceText sourceText)
+        public static void OutputSourceToFile(
+              SourceProductionContext context
+            , Location locationToErrorAt
+            , string generatedSourceFilePath
+            , SourceText sourceTextForNewClass
+            , string projectPath = null
+            , string errorCode = "SGE000"
+            , string errorTitle = "Generator"
+            , string errorCategory = "Generator"
+        )
         {
-            var firstLine = sourceText.Lines.FirstOrDefault();
-            return sourceText.WithChanges(new TextChange(
-                  firstLine.Span
-                , $"#pragma warning disable 0219{NEWLINE}{firstLine}"
-            ));
+            if (string.IsNullOrEmpty(projectPath))
+                return;
+
+            try
+            {
+                File.WriteAllText(generatedSourceFilePath, sourceTextForNewClass.ToString());
+            }
+            catch (IOException ioException)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
+                      errorCode
+                    , errorTitle
+                    , ioException.ToUnityPrintableString()
+                    , errorCategory
+                    , DiagnosticSeverity.Error
+                    , true
+                ), locationToErrorAt));
+            }
         }
 
         // Stable version of String.GetHashCode
@@ -159,37 +161,25 @@ namespace EncosyTower.SourceGen
             }
         }
 
-        public static void OutputSourceToFile(
-              SourceProductionContext context
-            , Location locationToErrorAt
+        public static SourceText WithInitialLineDirectiveToGeneratedSource(
+              this SourceText sourceText
             , string generatedSourceFilePath
-            , SourceText sourceTextForNewClass
-            , string projectPath = null
-            , string errorCode = "SGE000"
-            , string errorTitle = "Generator"
-            , string errorCategory = "Generator"
         )
         {
-            var resolvedPath = projectPath ?? (CanWriteToProjectPath ? s_projectPath : null);
+            var firstLine = sourceText.Lines.FirstOrDefault();
+            return sourceText.WithChanges(new TextChange(
+                  firstLine.Span
+                , $"#line 2 \"{generatedSourceFilePath}\"{NEWLINE}{firstLine}"
+            ));
+        }
 
-            if (string.IsNullOrEmpty(resolvedPath))
-                return;
-
-            try
-            {
-                File.WriteAllText(generatedSourceFilePath, sourceTextForNewClass.ToString());
-            }
-            catch (IOException ioException)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
-                      errorCode
-                    , errorTitle
-                    , ioException.ToUnityPrintableString()
-                    , errorCategory
-                    , DiagnosticSeverity.Error
-                    , true
-                ), locationToErrorAt));
-            }
+        public static SourceText WithIgnoreUnassignedVariableWarning(this SourceText sourceText)
+        {
+            var firstLine = sourceText.Lines.FirstOrDefault();
+            return sourceText.WithChanges(new TextChange(
+                  firstLine.Span
+                , $"#pragma warning disable 0219{NEWLINE}{firstLine}"
+            ));
         }
     }
 }

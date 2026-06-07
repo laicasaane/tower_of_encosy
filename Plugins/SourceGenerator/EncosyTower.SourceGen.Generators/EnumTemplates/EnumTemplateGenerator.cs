@@ -160,8 +160,6 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 var declaration = new EnumTemplateDeclaration(
                       templateCandidate
                     , memberCandidates

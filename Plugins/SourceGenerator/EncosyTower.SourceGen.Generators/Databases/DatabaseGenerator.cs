@@ -52,8 +52,6 @@ namespace EncosyTower.SourceGen.Generators.Databases
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            SourceGenHelpers.ProjectPath = projectPath;
-
             try
             {
                 var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, model.hintName, projectPath);

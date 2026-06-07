@@ -246,13 +246,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            SourceGenHelpers.ProjectPath = projectPath;
-
             var compilationAssemblyName = candidate.compilationAssemblyName;
             var fileTypeName = candidate.containingTypeFileName;
             var hintName = $"{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
             var filePathName = $"{fileTypeName}_{candidate.syntaxTreeStableHash}_{candidate.callSiteLineNumber}.g.cs";
-            var filePath = GeneratorHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName);
+            var filePath = SourceGenHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName, projectPath);
 
             try
             {
@@ -290,8 +288,6 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            SourceGenHelpers.ProjectPath = projectPath;
-
             var seen = new HashSet<ContainingTypeKey>();
 
             foreach (var key in keys)
@@ -306,8 +302,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 var compilationAssemblyName = key.compilationAssemblyName;
                 var fileTypeName = key.containingTypeFileName;
                 var hintName = $"{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
-                var filePathName = $"{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
-                var filePath = GeneratorHelpers.BuildSourceFilePath(compilationAssemblyName, filePathName);
+                var filePath = SourceGenHelpers.BuildSourceFilePath(compilationAssemblyName, hintName, projectPath);
 
                 try
                 {

@@ -131,8 +131,6 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 var declaration = new EnumExtensionsDeclaration(candidate, compilation.references.unityCollections);
                 var hintName = $"{candidate.fileHintName}.g.cs";
                 var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, hintName, projectPath);

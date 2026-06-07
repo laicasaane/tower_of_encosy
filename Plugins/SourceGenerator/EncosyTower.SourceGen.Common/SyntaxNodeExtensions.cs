@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,10 +22,20 @@ namespace EncosyTower.SourceGen
         public static int GetStableHashCode(this SyntaxTree syntaxTree)
             => SourceGenHelpers.GetStableHashCode(syntaxTree.FilePath) & 0x7fffffff;
 
-        public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, SyntaxNode node, string typeName)
+        public static string GetGeneratedSourceFileName(
+              this SyntaxTree syntaxTree
+            , string generatorName
+            , SyntaxNode node
+            , string typeName
+        )
             => GetGeneratedSourceFileName(syntaxTree, generatorName, node.GetLineNumber(), typeName);
 
-        public static string GetGeneratedSourceFileName(this SyntaxTree syntaxTree, string generatorName, int salting, string typeName)
+        public static string GetGeneratedSourceFileName(
+              this SyntaxTree syntaxTree
+            , string generatorName
+            , int salting
+            , string typeName
+        )
         {
             var stableHashCode = syntaxTree.GetStableHashCode();
             var postfix = string.Empty;
@@ -39,17 +48,14 @@ namespace EncosyTower.SourceGen
             return $"{postfix}_{stableHashCode}_{salting}.g.cs";
         }
 
-        public static string GetGeneratedSourceFilePath(this SyntaxTree syntaxTree, string assemblyName, string generatorName, string typeName)
+        public static string GetGeneratedSourceFilePath(
+              this SyntaxTree syntaxTree
+            , string assemblyName
+            , string generatorName
+            , string typeName
+        )
         {
             var fileName = GetGeneratedSourceFileName(syntaxTree, generatorName, 0, typeName);
-
-            if (SourceGenHelpers.CanWriteToProjectPath)
-            {
-                var saveToDirectory = $"{SourceGenHelpers.ProjectPath}/Temp/GeneratedCode/{assemblyName}/";
-                Directory.CreateDirectory(saveToDirectory);
-                return $"{saveToDirectory}{fileName}";
-            }
-
             return $"Temp/GeneratedCode/{assemblyName}/{fileName}";
         }
 

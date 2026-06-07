@@ -59,8 +59,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , spec.openingSource

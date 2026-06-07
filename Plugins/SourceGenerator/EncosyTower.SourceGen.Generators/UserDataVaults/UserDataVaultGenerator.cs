@@ -287,8 +287,6 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 , accessDeclarations
             );
 
-            SourceGenHelpers.ProjectPath = projectPath;
-
             var openingPrinter = Printer.DefaultLarge;
             PrinterAction printUsings = compilation.references.unitask
                 ? PrintUsingUniTask
@@ -328,7 +326,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var stableHashCode = SourceGenHelpers.GetStableHashCode(vaultInfo.location.filePath) & 0x7fffffff;
             var fileHintName = vaultInfo.fileHintName;
             var sourceFileName = $"{fileHintName}_{stableHashCode}_0.g.cs";
-            var sourceFilePath = GeneratorHelpers.BuildSourceFilePath(compilation.assemblyName, sourceFileName);
+            var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(compilation.assemblyName, sourceFileName, projectPath);
 
             context.OutputSource(
                   outputSourceGenFiles

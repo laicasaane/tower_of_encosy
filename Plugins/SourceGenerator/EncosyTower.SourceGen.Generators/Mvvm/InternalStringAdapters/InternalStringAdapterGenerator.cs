@@ -283,8 +283,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            SourceGenHelpers.ProjectPath = projectPath;
-
             var declaration = new InternalStringAdapterDeclaration(candidates, existingAdapterTypeNames);
 
             declaration.GenerateAdapters(context, assemblyName, outputSourceGenFiles);

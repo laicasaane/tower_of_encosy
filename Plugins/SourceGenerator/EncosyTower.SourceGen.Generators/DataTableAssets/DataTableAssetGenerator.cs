@@ -50,8 +50,6 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource

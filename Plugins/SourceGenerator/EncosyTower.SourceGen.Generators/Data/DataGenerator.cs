@@ -55,8 +55,6 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource

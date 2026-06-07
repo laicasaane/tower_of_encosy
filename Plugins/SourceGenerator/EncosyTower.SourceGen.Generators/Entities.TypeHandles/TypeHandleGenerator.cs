@@ -178,8 +178,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , candidate.openingSource

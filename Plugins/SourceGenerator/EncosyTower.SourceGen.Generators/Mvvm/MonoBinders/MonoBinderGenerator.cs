@@ -55,8 +55,6 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 context.OutputSource(
                       outputSourceGenFiles
                     , declaration.openingSource

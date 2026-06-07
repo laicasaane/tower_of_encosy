@@ -266,8 +266,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
             try
             {
-                SourceGenHelpers.ProjectPath = projectPath;
-
                 var writer = LookupCodeWriter.GetWriter(candidate.kind);
 
                 context.OutputSource(
