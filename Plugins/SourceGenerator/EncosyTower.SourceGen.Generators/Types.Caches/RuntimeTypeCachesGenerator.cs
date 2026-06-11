@@ -31,12 +31,12 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var compilationProvider = context.CompilationProvider
                 .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
-            var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
+            var partialTypeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
-                , transform: GetMatchedType
+                , transform: ExtractPartialType
             ).Where(static c => c.IsValid);
 
-            var combined = typeProvider
+            var combined = partialTypeProvider
                 .Combine(projectPathProvider)
                 .Combine(compilationProvider)
                 .Where(static t => t.Right.isValid);
@@ -51,12 +51,12 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 );
             });
 
-            var keysProvider = typeProvider.Select(static (x, _) => ContainingTypeKey.From(x))
+            var typesProvider = partialTypeProvider.Select(static (x, _) => TypeSpec.From(x))
                 .Collect()
                 .Combine(projectPathProvider)
                 .Combine(compilationProvider);
 
-            context.RegisterSourceOutput(keysProvider, static (sourceProductionContext, source) => {
+            context.RegisterSourceOutput(typesProvider, static (sourceProductionContext, source) => {
                 GenerateHeaderOutput(
                       sourceProductionContext
                     , source.Right
@@ -90,7 +90,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             };
         }
 
-        private static TypeCacheCallSite GetMatchedType(
+        private static PartialTypeSpec ExtractPartialType(
               GeneratorSyntaxContext context
             , CancellationToken token
         )
@@ -196,7 +196,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            return new TypeCacheCallSite {
+            return new PartialTypeSpec {
                 containingTypeFullName = containingType.ToFullName(),
                 containingTypeFileName = containingType.ToFileName(),
                 containingTypeIdentifier = containingSyntax.Identifier.ValueText,
@@ -208,7 +208,8 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 typeFullName = typeFullName,
                 cacheAttributeType = cacheAttributeType,
                 assemblyName = assemblyName,
-                syntaxTreeStableHash = containingSyntax.SyntaxTree.GetStableHashCode()
+                syntaxTreeStableHash = containingSyntax.SyntaxTree.GetStableHashCode(),
+                syntaxLineNumber = syntax.GetLineNumber(),
             };
         }
 
@@ -250,7 +251,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         private static void GenerateOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , TypeCacheCallSite candidate
+            , PartialTypeSpec type
             , string projectPath
             , bool outputSourceGenFiles
         )
@@ -260,16 +261,17 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             try
             {
                 var assemblyName = compilation.assemblyName;
-                var fileName = candidate.containingTypeFileName;
-                var stableHash = candidate.syntaxTreeStableHash;
-                var hintName = SourceGenHelpers.BuildHintName(assemblyName, fileName, stableHash, 0);
+                var fileName = type.containingTypeFileName;
+                var stableHash = type.syntaxTreeStableHash;
+                var lineNumber = type.syntaxLineNumber;
+                var hintName = SourceGenHelpers.BuildHintName(assemblyName, fileName, stableHash, lineNumber);
                 var sourceFilePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                 context.OutputSource(
                       outputSourceGenFiles
-                    , candidate.openingSource
-                    , WriteCode(candidate)
-                    , candidate.closingSource
+                    , type.openingSource
+                    , WriteCode(type)
+                    , type.closingSource
                     , hintName
                     , sourceFilePath
                 );
@@ -292,36 +294,38 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
         private static void GenerateHeaderOutput(
               SourceProductionContext context
             , CompilationInfo compilation
-            , ImmutableArray<ContainingTypeKey> keys
+            , ImmutableArray<TypeSpec> types
             , string projectPath
             , bool outputSourceGenFiles
         )
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var seen = new HashSet<ContainingTypeKey>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
 
-            foreach (var key in keys)
+            foreach (var type in types)
             {
-                if (seen.Add(key) == false)
-                {
-                    continue;
-                }
-
                 context.CancellationToken.ThrowIfCancellationRequested();
 
                 try
                 {
                     var assemblyName = compilation.assemblyName;
-                    var fileTypeName = key.containingTypeFileName;
-                    var hintName = $"{fileTypeName}_{key.syntaxTreeStableHash}_header.g.cs";
+                    var fileName = type.containingTypeFileName;
+                    var stableHash = type.syntaxTreeStableHash;
+                    var hintName = SourceGenHelpers.BuildHintName(assemblyName, fileName, stableHash, 0);
+
+                    if (seen.Add(hintName) == false)
+                    {
+                        continue;
+                    }
+
                     var filePath = SourceGenHelpers.BuildSourceFilePath(assemblyName, hintName, projectPath);
 
                     context.OutputSource(
                           outputSourceGenFiles
-                        , key.openingSource
-                        , WriteHeaderCode(key)
-                        , key.closingSource
+                        , type.openingSource
+                        , WriteCode(type)
+                        , type.closingSource
                         , hintName
                         , filePath
                     );
@@ -353,7 +357,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 , description: ""
             );
 
-        private static string WriteCode(in TypeCacheCallSite callSite)
+        private static string WriteCode(in PartialTypeSpec type)
         {
             var p = Printer.DefaultLarge;
 
@@ -364,17 +368,17 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine()
-                    .PrintIf(callSite.isRefStruct, "ref ")
+                    .PrintIf(type.isRefStruct, "ref ")
                     .Print("partial ")
-                    .PrintIf(callSite.isRecord, "record ")
-                    .PrintIf(callSite.isStruct, "struct ", "class ")
-                    .Print(callSite.containingTypeIdentifier)
+                    .PrintIf(type.isRecord, "record ")
+                    .PrintIf(type.isStruct, "struct ", "class ")
+                    .Print(type.containingTypeIdentifier)
                     .PrintEndLine();
                 p.OpenScope();
                 {
                     p.PrintBeginLine("[ETTC.");
 
-                    switch (callSite.cacheAttributeType)
+                    switch (type.cacheAttributeType)
                     {
                         case CacheAttributeType.CacheType:
                             p.Print(nameof(CacheAttributeType.CacheType));
@@ -397,19 +401,19 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                             break;
                     }
 
-                    p.Print("(typeof(").Print(callSite.typeFullName).Print(")");
+                    p.Print("(typeof(").Print(type.typeFullName).Print(")");
 
-                    if (string.IsNullOrEmpty(callSite.assemblyName) == false)
+                    if (string.IsNullOrEmpty(type.assemblyName) == false)
                     {
-                        p.Print(", \"").Print(callSite.assemblyName).Print("\"");
+                        p.Print(", \"").Print(type.assemblyName).Print("\"");
                     }
 
                     p.PrintEndLine(")]");
 
-                    p.PrintBeginLine("private partial struct ")
-                        .Print(callSite.containingTypeIdentifier)
+                    p.PrintBeginLine("partial struct ")
+                        .Print(type.containingTypeIdentifier)
                         .Print("_RuntimeTypeCaches_")
-                        .Print(callSite.syntaxTreeStableHash)
+                        .Print(type.syntaxTreeStableHash)
                         .PrintEndLine(" { }");
                 }
                 p.CloseScope();
@@ -419,7 +423,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             return p.Result;
         }
 
-        private static string WriteHeaderCode(in ContainingTypeKey key)
+        private static string WriteCode(in TypeSpec type)
         {
             var p = Printer.DefaultLarge;
 
@@ -430,11 +434,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             p = p.IncreasedIndent();
             {
                 p.PrintBeginLine()
-                    .PrintIf(key.isRefStruct, "ref ")
+                    .PrintIf(type.isRefStruct, "ref ")
                     .Print("partial ")
-                    .PrintIf(key.isRecord, "record ")
-                    .PrintIf(key.isStruct, "struct ", "class ")
-                    .Print(key.containingTypeIdentifier)
+                    .PrintIf(type.isRecord, "record ")
+                    .PrintIf(type.isStruct, "struct ", "class ")
+                    .Print(type.containingTypeIdentifier)
                     .PrintEndLine();
                 p.OpenScope();
                 {
@@ -448,9 +452,9 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                         .PrintLine(PRESERVE);
 
                     p.PrintBeginLine("private partial struct ")
-                        .Print(key.containingTypeIdentifier)
+                        .Print(type.containingTypeIdentifier)
                         .Print("_RuntimeTypeCaches_")
-                        .Print(key.syntaxTreeStableHash.ToString())
+                        .Print(type.syntaxTreeStableHash)
                         .PrintEndLine(" { }");
                 }
                 p.CloseScope();
@@ -470,7 +474,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             CacheMethodsWithAttribute,
         }
 
-        private struct TypeCacheCallSite : IEquatable<TypeCacheCallSite>
+        private struct PartialTypeSpec : IEquatable<PartialTypeSpec>
         {
             public string containingTypeFullName;
             public string containingTypeFileName;
@@ -480,6 +484,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             public string openingSource;
             public string closingSource;
             public int syntaxTreeStableHash;
+            public int syntaxLineNumber;
             public CacheAttributeType cacheAttributeType;
             public bool isStruct;
             public bool isRefStruct;
@@ -487,7 +492,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
 
             public readonly bool IsValid => containingTypeFullName is not null;
 
-            public readonly bool Equals(TypeCacheCallSite other)
+            public readonly bool Equals(PartialTypeSpec other)
             {
                 return string.Equals(containingTypeFullName, other.containingTypeFullName, StringComparison.Ordinal)
                     && string.Equals(containingTypeFileName, other.containingTypeFileName, StringComparison.Ordinal)
@@ -502,7 +507,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             }
 
             public readonly override bool Equals(object obj)
-                => obj is TypeCacheCallSite other && Equals(other);
+                => obj is PartialTypeSpec other && Equals(other);
 
             public readonly override int GetHashCode()
                 => HashValue.Combine(
@@ -519,12 +524,11 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 ;
         }
 
-        private struct ContainingTypeKey : IEquatable<ContainingTypeKey>
+        private struct TypeSpec : IEquatable<TypeSpec>
         {
             public string containingTypeFullName;
             public string containingTypeFileName;
             public string containingTypeIdentifier;
-            public string assemblyName;
             public string openingSource;
             public string closingSource;
             public int syntaxTreeStableHash;
@@ -532,11 +536,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             public bool isRefStruct;
             public bool isRecord;
 
-            public static ContainingTypeKey From(TypeCacheCallSite c) => new() {
+            public static TypeSpec From(PartialTypeSpec c) => new() {
                 containingTypeFullName = c.containingTypeFullName,
                 containingTypeFileName = c.containingTypeFileName,
                 containingTypeIdentifier = c.containingTypeIdentifier,
-                assemblyName = c.assemblyName,
                 openingSource = c.openingSource,
                 closingSource = c.closingSource,
                 syntaxTreeStableHash = c.syntaxTreeStableHash,
@@ -545,12 +548,10 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 isRecord = c.isRecord,
             };
 
-            public readonly bool Equals(ContainingTypeKey other)
+            public readonly bool Equals(TypeSpec other)
             {
                 return string.Equals(containingTypeFullName, other.containingTypeFullName, StringComparison.Ordinal)
                     && string.Equals(containingTypeFileName, other.containingTypeFileName, StringComparison.Ordinal)
-                    && string.Equals(containingTypeIdentifier, other.containingTypeIdentifier, StringComparison.Ordinal)
-                    && string.Equals(assemblyName, other.assemblyName, StringComparison.Ordinal)
                     && isStruct == other.isStruct
                     && isRefStruct == other.isRefStruct
                     && isRecord == other.isRecord
@@ -558,14 +559,12 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             }
 
             public readonly override bool Equals(object obj)
-                => obj is ContainingTypeKey other && Equals(other);
+                => obj is TypeSpec other && Equals(other);
 
             public readonly override int GetHashCode()
                 => HashValue.Combine(
                       containingTypeFullName
                     , containingTypeFileName
-                    , containingTypeIdentifier
-                    , assemblyName
                     , isStruct
                     , isRefStruct
                     , isRecord
