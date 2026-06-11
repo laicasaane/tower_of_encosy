@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Generators.Data
 {
     using static EncosyTower.SourceGen.Helpers.Data.Helpers;
-    using static EncosyTower.SourceGen.Helpers.Data.SuppressionDescriptors;
 
     /// <summary>
     /// <para>
@@ -20,7 +19,8 @@ namespace EncosyTower.SourceGen.Generators.Data
     /// <para>
     /// That is, this diagnostic suppressor will suppress the following diagnostic:
     /// <code>
-    /// public partial class MyData : IData
+    /// [Data]
+    /// public partial class MyData
     /// {
     ///     [DataProperty]
     ///     [field: JsonPropertyName("Name")]
@@ -32,6 +32,15 @@ namespace EncosyTower.SourceGen.Generators.Data
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class DataPropertyAttributeWithTargetsDiagnosticSuppressor : DiagnosticSuppressor
     {
+        /// <summary>
+        /// Gets a <see cref="SuppressionDescriptor"/> for a property using [DataProperty] with an attribute list targeting a field.
+        /// </summary>
+        public static readonly SuppressionDescriptor FieldAttributeListForDataProperty = new(
+              id: "SG_DATA_SUPPRESS_0002"
+            , suppressedDiagnosticId: "CS0657"
+            , justification: "Properties using [DataProperty] can use [field:] attribute lists to forward attributes to the generated fields"
+        );
+
         /// <inheritdoc/>
         public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
             => ImmutableArray.Create(FieldAttributeListForDataProperty);

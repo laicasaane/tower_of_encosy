@@ -229,6 +229,8 @@ namespace EncosyTower.SourceGen
             , CancellationToken token = default
         )
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var attribList in syntaxNode.AttributeLists)
             {
                 token.ThrowIfCancellationRequested();

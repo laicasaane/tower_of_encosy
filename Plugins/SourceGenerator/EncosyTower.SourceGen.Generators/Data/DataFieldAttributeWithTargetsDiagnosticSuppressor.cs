@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace EncosyTower.SourceGen.Generators.Data
 {
     using static EncosyTower.SourceGen.Helpers.Data.Helpers;
-    using static EncosyTower.SourceGen.Helpers.Data.SuppressionDescriptors;
 
     /// <summary>
     /// <para>
@@ -20,7 +19,8 @@ namespace EncosyTower.SourceGen.Generators.Data
     /// <para>
     /// That is, this diagnostic suppressor will suppress the following diagnostic:
     /// <code>
-    /// public partial class MyData : IData
+    /// [Data]
+    /// public partial class MyData
     /// {
     ///     [SerializeField]
     ///     [property: JsonPropertyName("Name")]
@@ -32,6 +32,15 @@ namespace EncosyTower.SourceGen.Generators.Data
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class DataFieldAttributeWithTargetsDiagnosticSuppressor : DiagnosticSuppressor
     {
+        /// <summary>
+        /// Gets a <see cref="SuppressionDescriptor"/> for a field using [SerializeField] with an attribute list targeting a property.
+        /// </summary>
+        public static readonly SuppressionDescriptor PropertyAttributeListForDataField = new(
+              id: "SG_DATA_SUPPRESS_0001"
+            , suppressedDiagnosticId: "CS0657"
+            , justification: "Fields using [SerializeField] can use [property:] attribute lists to forward attributes to the generated properties"
+        );
+
         /// <inheritdoc/>
         public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
             => ImmutableArray.Create(PropertyAttributeListForDataField);
@@ -52,8 +61,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 // Check that the target is effectively [property:] over a field declaration with at least one variable, which is the only case we are interested in
                 if (syntaxNode is not AttributeTargetSpecifierSyntax attributeTarget
                     || attributeTarget.Parent.Parent is not FieldDeclarationSyntax fieldDeclaration
-                    || fieldDeclaration.Declaration.Variables.Count <= 0
+                    || fieldDeclaration.Declaration.Variables.Count < 1
                     || attributeTarget.Identifier.Kind() is not SyntaxKind.PropertyKeyword
+                    || fieldDeclaration.Parent is not TypeDeclarationSyntax typeDeclaration
+                    || typeDeclaration.AttributeLists.Count < 1
+                    || typeDeclaration.HasAttribute(NAMESPACE, "Data", token) == false
                 )
                 {
                     continue;
@@ -67,6 +79,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 // Check if the field is using [SerializeField], in which case we should suppress the warning
                 if (declaredSymbol is IFieldSymbol fieldSymbol
                     && fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE, token)
+                    && fieldSymbol.ContainingType.HasAttribute(DATA_ATTRIBUTE, token)
                 )
                 {
                     context.ReportSuppression(Suppression.Create(PropertyAttributeListForDataField, diagnostic));

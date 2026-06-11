@@ -122,8 +122,8 @@ namespace EncosyTower.SourceGen.Analyzers.Data
         {
             token.ThrowIfCancellationRequested();
 
-            if (typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA, token) is not null
-                || typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE_METADATA}", token) is not null
+            if (typeSymbol.GetAttribute(DATA_ATTRIBUTE, token) is not null
+                || typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE}", token) is not null
             )
             {
                 return true;

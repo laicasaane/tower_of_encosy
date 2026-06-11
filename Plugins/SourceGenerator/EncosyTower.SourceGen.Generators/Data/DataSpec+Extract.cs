@@ -37,7 +37,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return default;
             }
 
-            var dataAttribute = typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA, token);
+            var dataAttribute = typeSymbol.GetAttribute(DATA_ATTRIBUTE, token);
 
             if (dataAttribute == null)
             {
@@ -157,7 +157,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             if (typeSymbol.BaseType is INamedTypeSymbol baseNamedTypeSymbol
                 && baseNamedTypeSymbol.TypeKind == TypeKind.Class
-                && baseNamedTypeSymbol.HasAttribute(DATA_ATTRIBUTE_METADATA, token)
+                && baseNamedTypeSymbol.HasAttribute(DATA_ATTRIBUTE, token)
             )
             {
                 baseTypeName = baseNamedTypeSymbol.ToFullName();
@@ -664,7 +664,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 {
                     token.ThrowIfCancellationRequested();
 
-                    if (baseType.HasAttribute(DATA_ATTRIBUTE_METADATA, token)
+                    if (baseType.HasAttribute(DATA_ATTRIBUTE, token)
                         && existingOverrideEquals.Contains(baseType) == false
                     )
                     {
@@ -760,7 +760,7 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var fieldEquality = type.DetermineEquality();
 
-            if (type.HasAttribute(DATA_ATTRIBUTE_METADATA, token))
+            if (type.HasAttribute(DATA_ATTRIBUTE, token))
             {
                 fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
             }
@@ -774,7 +774,7 @@ namespace EncosyTower.SourceGen.Generators.Data
 
         private static bool GetEquatable(ITypeSymbol type, CancellationToken token)
         {
-            return type.HasAttribute(DATA_ATTRIBUTE_METADATA, token)
+            return type.HasAttribute(DATA_ATTRIBUTE, token)
                 || type.HasAttribute(UNION_ID_ATTRIBUTE, token)
                 || type.DetermineIEquatable(token)
                 ;
