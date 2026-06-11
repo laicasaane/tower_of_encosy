@@ -5,12 +5,12 @@ using UnityEngine;
 namespace EncosyTower.Mvvm.ViewBinding
 {
     [Serializable]
-    public sealed class Converter
+    public struct Converter
     {
         [field: SerializeReference]
         public IAdapter Adapter { get; set; }
 
-        public Variant Convert(in Variant value)
+        public readonly Variant Convert(in Variant value)
             => Adapter?.Convert(value) ?? value;
     }
 }

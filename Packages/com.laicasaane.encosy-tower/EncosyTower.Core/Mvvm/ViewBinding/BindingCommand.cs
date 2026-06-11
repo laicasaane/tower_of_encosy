@@ -4,7 +4,7 @@ using UnityEngine;
 namespace EncosyTower.Mvvm.ViewBinding
 {
     [Serializable]
-    public sealed class BindingCommand
+    public struct BindingCommand
     {
         /// <summary>
         /// The <see cref="EncosyTower.Mvvm.Input.ICommand"/> whose container class

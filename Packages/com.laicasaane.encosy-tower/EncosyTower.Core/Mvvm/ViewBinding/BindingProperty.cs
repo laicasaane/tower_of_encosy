@@ -4,7 +4,7 @@ using UnityEngine;
 namespace EncosyTower.Mvvm.ViewBinding
 {
     [Serializable]
-    public sealed class BindingProperty
+    public struct BindingProperty
     {
         /// <summary>
         /// The property whose container class is an <see cref="EncosyTower.Mvvm.ComponentModel.IObservableObject"/>.
