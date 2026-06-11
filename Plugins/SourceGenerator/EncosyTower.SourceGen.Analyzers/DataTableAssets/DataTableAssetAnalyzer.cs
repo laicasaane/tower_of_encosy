@@ -32,6 +32,9 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
 
         private static void AnalyzeNamedType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
             {
                 return;
@@ -41,6 +44,8 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
 
             foreach (var attr in typeSymbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 var attrClass = attr.AttributeClass;
 
                 if (attrClass is null)
@@ -48,12 +53,14 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
                     continue;
                 }
 
-                if (attrClass.HasFullName(DATA_TABLE_ASSET_ATTRIBUTE))
+                if (attrClass.HasFullName(DATA_TABLE_ASSET_ATTRIBUTE, token))
                 {
                     hasAttribute = true;
                     break;
                 }
             }
+
+            token.ThrowIfCancellationRequested();
 
             if (hasAttribute == false)
             {
@@ -64,11 +71,13 @@ namespace EncosyTower.SourceGen.Analyzers.DataTableAssets
 
             while (baseType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 var typeArguments = baseType.TypeArguments;
 
                 if (typeArguments.Length >= 2)
                 {
-                    if (baseType.HasFullNamePrefix(DATA_TABLE_ASSET))
+                    if (baseType.HasFullNamePrefix(DATA_TABLE_ASSET, token))
                     {
                         var idType = typeArguments[0];
                         var dataType = typeArguments[1];

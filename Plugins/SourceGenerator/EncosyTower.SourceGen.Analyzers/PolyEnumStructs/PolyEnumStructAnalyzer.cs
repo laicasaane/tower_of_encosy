@@ -70,15 +70,17 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
 
         private static void AnalyzeType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE, token) == false
             )
             {
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(POLY_ENUM_STRUCT_ATTRIBUTE);
-            var token = context.CancellationToken;
+            var attrib = typeSymbol.GetAttribute(POLY_ENUM_STRUCT_ATTRIBUTE, token);
             var location = attrib?.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                 ?? typeSymbol.Locations[0];
 
@@ -92,18 +94,24 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var parentName = typeSymbol.Name;
             var verboseUndefinedName = $"{parentName}_Undefined";
             var validCaseCount = 0;
 
             foreach (var nested in typeSymbol.GetTypeMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (nested.TypeKind == TypeKind.Interface
                     && string.Equals(nested.Name, INTERFACE_NAME, StringComparison.Ordinal)
                 )
                 {
                     foreach (var member in nested.GetMembers())
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (member is IMethodSymbol method
                             && method.MethodKind == MethodKind.Ordinary
                             && method.TypeParameters.Length > 0
@@ -132,10 +140,14 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumStructs
                     continue;
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 validCaseCount++;
 
                 foreach (var member in nested.GetMembers())
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is IMethodSymbol method
                         && method.MethodKind == MethodKind.Ordinary
                         && method.TypeParameters.Length > 0

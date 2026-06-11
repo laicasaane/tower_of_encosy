@@ -33,14 +33,21 @@ namespace EncosyTower.SourceGen.Generators.Data
     public sealed class DataFieldAttributeWithTargetsDiagnosticSuppressor : DiagnosticSuppressor
     {
         /// <inheritdoc/>
-        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => ImmutableArray.Create(PropertyAttributeListForDataField);
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
+            => ImmutableArray.Create(PropertyAttributeListForDataField);
 
         /// <inheritdoc/>
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (Diagnostic diagnostic in context.ReportedDiagnostics)
             {
-                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken).FindNode(diagnostic.Location.SourceSpan);
+                token.ThrowIfCancellationRequested();
+
+                var syntaxNode = diagnostic.Location.SourceTree?
+                    .GetRoot(token).FindNode(diagnostic.Location.SourceSpan);
 
                 // Check that the target is effectively [property:] over a field declaration with at least one variable, which is the only case we are interested in
                 if (syntaxNode is not AttributeTargetSpecifierSyntax attributeTarget
@@ -55,11 +62,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 var semanticModel = context.GetSemanticModel(syntaxNode.SyntaxTree);
 
                 // Get the field symbol from the first variable declaration
-                var declaredSymbol = semanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables[0], context.CancellationToken);
+                var declaredSymbol = semanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables[0], token);
 
                 // Check if the field is using [SerializeField], in which case we should suppress the warning
                 if (declaredSymbol is IFieldSymbol fieldSymbol
-                    && fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE)
+                    && fieldSymbol.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE, token)
                 )
                 {
                     context.ReportSuppression(Suppression.Create(PropertyAttributeListForDataField, diagnostic));

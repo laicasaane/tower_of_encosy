@@ -26,12 +26,12 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 p.PrintEndLine();
                 p.OpenScope();
                 {
-                    var generatesId = RequiresGeneratedProperty(propertyId);
-                    var generatesVersion = RequiresGeneratedProperty(propertyVersion);
+                    var generatesId = memberId.ShouldGenerate;
+                    var generatesVersion = memberVersion.ShouldGenerate;
 
                     if (generatesId)
                     {
-                        WriteProperty(ref p, "Id", propertyId);
+                        WriteProperty(ref p, "Id", memberId);
 
                         if (generatesVersion)
                         {
@@ -41,7 +41,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     if (generatesVersion)
                     {
-                        WriteProperty(ref p, "Version", propertyVersion);
+                        WriteProperty(ref p, "Version", memberVersion);
                     }
                 }
                 p.CloseScope();
@@ -51,13 +51,43 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             return p.Result;
         }
 
-        private static void WriteProperty(ref Printer p, string name, MemberDefinitionType definitionType)
+        private static void WriteProperty(ref Printer p, string name, MemberDefinition member)
         {
-            var modifier = definitionType == MemberDefinitionType.DefinedInBaseTypeAsAbstract
+            var modifier = member.type == MemberDefinitionType.DefinedInBaseTypeAsAbstract
                 ? "public override string "
                 : "public string ";
 
-            p.PrintBeginLine(modifier).Print(name).PrintEndLine(" { get; set; }");
+            p.PrintBeginLine(modifier).Print(name);
+
+            if (member.isField == false)
+            {
+                p.PrintEndLine(" { get; set; }");
+                return;
+            }
+
+            p.PrintEndLine();
+            p.OpenScope();
+            {
+                p.PrintLine("get");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine("return ")
+                        .PrintIf(member.type == MemberDefinitionType.DefinedInBaseType, "base", "this")
+                        .Print(".").Print(member.name).PrintEndLine(";");
+                }
+                p.CloseScope();
+                p.PrintEndLine();
+
+                p.PrintLine("set");
+                p.OpenScope();
+                {
+                    p.PrintBeginLine()
+                        .PrintIf(member.type == MemberDefinitionType.DefinedInBaseType, "base", "this")
+                        .Print(".").Print(member.name).PrintEndLine(" = value;");
+                }
+                p.CloseScope();
+            }
+            p.CloseScope();
         }
     }
 }

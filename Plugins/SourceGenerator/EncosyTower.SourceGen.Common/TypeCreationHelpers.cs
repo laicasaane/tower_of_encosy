@@ -8,10 +8,7 @@
 //
 // Please review the license for details on these and other terms and conditions.
 
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -24,120 +21,6 @@ namespace EncosyTower.SourceGen
     public static class TypeCreationHelpers
     {
         public const string NEWLINE = "\n";
-
-        /// <summary>
-        /// Constructs a replaced tree based on a root note.
-        /// Uses originalToReplacedNode to replace.
-        /// Filtered based on replacementNodeCandidates.
-        /// </summary>
-        /// <param name="currentNode">Root to replace downwards from.</param>
-        /// <param name="originalToReplacedNode">Dictionary containing keys of original nodes, and values of replacements.</param>
-        /// <param name="replacementNodeCandidates">A list of nodes to look through. (ie. only these nodes will be replaced.)</param>
-        /// <returns>Top member of replaced tree.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Happens if currentNode is not a class, namespace or struct. (and is contained in replacementNodeCandidates.)
-        /// </exception>
-        /// <remarks> Uses Downwards Recursion. </remarks>
-        static MemberDeclarationSyntax ConstructReplacedTree(SyntaxNode currentNode,
-            IDictionary<TypeDeclarationSyntax, TypeDeclarationSyntax> originalToReplacedNode,
-            ImmutableHashSet<SyntaxNode> replacementNodeCandidates)
-        {
-            // If this node shouldn't exist in replaced tree, early out
-            if (replacementNodeCandidates.Contains(currentNode) == false)
-                return null;
-
-            // Otherwise, check for replaced children by recursing
-            var replacedChildren =
-                currentNode
-                    .ChildNodes()
-                    .Select(childNode => ConstructReplacedTree(childNode, originalToReplacedNode, replacementNodeCandidates))
-                    .Where(child => child != null).ToArray();
-
-            // Either get the replaced node for this level - or create one - and add the replaced children
-            // No node found, need to create a new one to represent this node in the hierarchy
-            return currentNode switch {
-                BaseNamespaceDeclarationSyntax namespaceNode =>
-                    SyntaxFactory.NamespaceDeclaration(namespaceNode.Name)
-                        .AddMembers(replacedChildren)
-                        .WithModifiers(namespaceNode.Modifiers)
-                        .WithUsings(namespaceNode.Usings),
-
-                ClassDeclarationSyntax classNode =>
-                    SyntaxFactory.ClassDeclaration(classNode.Identifier)
-                        .AddMembers(replacedChildren)
-                        .WithBaseList(classNode.BaseList)
-                        .WithModifiers(classNode.Modifiers),
-
-                StructDeclarationSyntax structNode =>
-                    SyntaxFactory.StructDeclaration(structNode.Identifier)
-                        .AddMembers(replacedChildren)
-                        .WithBaseList(structNode.BaseList)
-                        .WithModifiers(structNode.Modifiers),
-
-                RecordDeclarationSyntax recordNode =>
-                    SyntaxFactory.RecordDeclaration(recordNode.ClassOrStructKeyword, recordNode.Identifier)
-                        .AddMembers(replacedChildren)
-                        .WithBaseList(recordNode.BaseList)
-                        .WithModifiers(recordNode.Modifiers),
-
-                InterfaceDeclarationSyntax interfaceNode =>
-                    SyntaxFactory.InterfaceDeclaration(interfaceNode.Identifier)
-                        .AddMembers(replacedChildren)
-                        .WithBaseList(interfaceNode.BaseList)
-                        .WithModifiers(interfaceNode.Modifiers),
-
-                TypeDeclarationSyntax typeNode when originalToReplacedNode.ContainsKey(typeNode) =>
-                    originalToReplacedNode[typeNode]?.AddMembers(replacedChildren),
-
-                _ => throw new InvalidOperationException(
-                    $"Expecting class or namespace declaration in syntax tree for {currentNode} but found {currentNode.Kind()}"
-                )
-            };
-        }
-
-        public static SourceText GenerateSourceTextForRootNodes(
-              string generatedSourceFilePath
-            , SyntaxNode containingSyntax
-            , string bodySource
-            , CancellationToken cancellationToken
-            , Printer? overridePrinter = default
-            , PrinterAction printAdditionalUsings = default
-        )
-        {
-            // DO NOT worry about #if directives
-            // Because source generators run after preprocessors,
-            // every disabled code will be removed from the compilation context.
-            // So there might be no generated code to worry about.
-
-            var printer = overridePrinter ?? Printer.DefaultLarge;
-
-            var result = WriteOpeningSyntax_AndReturnClosingSyntax(
-                  ref printer
-                , containingSyntax
-                , cancellationToken
-                , printAdditionalUsings
-            );
-
-            printer.PrintLine(bodySource);
-
-            var numClosingBraces = result.NumClosingBraces;
-
-            if (numClosingBraces > 0)
-            {
-                printer.PrintEndLine();
-            }
-
-            for (int i = 0; i < numClosingBraces; i++)
-            {
-                printer = printer.DecreasedIndent();
-                printer.PrintLine("}");
-            }
-
-            return SourceText.From(printer.Result, Encoding.UTF8)
-                .WithIgnoreUnassignedVariableWarning()
-                .WithInitialLineDirectiveToGeneratedSource(generatedSourceFilePath)
-                ;
-        }
 
         public static SourceText GenerateSourceText(
               string generatedSourceFilePath
@@ -167,7 +50,7 @@ namespace EncosyTower.SourceGen
 
         public static void GenerateOpeningAndClosingSource(
               SyntaxNode containingSyntax
-            , CancellationToken cancellationToken
+            , CancellationToken token
             , out string openingSource
             , out string closingSource
             , Printer? overridePrinter = default
@@ -179,7 +62,7 @@ namespace EncosyTower.SourceGen
             var result = WriteOpeningSyntax_AndReturnClosingSyntax(
                   ref printer
                 , containingSyntax
-                , cancellationToken
+                , token
                 , printAdditionalUsings
             );
 
@@ -196,6 +79,8 @@ namespace EncosyTower.SourceGen
 
             for (int i = 0; i < numClosingBraces; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 printer = printer.DecreasedIndent();
                 printer.PrintLine("}");
             }
@@ -206,21 +91,24 @@ namespace EncosyTower.SourceGen
         private static ClosingSyntax WriteOpeningSyntax_AndReturnClosingSyntax(
               ref Printer printer
             , SyntaxNode containingTypeSyntax
-            , CancellationToken cancellationToken
+            , CancellationToken token
             , PrinterAction printAdditionUsings
         )
         {
-            var (openingSyntaxes, numClosingBraces) = GetOpeningSyntaxes(containingTypeSyntax);
+            token.ThrowIfCancellationRequested();
+
+            var (openingSyntaxes, numClosingBraces) = GetOpeningSyntaxes(containingTypeSyntax, token);
 
             var uniqueUsings = new HashSet<string>();
             var usings = SyntaxFactory.List<UsingDirectiveSyntax>();
 
-            GetUsings(containingTypeSyntax?.SyntaxTree, uniqueUsings, ref usings, cancellationToken);
+            GetUsings(containingTypeSyntax?.SyntaxTree, uniqueUsings, ref usings, token);
 
             printer.PrintEndLine();
 
             foreach (var @using in usings)
             {
+                token.ThrowIfCancellationRequested();
                 printer.PrintLine(@using.ToString());
             }
 
@@ -233,6 +121,8 @@ namespace EncosyTower.SourceGen
 
             foreach (var (openingValue, addIndentAfter) in openingSyntaxes)
             {
+                token.ThrowIfCancellationRequested();
+
                 printer.PrintLine(openingValue);
 
                 if (addIndentAfter)
@@ -252,7 +142,7 @@ namespace EncosyTower.SourceGen
                   SyntaxTree syntaxTree
                 , HashSet<string> uniqueUsings
                 , ref SyntaxList<UsingDirectiveSyntax> usings
-                , CancellationToken cancellationToken
+                , CancellationToken token
             )
             {
                 if (syntaxTree == null)
@@ -260,10 +150,12 @@ namespace EncosyTower.SourceGen
                     return;
                 }
 
-                var currentUsings = syntaxTree.GetCompilationUnitRoot(cancellationToken).Usings;
+                var currentUsings = syntaxTree.GetCompilationUnitRoot(token).Usings;
 
                 foreach (var @using in currentUsings)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (uniqueUsings.Add(@using.Name.ToString()))
                     {
                         usings = usings.Add(@using);
@@ -272,14 +164,18 @@ namespace EncosyTower.SourceGen
             }
         }
 
-        private static OpeningSyntaxes GetOpeningSyntaxes(SyntaxNode node)
+        private static OpeningSyntaxes GetOpeningSyntaxes(SyntaxNode node, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var opening = new Stack<OpeningSyntax>();
             var numBracesToClose = 0;
             var parentSyntax = node?.Parent;
 
             while (parentSyntax != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 switch (parentSyntax)
                 {
                     case RecordDeclarationSyntax recordSyntax:

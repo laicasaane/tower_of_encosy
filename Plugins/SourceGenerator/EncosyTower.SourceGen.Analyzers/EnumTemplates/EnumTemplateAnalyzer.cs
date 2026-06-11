@@ -104,18 +104,21 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
 
         private static void AnalyzeType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
             {
                 return;
             }
 
-            if (typeSymbol.HasAttribute(ENUM_TEMPLATE_ATTRIBUTE))
+            if (typeSymbol.HasAttribute(ENUM_TEMPLATE_ATTRIBUTE, token))
             {
                 AnalyzeTemplateStruct(context, typeSymbol);
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE);
+            var attrib = typeSymbol.GetAttribute(ENUM_MEMBERS_FOR_TEMPLATE_ATTRIBUTE, token);
 
             if (attrib != null)
             {
@@ -123,7 +126,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
                 return;
             }
 
-            attrib = typeSymbol.GetAttribute(TYPE_AS_MEMBER_ATTRIBUTE);
+            attrib = typeSymbol.GetAttribute(TYPE_AS_MEMBER_ATTRIBUTE, token);
 
             if (attrib != null)
             {
@@ -133,10 +136,11 @@ namespace EncosyTower.SourceGen.Analyzers.EnumTemplates
 
         private static void AnalyzeTemplateStruct(SymbolAnalysisContext context, INamedTypeSymbol templateSymbol)
         {
+            var token = context.CancellationToken;
+
             ReportTemplateSuffix(context, templateSymbol);
 
-            var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
-            var token = context.CancellationToken;
+            var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE, token);
 
             foreach (var attrib in attributes)
             {

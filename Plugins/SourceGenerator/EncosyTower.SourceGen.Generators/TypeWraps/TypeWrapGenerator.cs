@@ -26,7 +26,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var wrapTypeProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   WRAP_TYPE_ATTRIBUTE_METADATA
@@ -92,9 +92,9 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             {
                 case StructDeclarationSyntax structSyntax:
                 {
-                    if (TryGetWrapTypeInfo(structSyntax, out var candidate))
+                    if (TryGetWrapTypeInfo(structSyntax, token, out var candidate))
                     {
-                        GetTypeName(structSyntax, ref candidate);
+                        GetTypeName(structSyntax, token, ref candidate);
                         SetOtherFields(ref candidate, structSyntax, symbol, semanticModel, token);
                         candidate.isStruct = true;
                         candidate.isRefStruct = structSyntax.Modifiers.Any(SyntaxKind.RefKeyword);
@@ -134,9 +134,11 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 case ClassDeclarationSyntax classSyntax:
                 {
-                    if (TryGetWrapTypeInfo(classSyntax, out var candidate) && InheritBaseClass(symbol) == false)
+                    if (TryGetWrapTypeInfo(classSyntax, token, out var candidate)
+                        && InheritBaseClass(symbol, token) == false
+                    )
                     {
-                        GetTypeName(classSyntax, ref candidate);
+                        GetTypeName(classSyntax, token, ref candidate);
                         SetOtherFields(ref candidate, classSyntax, symbol, semanticModel, token);
 
                         var syntaxTree = classSyntax.SyntaxTree;
@@ -198,12 +200,12 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             var semanticModel = context.SemanticModel;
             var enableNullable = semanticModel.Compilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
-            if (TryGetWrapRecordInfo(recordSyntax, out var candidate)
+            if (TryGetWrapRecordInfo(recordSyntax, token, out var candidate)
                 && (recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.ClassKeyword) == false
-                    || InheritBaseClass(symbol) == false)
+                    || InheritBaseClass(symbol, token) == false)
             )
             {
-                GetTypeName(recordSyntax, ref candidate);
+                GetTypeName(recordSyntax, token, ref candidate);
                 SetOtherFields(ref candidate, recordSyntax, symbol, semanticModel, token);
                 candidate.isStruct = recordSyntax.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword);
                 candidate.isRecord = true;
@@ -264,12 +266,16 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             p.PrintEndLine();
         }
 
-        private static bool InheritBaseClass(INamedTypeSymbol classSymbol)
+        private static bool InheritBaseClass(INamedTypeSymbol classSymbol, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var baseType = classSymbol.BaseType;
 
             while (baseType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (baseType.TypeKind == TypeKind.Class
                     && baseType.SpecialType != SpecialType.System_Object
                 )
@@ -283,8 +289,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return false;
         }
 
-        private static bool TryGetWrapTypeInfo(TypeDeclarationSyntax syntax, out Candidate result)
+        private static bool TryGetWrapTypeInfo(
+              TypeDeclarationSyntax syntax
+            , CancellationToken token
+            , out Candidate result
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             result = new Candidate {
                 fieldName = string.Empty,
             };
@@ -293,8 +305,12 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
             foreach (var attribList in syntax.AttributeLists)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var attrib in attribList.Attributes)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var argumentList = attrib.ArgumentList;
 
                     if (argumentList == null)
@@ -316,6 +332,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                     foreach (var arg in arguments)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (arg.NameEquals != null)
                         {
                             switch (arg.NameEquals.Name.Identifier.Text)
@@ -391,16 +409,26 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return result.fieldTypeSyntax != null;
         }
 
-        private static bool TryGetWrapRecordInfo(RecordDeclarationSyntax syntax, out Candidate result)
+        private static bool TryGetWrapRecordInfo(
+              RecordDeclarationSyntax syntax
+            , CancellationToken token
+            , out Candidate result
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             result = new Candidate();
 
             foreach (var attribList in syntax.AttributeLists)
             {
+                token.ThrowIfCancellationRequested();
+
                 var alreadProcessed = false;
 
                 foreach (var attrib in attribList.Attributes)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_RECORD) == false)
                     {
                         continue;
@@ -414,6 +442,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                         foreach (var arg in arguments)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (arg.NameEquals == null)
                             {
                                 continue;
@@ -456,8 +486,14 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
             return result.fieldTypeSyntax != null;
         }
 
-        private static void GetTypeName(TypeDeclarationSyntax syntax, ref Candidate candidate)
+        private static void GetTypeName(
+              TypeDeclarationSyntax syntax
+            , CancellationToken token
+            , ref Candidate candidate
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var typeNameWithTypeParamsBuilder = new StringBuilder(syntax.Identifier.ValueText);
 
             if (syntax.TypeParameterList is TypeParameterListSyntax typeParamList
@@ -473,6 +509,8 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
 
                 for (var i = 0; i <= last; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     typeNameWithTypeParamsBuilder.Append(typeParams[i].Identifier.Text);
 
                     if (i < last)

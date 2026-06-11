@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -134,6 +135,9 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
                 || typeSymbol.TypeKind != TypeKind.Class
             )
@@ -141,7 +145,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                 return;
             }
 
-            var hasObservableObject = typeSymbol.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE);
+            var hasObservableObject = typeSymbol.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE, token);
 
             BuildMemberDirectories(
                   typeSymbol
@@ -149,6 +153,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                 , out var declaredPropertyNames
                 , out var relayCommandNames
                 , out var observablePropertyMembers
+                , token
             );
 
             if (hasObservableObject == false && observablePropertyMembers.Count == 0)
@@ -156,10 +161,14 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var generatedNames = new Dictionary<string, ISymbol>(StringComparer.Ordinal);
 
             foreach (var member in observablePropertyMembers)
             {
+                token.ThrowIfCancellationRequested();
+
                 var memberLocation = member.Locations.Length > 0
                     ? member.Locations[0]
                     : Location.None;
@@ -194,7 +203,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                     continue;
                 }
 
-                var observableAttr = TryLocateObservableAttribute(member);
+                var observableAttr = TryLocateObservableAttribute(member, token);
 
                 var observableAttrLocation = observableAttr?.ApplicationSyntaxReference
                     ?.GetSyntax(context.CancellationToken)?.GetLocation() ?? memberLocation;
@@ -241,8 +250,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
             , out HashSet<string> declaredPropertyNames
             , out HashSet<string> relayCommandNames
             , out List<ISymbol> observablePropertyMembers
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             declaredMemberNames = new HashSet<string>(StringComparer.Ordinal);
             declaredPropertyNames = new HashSet<string>(StringComparer.Ordinal);
             relayCommandNames = new HashSet<string>(StringComparer.Ordinal);
@@ -250,6 +262,8 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
 
             foreach (var member in typeSymbol.GetMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 declaredMemberNames.Add(member.Name);
 
                 if (member is IPropertySymbol propertySymbol)
@@ -258,14 +272,14 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                 }
 
                 if (member is IMethodSymbol methodSymbol
-                    && methodSymbol.HasAttribute(RELAY_COMMAND_ATTRIBUTE)
+                    && methodSymbol.HasAttribute(RELAY_COMMAND_ATTRIBUTE, token)
                 )
                 {
-                    relayCommandNames.Add(methodSymbol.Name + COMMAND_SUFFIX);
+                    relayCommandNames.Add($"{methodSymbol.Name}{COMMAND_SUFFIX}");
                 }
 
                 if ((member is IFieldSymbol || member is IPropertySymbol)
-                    && member.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE)
+                    && member.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE, token)
                 )
                 {
                     observablePropertyMembers.Add(member);
@@ -273,11 +287,15 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
             }
         }
 
-        private static AttributeData TryLocateObservableAttribute(ISymbol member)
+        private static AttributeData TryLocateObservableAttribute(ISymbol member, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var attr in member.GetAttributes())
             {
-                if (attr.AttributeClass.HasFullName(OBSERVABLE_PROPERTY_ATTRIBUTE))
+                token.ThrowIfCancellationRequested();
+
+                if (attr.AttributeClass.HasFullName(OBSERVABLE_PROPERTY_ATTRIBUTE, token))
                 {
                     return attr;
                 }
@@ -386,8 +404,13 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
             , HashSet<string> relayCommandNames
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (var attrib in member.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 var attrClass = attrib.AttributeClass;
 
                 if (attrClass is null)
@@ -398,12 +421,12 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                 string correlationKind;
                 bool isPropertyChanged;
 
-                if (attrClass.HasFullName(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE))
+                if (attrClass.HasFullName(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE, token))
                 {
                     correlationKind = KIND_NOTIFY_PROPERTY_CHANGED_FOR;
                     isPropertyChanged = true;
                 }
-                else if (attrClass.HasFullName(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE))
+                else if (attrClass.HasFullName(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE, token))
                 {
                     correlationKind = KIND_NOTIFY_CAN_EXECUTE_CHANGED_FOR;
                     isPropertyChanged = false;
@@ -447,6 +470,8 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                 {
                     foreach (var element in args[1].Values)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (element.Kind != TypedConstantKind.Primitive || element.Value is not string extraName)
                         {
                             malformed = true;
@@ -468,8 +493,12 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.ObservableProperties
                     continue;
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 foreach (var targetName in targetNames)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (string.IsNullOrEmpty(targetName))
                     {
                         continue;

@@ -61,6 +61,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
 
                 foreach (var attribute in field.GetAttributes())
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var attributeName = attribute.AttributeClass?.Name ?? string.Empty;
 
                     switch (attributeName)
@@ -91,6 +93,8 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                             {
                                 foreach (var arg in attribute.NamedArguments)
                                 {
+                                    token.ThrowIfCancellationRequested();
+
                                     if (arg.Key is "Name" or "DisplayName"
                                         && arg.Value.Kind == TypedConstantKind.Primitive
                                         && arg.Value.Value?.ToString() is string dn
@@ -141,7 +145,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 fileHintName = enumSymbol.ToFileName(),
                 accessibility = accessibility,
                 parentIsNamespace = parentIsNamespace,
-                hasFlags = enumSymbol.HasAttribute(FLAGS_ATTRIBUTE),
+                hasFlags = enumSymbol.HasAttribute(FLAGS_ATTRIBUTE, token),
                 isDisplayAttributeUsed = isDisplayAttributeUsed,
                 fixedStringBytes = fixedStringBytes,
                 members = new EquatableArray<EnumMemberSpec>(memberBuilder.ToImmutable()),

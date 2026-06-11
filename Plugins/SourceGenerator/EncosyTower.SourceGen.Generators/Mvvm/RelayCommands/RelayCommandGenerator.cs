@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -21,12 +22,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       OBSERVABLE_OBJECT_ATTRIBUTE_METADATA
-                    , static (node, _) => node is ClassDeclarationSyntax cls && HasAnyRelayCommandMethod(cls)
+                    , static (node, c) => node is ClassDeclarationSyntax s && HasAnyRelayCommandMethod(s, c)
                     , RelayCommandSpec.Extract
                 )
                 .Where(static t => t.IsValid);
@@ -47,12 +48,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
             });
         }
 
-        private static bool HasAnyRelayCommandMethod(ClassDeclarationSyntax cls)
+        private static bool HasAnyRelayCommandMethod(ClassDeclarationSyntax cls, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var member in cls.Members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is MethodDeclarationSyntax method
-                    && method.HasAttributeCandidate(INPUT_NAMESPACE, ATTRIBUTE))
+                    && method.HasAttributeCandidate(INPUT_NAMESPACE, ATTRIBUTE, token))
                 {
                     return true;
                 }

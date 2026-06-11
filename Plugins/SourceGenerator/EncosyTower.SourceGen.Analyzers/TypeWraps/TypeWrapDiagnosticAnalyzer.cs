@@ -94,14 +94,16 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
             {
                 return;
             }
 
-            var ct = context.CancellationToken;
-            var hasWrapType = typeSymbol.TryGetAttribute(WRAP_TYPE_FQN, out var wrapTypeAttr);
-            var hasWrapRecord = typeSymbol.TryGetAttribute(WRAP_RECORD_FQN, out var wrapRecordAttr);
+            var hasWrapType = typeSymbol.TryGetAttribute(WRAP_TYPE_FQN, out var wrapTypeAttr, token);
+            var hasWrapRecord = typeSymbol.TryGetAttribute(WRAP_RECORD_FQN, out var wrapRecordAttr, token);
 
             if (hasWrapType == false && hasWrapRecord == false)
             {
@@ -110,18 +112,18 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
 
             if (hasWrapType)
             {
-                AnalyzeWrapType(context, typeSymbol, wrapTypeAttr, ct);
+                AnalyzeWrapType(context, typeSymbol, wrapTypeAttr);
             }
 
             if (hasWrapRecord)
             {
-                AnalyzeWrapRecord(context, typeSymbol, wrapRecordAttr, ct);
+                AnalyzeWrapRecord(context, typeSymbol, wrapRecordAttr);
             }
 
-            if (typeSymbol.TypeKind == TypeKind.Class && InheritsNonObjectBaseClass(typeSymbol))
+            if (typeSymbol.TypeKind == TypeKind.Class && InheritsNonObjectBaseClass(typeSymbol, token))
             {
                 var attr = wrapTypeAttr ?? wrapRecordAttr;
-                var location = GetAttributeLocation(attr, typeSymbol, ct);
+                var location = GetAttributeLocation(attr, typeSymbol, token);
 
                 context.ReportDiagnostic(Diagnostic.Create(
                       WrapperInheritsBaseClass
@@ -135,10 +137,9 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
               SymbolAnalysisContext context
             , INamedTypeSymbol typeSymbol
             , AttributeData attr
-            , CancellationToken ct
         )
         {
-            var location = GetAttributeLocation(attr, typeSymbol, ct);
+            var location = GetAttributeLocation(attr, typeSymbol, context.CancellationToken);
 
             if (typeSymbol.IsRecord)
             {
@@ -200,10 +201,9 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
               SymbolAnalysisContext context
             , INamedTypeSymbol typeSymbol
             , AttributeData attr
-            , CancellationToken ct
         )
         {
-            var location = GetAttributeLocation(attr, typeSymbol, ct);
+            var location = GetAttributeLocation(attr, typeSymbol, context.CancellationToken);
 
             if (typeSymbol.IsRecord == false)
             {
@@ -215,7 +215,9 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
                 return;
             }
 
-            if (TryGetRecordParameterCount(typeSymbol, ct, out var paramCount) && paramCount == 1)
+            if (TryGetRecordParameterCount(typeSymbol, context.CancellationToken, out var paramCount)
+                && paramCount == 1
+            )
             {
                 return;
             }
@@ -229,15 +231,19 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
 
         private static bool TryGetRecordParameterCount(
               INamedTypeSymbol typeSymbol
-            , CancellationToken ct
+            , CancellationToken token
             , out int parameterCount
         )
         {
+            token.ThrowIfCancellationRequested();
+
             parameterCount = 0;
 
             foreach (var reference in typeSymbol.DeclaringSyntaxReferences)
             {
-                if (reference.GetSyntax(ct) is RecordDeclarationSyntax recordSyntax
+                token.ThrowIfCancellationRequested();
+
+                if (reference.GetSyntax(token) is RecordDeclarationSyntax recordSyntax
                     && recordSyntax.ParameterList is ParameterListSyntax parameterList
                 )
                 {
@@ -249,12 +255,16 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
             return false;
         }
 
-        private static bool InheritsNonObjectBaseClass(INamedTypeSymbol typeSymbol)
+        private static bool InheritsNonObjectBaseClass(INamedTypeSymbol typeSymbol, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var baseType = typeSymbol.BaseType;
 
             while (baseType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (baseType.TypeKind == TypeKind.Class
                     && baseType.SpecialType != SpecialType.System_Object
                 )
@@ -271,12 +281,12 @@ namespace EncosyTower.SourceGen.Analyzers.TypeWraps
         private static Location GetAttributeLocation(
               AttributeData attr
             , INamedTypeSymbol typeSymbol
-            , CancellationToken ct
+            , CancellationToken token
         )
         {
             if (attr is { ApplicationSyntaxReference: { } reference })
             {
-                var syntax = reference.GetSyntax(ct);
+                var syntax = reference.GetSyntax(token);
 
                 if (syntax != null)
                 {

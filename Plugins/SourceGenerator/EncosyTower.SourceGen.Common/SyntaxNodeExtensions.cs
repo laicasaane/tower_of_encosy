@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -193,10 +194,13 @@ namespace EncosyTower.SourceGen
               this SyntaxNode syntaxNode
             , string attributeNameSpace
             , string attributeName
+            , CancellationToken token = default
         )
         {
             foreach (var attribListCandidate in syntaxNode.ChildNodes())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attribListCandidate == null || attribListCandidate.IsKind(SyntaxKind.AttributeList) == false)
                 {
                     continue;
@@ -204,6 +208,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (var attribCandidate in attribListCandidate.ChildNodes())
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attribCandidate is AttributeSyntax attrib
                         && attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName)
                     )
@@ -220,12 +226,17 @@ namespace EncosyTower.SourceGen
               this MemberDeclarationSyntax syntaxNode
             , string attributeNameSpace
             , string attributeName
+            , CancellationToken token = default
         )
         {
             foreach (var attribList in syntaxNode.AttributeLists)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var attrib in attribList.Attributes)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName))
                     {
                         return true;
@@ -240,12 +251,17 @@ namespace EncosyTower.SourceGen
               this MemberDeclarationSyntax syntaxNode
             , string attributeNameSpace
             , string attributeName
+            , CancellationToken token = default
         )
         {
             foreach (var attribList in syntaxNode.AttributeLists)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var attrib in attribList.Attributes)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName))
                     {
                         return attrib;
@@ -273,16 +289,24 @@ namespace EncosyTower.SourceGen
             return root.RemoveNode(toRemove, removeOptions);
         }
 
-        public static string GetDisplayNameOrDefault(this MemberDeclarationSyntax syntax, string defaultValue)
+        public static string GetDisplayNameOrDefault(
+              this MemberDeclarationSyntax syntax
+            , string defaultValue
+            , CancellationToken token = default
+        )
         {
             var displayName = defaultValue;
-            Get(syntax, ref displayName);
+            Get(syntax, ref displayName, token);
             return displayName;
 
-            static void Get(MemberDeclarationSyntax syntax, ref string displayName)
+            static void Get(MemberDeclarationSyntax syntax, ref string displayName, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var attributeList in syntax.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList is null)
                     {
                         continue;
@@ -290,6 +314,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (var attrib in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (attrib is null
                             || attrib.Name is not IdentifierNameSyntax identifierName
                             || attrib.ArgumentList is not AttributeArgumentListSyntax attributeArgumentList

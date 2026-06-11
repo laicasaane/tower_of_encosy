@@ -17,6 +17,8 @@ namespace EncosyTower.SourceGen
             , Printer? overridePrinter = default
         )
         {
+            context.CancellationToken.ThrowIfCancellationRequested();
+
             var outputSource = TypeCreationHelpers.GenerateSourceText(
                   sourceFilePath
                 , openingSource
@@ -31,6 +33,8 @@ namespace EncosyTower.SourceGen
             {
                 return;
             }
+
+            context.CancellationToken.ThrowIfCancellationRequested();
 
             var directoryPath = Path.GetDirectoryName(sourceFilePath);
             Directory.CreateDirectory(directoryPath);

@@ -33,8 +33,11 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE, token) == false
             )
             {
                 return;

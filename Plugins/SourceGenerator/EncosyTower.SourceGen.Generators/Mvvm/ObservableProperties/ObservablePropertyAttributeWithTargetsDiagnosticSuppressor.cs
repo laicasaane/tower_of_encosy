@@ -41,9 +41,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
         /// <inheritdoc/>
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (Diagnostic diagnostic in context.ReportedDiagnostics)
             {
-                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken)
+                token.ThrowIfCancellationRequested();
+
+                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(token)
                     .FindNode(diagnostic.Location.SourceSpan);
 
                 // Check that the target is effectively [field:] over a property declaration with at least one variable,
@@ -59,12 +64,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 var semanticModel = context.GetSemanticModel(syntaxNode.SyntaxTree);
 
                 // Get the property symbol from the first variable declaration
-                var declaredSymbol = semanticModel.GetDeclaredSymbol(propertyDeclaration, context.CancellationToken);
+                var declaredSymbol = semanticModel.GetDeclaredSymbol(propertyDeclaration, token);
 
                 // Check if the property is using [ObservableProperty], in which case we should suppress the warning
                 if (declaredSymbol is IPropertySymbol propertySymbol
                     && semanticModel.Compilation.GetTypeByMetadataName(ATTRIBUTE) is INamedTypeSymbol attribTypeSymbol
-                    && propertySymbol.HasAttributeWithType(attribTypeSymbol)
+                    && propertySymbol.HasAttributeWithType(attribTypeSymbol, token)
                 )
                 {
                     context.ReportSuppression(Suppression.Create(FieldAttributeListForObservableProperty, diagnostic));

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -116,6 +117,9 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
                 || typeSymbol.TypeKind != TypeKind.Class
             )
@@ -123,23 +127,27 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
                 return;
             }
 
-            BuildMethodDirectories(typeSymbol, out var allMethodMap, out var relayMethods);
+            BuildMethodDirectories(typeSymbol, out var allMethodMap, out var relayMethods, token);
 
             if (relayMethods.Count == 0)
             {
                 return;
             }
 
-            var hasObservableObject = typeSymbol.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE);
+            token.ThrowIfCancellationRequested();
+
+            var hasObservableObject = typeSymbol.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE, token);
             var containerReported = false;
 
             foreach (var method in relayMethods)
             {
+                token.ThrowIfCancellationRequested();
+
                 var methodLocation = method.Locations.Length > 0
                     ? method.Locations[0]
                     : Location.None;
 
-                var attrib = TryLocateRelayCommandAttribute(method);
+                var attrib = TryLocateRelayCommandAttribute(method, token);
 
                 var attribLocation = attrib?.ApplicationSyntaxReference
                     ?.GetSyntax(context.CancellationToken)?.GetLocation() ?? methodLocation;
@@ -165,13 +173,18 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
               INamedTypeSymbol typeSymbol
             , out Dictionary<string, IMethodSymbol> allMethodMap
             , out List<IMethodSymbol> relayMethods
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             allMethodMap = new Dictionary<string, IMethodSymbol>(StringComparer.Ordinal);
             relayMethods = new List<IMethodSymbol>();
 
             foreach (var member in typeSymbol.GetMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.MethodKind != MethodKind.Ordinary
                 )
@@ -181,18 +194,22 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
 
                 allMethodMap[method.Name] = method;
 
-                if (method.HasAttribute(RELAY_COMMAND_ATTRIBUTE))
+                if (method.HasAttribute(RELAY_COMMAND_ATTRIBUTE, token))
                 {
                     relayMethods.Add(method);
                 }
             }
         }
 
-        private static AttributeData TryLocateRelayCommandAttribute(IMethodSymbol method)
+        private static AttributeData TryLocateRelayCommandAttribute(IMethodSymbol method, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var attr in method.GetAttributes())
             {
-                if (attr.AttributeClass.HasFullName(RELAY_COMMAND_ATTRIBUTE))
+                token.ThrowIfCancellationRequested();
+
+                if (attr.AttributeClass.HasFullName(RELAY_COMMAND_ATTRIBUTE, token))
                 {
                     return attr;
                 }
@@ -273,6 +290,9 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
             , Dictionary<string, IMethodSymbol> allMethodMap
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (attrib is null || attrib.NamedArguments.Length == 0)
             {
                 return;
@@ -282,6 +302,8 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
 
             foreach (var kv in attrib.NamedArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (string.Equals(kv.Key, CAN_EXECUTE, StringComparison.Ordinal) == false)
                 {
                     continue;
@@ -348,15 +370,23 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.RelayCommands
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var commandParamTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
             foreach (var param in method.Parameters)
             {
+                token.ThrowIfCancellationRequested();
+
                 commandParamTypes.Add(param.Type);
             }
 
+            token.ThrowIfCancellationRequested();
+
             foreach (var param in canExecuteMethod.Parameters)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (commandParamTypes.Contains(param.Type) == false)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(

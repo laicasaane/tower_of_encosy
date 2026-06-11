@@ -30,7 +30,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -79,8 +79,7 @@ namespace EncosyTower.SourceGen.Generators.EnumExtensions
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var containingTypes = enumSymbol.GetContainingTypes();
-
+            var containingTypes = enumSymbol.GetContainingTypes(token);
             var ns = enumSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
 

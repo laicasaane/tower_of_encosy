@@ -94,15 +94,17 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
 
         private static void AnalyzeType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(POLY_ENUM_FACTORY_FOR_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(POLY_ENUM_FACTORY_FOR_ATTRIBUTE, token) == false
             )
             {
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(POLY_ENUM_FACTORY_FOR_ATTRIBUTE);
-            var token = context.CancellationToken;
+            var attrib = typeSymbol.GetAttribute(POLY_ENUM_FACTORY_FOR_ATTRIBUTE, token);
             var attribLocation = attrib?.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                 ?? typeSymbol.Locations[0];
             var typeLocation = typeSymbol.Locations.Length > 0 ? typeSymbol.Locations[0] : attribLocation;
@@ -143,7 +145,7 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
                 return;
             }
 
-            if (enumStructSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE) == false)
+            if (enumStructSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE, token) == false)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                       TargetMustBePolyEnumStruct
@@ -153,16 +155,20 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var hasCase = false;
 
             foreach (var nested in enumStructSymbol.GetTypeMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (nested.TypeKind != TypeKind.Struct)
                 {
                     continue;
                 }
 
-                if (nested.HasAttribute(ENUM_CASE_IGNORE_ATTRIBUTE))
+                if (nested.HasAttribute(ENUM_CASE_IGNORE_ATTRIBUTE, token))
                 {
                     continue;
                 }
@@ -183,6 +189,8 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
 
         private static bool IsDeclaredPartial(INamedTypeSymbol typeSymbol, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var syntaxRef in typeSymbol.DeclaringSyntaxReferences)
             {
                 token.ThrowIfCancellationRequested();
@@ -191,6 +199,8 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
                 {
                     foreach (var modifier in typeSyntax.Modifiers)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PartialKeyword))
                         {
                             return true;
@@ -204,8 +214,13 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
 
         private static void ReportOutParamCtors(SymbolAnalysisContext context, INamedTypeSymbol caseSymbol)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (var ctor in caseSymbol.InstanceConstructors)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (ctor.IsImplicitlyDeclared)
                 {
                     continue;
@@ -220,6 +235,8 @@ namespace EncosyTower.SourceGen.Analyzers.PolyEnumFactories
 
                 foreach (var p in ctor.Parameters)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (p.RefKind == RefKind.Out)
                     {
                         hasOut = true;

@@ -80,6 +80,8 @@ namespace EncosyTower.SourceGen
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             string typeName = typeSymbol.ToFullName();
 
             using var constructorArguments = ImmutableArrayBuilder<TypedConstantInfo>.Rent();
@@ -87,6 +89,8 @@ namespace EncosyTower.SourceGen
 
             foreach (AttributeArgumentSyntax argument in arguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (semanticModel.GetOperation(argument.Expression, token) is not IOperation operation)
                 {
                     continue;

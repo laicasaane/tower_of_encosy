@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   STAT_COLLECTION_ATTRIBUTE_METADATA
@@ -70,7 +70,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
 
 
             if (attribute.ConstructorArguments[0].Value is not INamedTypeSymbol statSystemTypeSymbol
-                || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false
+                || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE, token) == false
             )
             {
                 return default;
@@ -152,13 +152,15 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 , ref StatCollectionSpec statCollection
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 using var arrayBuilder = ImmutableArrayBuilder<StatCollectionSpec.StatDataSpec>.Rent();
 
                 foreach (var childNode in parentSyntax.ChildNodes())
                 {
                     token.ThrowIfCancellationRequested();
 
-                    var statData = GetStatDataDefinition(childNode);
+                    var statData = GetStatDataDefinition(childNode, token);
 
                     if (statData.IsValid == false)
                     {
@@ -171,11 +173,13 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 statCollection.statDataCollection = arrayBuilder.ToImmutable();
             }
 
-            static StatCollectionSpec.StatDataSpec GetStatDataDefinition(SyntaxNode node)
+            static StatCollectionSpec.StatDataSpec GetStatDataDefinition(SyntaxNode node, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (node is not StructDeclarationSyntax syntax
                     || syntax.TypeParameterList is not null
-                    || syntax.GetAttribute(NAMESPACE, STAT_DATA) is not AttributeSyntax attributeSyntax
+                    || syntax.GetAttribute(NAMESPACE, STAT_DATA, token) is not AttributeSyntax attributeSyntax
                     || attributeSyntax.ArgumentList is not AttributeArgumentListSyntax argumentList
                     || argumentList.Arguments.Count < 1
                 )
@@ -222,8 +226,12 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     return default;
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 for (var i = 1; i < args.Count; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var arg = args[i];
 
                     if (arg.NameEquals is not NameEqualsSyntax nameEquals

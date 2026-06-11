@@ -29,7 +29,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 && syntax.Expression is IdentifierNameSyntax { Identifier.ValueText: "RuntimeTypeCache" }
                 && syntax.Name is GenericNameSyntax { TypeArgumentList.Arguments.Count: 1 } member
                 && IsMemberSupported(member.Identifier.ValueText)
-                && GetContainingType(syntax) is not null;
+                && GetContainingType(syntax, token) is not null;
         }
 
         private static bool IsMemberSupported(string memberName)
@@ -108,7 +108,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             var semanticModel = context.SemanticModel;
             var identifierType = semanticModel.GetTypeInfo(identifier, token).Type;
 
-            if (identifierType.HasFullName(RUNTIME_TYPE_CACHE) == false)
+            if (identifierType.HasFullName(RUNTIME_TYPE_CACHE, token) == false)
             {
                 return default;
             }
@@ -174,7 +174,7 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 }
             }
 
-            var containingSyntax = GetContainingType(syntax);
+            var containingSyntax = GetContainingType(syntax, token);
 
             if (containingSyntax is null)
             {
@@ -231,12 +231,16 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
             p.PrintEndLine();
         }
 
-        private static TypeDeclarationSyntax GetContainingType(SyntaxNode node)
+        private static TypeDeclarationSyntax GetContainingType(SyntaxNode node, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var parent = node.Parent;
 
             while (parent is not null && parent is not TypeDeclarationSyntax)
             {
+                token.ThrowIfCancellationRequested();
+
                 parent = parent.Parent;
             }
 

@@ -28,7 +28,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var idProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   UNION_ID_ATTRIBUTE_METADATA
@@ -44,7 +44,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                         or SyntaxKind.RecordStructDeclaration
                 , GetKindForUnionIdInfo
             ).Where(static x => string.IsNullOrEmpty(x.kindFullName) == false
-                             && string.IsNullOrEmpty(x.idFullName) == false);
+                && string.IsNullOrEmpty(x.idFullName) == false
+            );
 
             var combined = idProvider
                 .Combine(kindProvider.Collect())
@@ -89,6 +90,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
             foreach (var arg in args)
             {
+                token.ThrowIfCancellationRequested();
+
                 switch (arg.Key)
                 {
                     case "Size":
@@ -150,6 +153,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var ns = symbol.ContainingNamespace;
             info.fullName = symbol.ToFullName();
             info.simpleName = symbol.Name;
@@ -158,7 +163,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             info.accessibility = symbol.DeclaredAccessibility;
             info.location = LocationInfo.From(context.TargetNode.GetLocation());
             info.parentIsNamespace = context.TargetNode.Parent is BaseNamespaceDeclarationSyntax;
-            info.generateTryFormat = CheckTryParse(symbol) == false;
+            info.generateTryFormat = CheckTryParse(symbol, token) == false;
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   context.TargetNode
@@ -168,7 +173,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            info.containingTypes = symbol.GetContainingTypes();
+            info.containingTypes = symbol.GetContainingTypes(token);
             info.inlineKinds = GetInlineKinds(symbol, info.fullName, token);
 
             return info;
@@ -200,7 +205,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 || typeArg.Value is not INamedTypeSymbol idSymbol
                 || idSymbol.IsUnmanagedType == false
                 || idSymbol.IsUnboundGenericType
-                || idSymbol.HasAttribute(UNION_ID_ATTRIBUTE_FULL) == false
+                || idSymbol.HasAttribute(UNION_ID_ATTRIBUTE_FULL, token) == false
             )
             {
                 return default;
@@ -216,6 +221,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
             for (var i = 1; i < ctorArgs.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 var arg = ctorArgs[i];
 
                 if (i == 1 && arg.Value is ulong ulongVal) order = ulongVal;
@@ -246,11 +253,13 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             , CancellationToken token
         )
         {
-            var attributes = idSymbol.GetAttributes(UNION_ID_KIND_ATTRIBUTE_FULL);
+            var attributes = idSymbol.GetAttributes(UNION_ID_KIND_ATTRIBUTE_FULL, token);
             using var builder = ImmutableArrayBuilder<KindSpec>.Rent();
 
             foreach (var attrib in attributes)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attrib == null)
                     continue;
 
@@ -278,6 +287,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 for (var i = 1; i < args.Length; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var arg = args[i];
 
                     if (i == 1 && arg.Value is ulong ulongVal) order = ulongVal;
@@ -288,8 +299,18 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                     else if (i == 6 && arg.Value is byte byteVal2) tryParseMethodType = (TryParseMethodType)byteVal2;
                 }
 
-                var kindInfo = BuildKindInfo(kindSymbol, idFullName, order, name, displayName, signed, toStringMethods, tryParseMethodType,
-                    default, token);
+                var kindInfo = BuildKindInfo(
+                      kindSymbol
+                    , idFullName
+                    , order
+                    , name
+                    , displayName
+                    , signed
+                    , toStringMethods
+                    , tryParseMethodType
+                    , default
+                    , token
+                );
 
                 if (string.IsNullOrEmpty(kindInfo.kindFullName) == false)
                     builder.Add(kindInfo);
@@ -326,20 +347,20 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             };
 
             var size = 0;
-            kindSymbol.GetUnmanagedSize(ref size);
+            kindSymbol.GetUnmanagedSize(ref size, token);
             info.kindUnmanagedSize = size;
 
             var isEnum = kindSymbol.TypeKind == TypeKind.Enum;
             info.isEnum = isEnum;
 
-            var kindUnionIdAttr = kindSymbol.GetAttribute(UNION_ID_ATTRIBUTE_FULL);
+            var kindUnionIdAttr = kindSymbol.GetAttribute(UNION_ID_ATTRIBUTE_FULL, token);
             info.isKindAlsoUnionId = kindUnionIdAttr != null;
 
             if (isEnum)
             {
-                info.kindEnumHasFlags = kindSymbol.HasAttribute(FLAGS_ATTRIBUTE_FULL);
+                info.kindEnumHasFlags = kindSymbol.HasAttribute(FLAGS_ATTRIBUTE_FULL, token);
                 info.kindEnumUnderlyingTypeName = kindSymbol.EnumUnderlyingType?.ToDisplayString() ?? "int";
-                info.hasExternalEnumExtensions = kindSymbol.TryGetAttribute(ENUM_EXTENSIONS_ATTRIBUTE_FULL, out _);
+                info.hasExternalEnumExtensions = kindSymbol.TryGetAttribute(ENUM_EXTENSIONS_ATTRIBUTE_FULL, out _, token);
 
                 if (info.hasExternalEnumExtensions)
                 {
@@ -353,13 +374,19 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 foreach (var member in enumMembers)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is not IFieldSymbol field || field.ConstantValue is null)
+                    {
                         continue;
+                    }
 
                     string memberDisplayName = null;
 
                     foreach (var attr in field.GetAttributes())
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var attrName = attr.AttributeClass?.Name ?? string.Empty;
 
                         switch (attrName)
@@ -387,6 +414,8 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                                 {
                                     foreach (var na in attr.NamedArguments)
                                     {
+                                        token.ThrowIfCancellationRequested();
+
                                         if (na.Key is "Name" or "DisplayName"
                                             && na.Value.Kind == TypedConstantKind.Primitive
                                             && na.Value.Value?.ToString() is string dn
@@ -404,7 +433,10 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                     ADD:
                     {
-                        if (string.IsNullOrEmpty(memberDisplayName) == false) hasDisplayAttr = true;
+                        if (string.IsNullOrEmpty(memberDisplayName) == false)
+                        {
+                            hasDisplayAttr = true;
+                        }
 
                         var nb = member.Name.GetByteCount();
                         var db = memberDisplayName.GetByteCount();
@@ -466,19 +498,19 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
                 if (info.equality.IsNullable)
                     info.kindFullNameFromNullable = kindSymbol.GetTypeFromNullable().ToFullName();
 
-                if (CheckToDisplayFixedString(kindSymbol))
+                if (CheckToDisplayFixedString(kindSymbol, token))
                 {
                     info.hasToDisplayString = true;
                     info.toStringMethods |= ToStringMethods.ToDisplayString;
                 }
 
-                if (CheckToFixedString(kindSymbol, "ToFixedString", out var fixedBytes))
+                if (CheckToFixedString(kindSymbol, "ToFixedString", out var fixedBytes, token))
                 {
                     info.hasToFixedString = true;
                     info.toFixedStringBytes = fixedBytes;
                 }
 
-                if (CheckToFixedString(kindSymbol, "ToDisplayFixedString", out var displayFixedBytes))
+                if (CheckToFixedString(kindSymbol, "ToDisplayFixedString", out var displayFixedBytes, token))
                 {
                     info.hasToDisplayFixedString = true;
                     info.toDisplayFixedStringBytes = displayFixedBytes;
@@ -488,12 +520,19 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return info;
         }
 
-        private static bool CheckToFixedString(INamedTypeSymbol symbol, string name, out int byteCount)
+        private static bool CheckToFixedString(
+              INamedTypeSymbol symbol
+            , string name
+            , out int byteCount
+            , CancellationToken token
+        )
         {
             var members = symbol.GetMembers(name);
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.IsStatic
@@ -522,12 +561,14 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return false;
         }
 
-        private static bool CheckToDisplayFixedString(INamedTypeSymbol symbol)
+        private static bool CheckToDisplayFixedString(INamedTypeSymbol symbol, CancellationToken token)
         {
             var members = symbol.GetMembers("ToDisplayString");
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.IsStatic
@@ -544,12 +585,14 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
             return false;
         }
 
-        private static bool CheckTryParse(INamedTypeSymbol symbol)
+        private static bool CheckTryParse(INamedTypeSymbol symbol, CancellationToken token)
         {
             var members = symbol.GetMembers("TryParse");
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.IsStatic
@@ -566,7 +609,7 @@ namespace EncosyTower.SourceGen.Generators.UnionIds
 
                 return p2.Type.SpecialType == SpecialType.System_Int32
                     && p2.RefKind == RefKind.Out
-                    && p1.Type.IsType("global::System.Span<char>")
+                    && p1.Type.IsType("global::System.Span<char>", token)
                     ;
             }
 

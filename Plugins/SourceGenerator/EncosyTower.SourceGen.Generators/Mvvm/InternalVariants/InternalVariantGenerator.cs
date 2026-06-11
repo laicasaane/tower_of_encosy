@@ -26,7 +26,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var obsProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -192,6 +192,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
             foreach (var iface in containingType.AllInterfaces)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (iface.Name == "IObservableObject"
                     && iface.ContainingNamespace is { Name: "ComponentModel" } ns1
                     && ns1.ContainingNamespace is { Name: "Mvvm" } ns2
@@ -211,6 +213,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
             foreach (var attribute in context.Attributes)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attribute.ConstructorArguments.Length < 1
                     || attribute.ConstructorArguments[0].Value is not string propertyName
                     || string.IsNullOrEmpty(propertyName)
@@ -221,6 +225,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
 
                 foreach (var member in containingType.GetMembers(propertyName))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is not IPropertySymbol targetProperty)
                     {
                         continue;
@@ -263,6 +269,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (typeSymbol is not INamedTypeSymbol namedType
                 || namedType.IsUnboundGenericType
                 || (namedType.IsGenericType && namedType.TypeParameters.Length != 0)
@@ -270,6 +278,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalVariants
             {
                 return default;
             }
+
+            token.ThrowIfCancellationRequested();
 
             return Generators.Variants.InternalVariantGenerator.BuildDeclaration(
                   namedType

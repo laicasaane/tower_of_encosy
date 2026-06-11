@@ -37,7 +37,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return default;
             }
 
-            var dataAttribute = typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA);
+            var dataAttribute = typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA, token);
 
             if (dataAttribute == null)
             {
@@ -49,9 +49,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                 , out var isMutable
                 , out var withoutPropertySetters
                 , out var withReadOnlyView
+                , token
             );
 
-            var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
+            token.ThrowIfCancellationRequested();
+
+            var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE, token);
             var fieldPolicy = DataFieldPolicy.Private;
 
             if (isMutable == false && fieldPolicyAttrib != null)
@@ -69,6 +72,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             foreach (var kvp in dataAttribute.NamedArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 switch (kvp.Key)
                 {
                     case "Converters":
@@ -79,7 +84,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                             {
                                 if (tc.Value is ITypeSymbol type)
                                 {
-                                    RegisterConvertMethods(type, converterMap);
+                                    RegisterConvertMethods(type, converterMap, token);
                                 }
                             }
                         }
@@ -94,7 +99,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                             {
                                 if (tc.Value is ITypeSymbol type)
                                 {
-                                    RegisterEqualsMethods(type, comparerMap);
+                                    RegisterEqualsMethods(type, comparerMap, token);
                                 }
                             }
                         }
@@ -102,6 +107,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                     }
                 }
             }
+
+            token.ThrowIfCancellationRequested();
 
             if (typeSyntax.TypeParameterList is TypeParameterListSyntax typeParamList
                 && typeParamList.Parameters.Count > 0
@@ -150,13 +157,13 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             if (typeSymbol.BaseType is INamedTypeSymbol baseNamedTypeSymbol
                 && baseNamedTypeSymbol.TypeKind == TypeKind.Class
-                && baseNamedTypeSymbol.HasAttribute(DATA_ATTRIBUTE_METADATA)
+                && baseNamedTypeSymbol.HasAttribute(DATA_ATTRIBUTE_METADATA, token)
             )
             {
                 baseTypeName = baseNamedTypeSymbol.ToFullName();
             }
 
-            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) != null;
+            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE, token) != null;
             var withId = withoutId == false;
             var locationInfo = LocationInfo.From(typeSymbol.Locations.IsEmpty
                 ? Location.None
@@ -167,6 +174,8 @@ namespace EncosyTower.SourceGen.Generators.Data
             var existingOverrideEquals = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
             var equalityComparer = SymbolEqualityComparer.Default;
+
+            token.ThrowIfCancellationRequested();
 
             using var orderBuilder = ImmutableArrayBuilder<OrderData>.Rent();
             using var fieldArrayBuilder = ImmutableArrayBuilder<FieldRefData>.Rent();
@@ -181,11 +190,13 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is IFieldSymbol field)
                 {
                     existingFields.Add(field.Name);
 
-                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
+                    if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE, token) == false)
                     {
                         continue;
                     }
@@ -199,7 +210,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                     bool implicitlyConvertible;
                     var fieldType = field.Type;
 
-                    if (field.TryGetAttribute(PROPERTY_TYPE_ATTRIBUTE, out var propertyTypeAttrib)
+                    if (field.TryGetAttribute(PROPERTY_TYPE_ATTRIBUTE, out var propertyTypeAttrib, token)
                         && propertyTypeAttrib.ConstructorArguments is { Length: > 0 } propertyTypeArgs
                         && propertyTypeArgs[0].Value is ITypeSymbol propTypeSymbol
                     )
@@ -220,8 +231,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                     );
 
                     var propertyName = field.ToPropertyName();
-                    var collection = GetCollection(fieldType, isField: true);
-                    var fieldEquality = GetEquality(fieldType);
+                    var collection = GetCollection(fieldType, isField: true, token);
+                    var fieldEquality = GetEquality(fieldType, token);
                     var fieldConverter = string.Empty;
                     var propertyConverter = string.Empty;
                     var fieldEqualityComparer = string.Empty;
@@ -243,6 +254,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         , fieldType
                         , propertyType
                         , typeSymbol
+                        , token
                     );
 
                     MakeFieldComparer(
@@ -251,6 +263,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         , propertyType
                         , field
                         , typeSymbol
+                        , token
                     );
 
                     var fieldTypeName = GetFieldTypeName(fieldType, collection);
@@ -287,17 +300,23 @@ namespace EncosyTower.SourceGen.Generators.Data
                         equalityFieldType = fieldType;
                     }
 
+                    token.ThrowIfCancellationRequested();
+
                     var fieldTypeFullNameForEquality = equalityFieldType.ToFullName();
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
                     using var attrBuilder = ImmutableArrayBuilder<ForwardedAttributeData>.Rent();
 
                     foreach (var (fullTypeName, attributeInfo) in propertyAttributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         attrBuilder.Add(new ForwardedAttributeData {
                             fullTypeName = fullTypeName,
                             syntax = attributeInfo.GetSyntax().ToFullString(),
                         });
                     }
+
+                    token.ThrowIfCancellationRequested();
 
                     field.GatherAttributes(semanticModel, token, out var attributes);
 
@@ -306,6 +325,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     foreach (var (fullyTypeName, attributeInfo) in attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         switch (fullyTypeName)
                         {
                             case DATA_MANUAL_AUTHORING_ATTRIBUTE:
@@ -378,7 +399,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         }
                     }
 
-                    if (property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not { } dataPropertyAttribute)
+                    if (property.GetAttribute(DATA_PROPERTY_ATTRIBUTE, token) is not { } dataPropertyAttribute)
                     {
                         continue;
                     }
@@ -406,9 +427,9 @@ namespace EncosyTower.SourceGen.Generators.Data
                     );
 
                     var fieldName = property.ToPrivateFieldName();
-                    var collection = GetCollection(fieldType, isField: true);
-                    var propCollection = GetCollection(property.Type, isField: false);
-                    var fieldEquality = GetEquality(fieldType);
+                    var collection = GetCollection(fieldType, isField: true, token);
+                    var propCollection = GetCollection(property.Type, isField: false, token);
+                    var fieldEquality = GetEquality(fieldType, token);
                     var fieldConverter = string.Empty;
                     var propertyConverter = string.Empty;
                     var fieldEqualityComparer = string.Empty;
@@ -430,6 +451,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         , fieldType
                         , property.Type
                         , typeSymbol
+                        , token
                     );
 
                     MakeFieldComparer(
@@ -438,6 +460,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         , property.Type
                         , property
                         , typeSymbol
+                        , token
                     );
 
                     var fieldTypeName = GetFieldTypeName(fieldType, collection);
@@ -473,18 +496,24 @@ namespace EncosyTower.SourceGen.Generators.Data
                         equalityFieldType = fieldType;
                     }
 
-                    var equalityCollection = GetCollection(equalityFieldType, isField: true);
+                    token.ThrowIfCancellationRequested();
+
+                    var equalityCollection = GetCollection(equalityFieldType, isField: true, token);
                     var fieldTypeDeclNameForEquality = GetFieldTypeName(equalityFieldType, equalityCollection);
                     var fieldTypeIsReferenceType = equalityFieldType.IsReferenceType;
                     using var attrBuilder = ImmutableArrayBuilder<ForwardedAttributeData>.Rent();
 
                     foreach (var (fullTypeName, attributeInfo) in fieldAttributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         attrBuilder.Add(new ForwardedAttributeData {
                             fullTypeName = fullTypeName,
                             syntax = attributeInfo.GetSyntax().ToFullString(),
                         });
                     }
+
+                    token.ThrowIfCancellationRequested();
 
                     property.GatherAttributes(semanticModel, token, out var attributes);
 
@@ -493,6 +522,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                     foreach (var (fullyTypeName, attributeInfo) in attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         switch (fullyTypeName)
                         {
                             case DATA_MANUAL_AUTHORING_ATTRIBUTE:
@@ -511,7 +542,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                         }
                     }
 
-                    var doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE);
+                    var doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE, token);
                     var fieldIsImplemented = existingFields.Contains(fieldName);
 
                     var propRefData = new PropRefData {
@@ -588,10 +619,14 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var resolvedFieldRefs = fieldArrayBuilder.ToImmutable();
 
             for (var i = 0; i < resolvedFieldRefs.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 var fr = resolvedFieldRefs[i];
 
                 if (existingProperties.TryGetValue(fr.propertyName, out var isPublic))
@@ -602,10 +637,14 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var resolvedPropRefs = propArrayBuilder.ToImmutable();
 
             for (var i = 0; i < resolvedPropRefs.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 var pr = resolvedPropRefs[i];
 
                 if (existingFields.Contains(pr.fieldName) != pr.fieldIsImplemented)
@@ -617,11 +656,15 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             if (string.IsNullOrEmpty(baseTypeName) == false)
             {
+                token.ThrowIfCancellationRequested();
+
                 var baseType = typeSymbol.BaseType;
 
                 while (baseType != null)
                 {
-                    if (baseType.HasAttribute(DATA_ATTRIBUTE_METADATA)
+                    token.ThrowIfCancellationRequested();
+
+                    if (baseType.HasAttribute(DATA_ATTRIBUTE_METADATA, token)
                         && existingOverrideEquals.Contains(baseType) == false
                     )
                     {
@@ -650,8 +693,8 @@ namespace EncosyTower.SourceGen.Generators.Data
                 withoutPropertySetters = withoutPropertySetters,
                 withReadOnlyView = withReadOnlyView,
                 isSealed = typeSymbol.IsSealed || typeSymbol.IsValueType,
-                hasSerializableAttribute = typeSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE),
-                hasGeneratePropertyBagAttribute = typeSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE),
+                hasSerializableAttribute = typeSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE, token),
+                hasGeneratePropertyBagAttribute = typeSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE, token),
                 hasGetHashCodeMethod = hasGetHashCodeMethod,
                 hasEqualsMethod = hasEqualsMethod,
                 hasIEquatableMethod = hasIEquatableMethod,
@@ -713,15 +756,15 @@ namespace EncosyTower.SourceGen.Generators.Data
             };
         }
 
-        private static Equality GetEquality(ITypeSymbol type)
+        private static Equality GetEquality(ITypeSymbol type, CancellationToken token)
         {
             var fieldEquality = type.DetermineEquality();
 
-            if (type.HasAttribute(DATA_ATTRIBUTE_METADATA))
+            if (type.HasAttribute(DATA_ATTRIBUTE_METADATA, token))
             {
                 fieldEquality = new Equality(EqualityStrategy.Equals, false, false);
             }
-            else if (type.HasAttribute(UNION_ID_ATTRIBUTE))
+            else if (type.HasAttribute(UNION_ID_ATTRIBUTE, token))
             {
                 fieldEquality = new Equality(EqualityStrategy.Operator, false, false);
             }
@@ -729,22 +772,22 @@ namespace EncosyTower.SourceGen.Generators.Data
             return fieldEquality;
         }
 
-        private static bool GetEquatable(ITypeSymbol type)
+        private static bool GetEquatable(ITypeSymbol type, CancellationToken token)
         {
-            return type.HasAttribute(DATA_ATTRIBUTE_METADATA)
-                || type.HasAttribute(UNION_ID_ATTRIBUTE)
-                || type.DetermineIEquatable()
+            return type.HasAttribute(DATA_ATTRIBUTE_METADATA, token)
+                || type.HasAttribute(UNION_ID_ATTRIBUTE, token)
+                || type.DetermineIEquatable(token)
                 ;
         }
 
-        private static CollectionRef GetCollection(ITypeSymbol typeSymbol, bool isField)
+        private static CollectionRef GetCollection(ITypeSymbol typeSymbol, bool isField, CancellationToken token)
         {
             if (typeSymbol is IArrayTypeSymbol arrayType)
             {
                 return new CollectionRef {
                     Kind = CollectionKind.Array,
                     ElementType = arrayType.ElementType,
-                    IsElementEquatable = GetEquatable(arrayType.ElementType),
+                    IsElementEquatable = GetEquatable(arrayType.ElementType, token),
                 };
             }
 
@@ -753,99 +796,99 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return default;
             }
 
-            if (namedType.TryGetGenericType(READONLY_MEMORY_TYPE_T, 1, out var readMemoryType))
+            if (namedType.TryGetGenericType(READONLY_MEMORY_TYPE_T, 1, out var readMemoryType, token))
             {
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.ReadOnlyMemory,
                     ElementType = readMemoryType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(readMemoryType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(readMemoryType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(MEMORY_TYPE_T, 1, out var memoryType))
+            if (namedType.TryGetGenericType(MEMORY_TYPE_T, 1, out var memoryType, token))
             {
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.Memory,
                     ElementType = memoryType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(memoryType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(memoryType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(READONLY_SPAN_TYPE_T, 1, out var readSpanType))
+            if (namedType.TryGetGenericType(READONLY_SPAN_TYPE_T, 1, out var readSpanType, token))
             {
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.ReadOnlySpan,
                     ElementType = readSpanType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(readSpanType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(readSpanType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(SPAN_TYPE_T, 1, out var spanType))
+            if (namedType.TryGetGenericType(SPAN_TYPE_T, 1, out var spanType, token))
             {
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Array : CollectionKind.Span,
                     ElementType = spanType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(spanType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(spanType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(IREADONLY_LIST_TYPE_T, 1, out var iReadListType))
+            if (namedType.TryGetGenericType(IREADONLY_LIST_TYPE_T, 1, out var iReadListType, token))
             {
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.List : CollectionKind.ReadOnlyList,
                     ElementType = iReadListType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(iReadListType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(iReadListType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(ILIST_TYPE_T, 1, out var iListType))
+            if (namedType.TryGetGenericType(ILIST_TYPE_T, 1, out var iListType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.List,
                     ElementType = iListType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(iListType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(iListType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericFromContainingType(LIST_FAST_TYPE_T, 1, out var listFastType))
+            if (namedType.TryGetGenericFromContainingType(LIST_FAST_TYPE_T, 1, out var listFastType, token))
             {
                 var isReadOnly = namedType.Name.Equals("ReadOnly");
 
                 return new CollectionRef {
                     Kind = isField || isReadOnly == false ? CollectionKind.List : CollectionKind.ReadOnlyList,
                     ElementType = listFastType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(listFastType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(listFastType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType))
+            if (namedType.TryGetGenericType(LIST_TYPE_T, 1, out var listType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.List,
                     ElementType = listType.TypeArguments[0],
-                    IsElementEquatable = GetEquatable(listType.TypeArguments[0]),
+                    IsElementEquatable = GetEquatable(listType.TypeArguments[0], token),
                 };
             }
 
-            if (namedType.TryGetGenericType(ISET_TYPE_T, 1, out var iSetType))
+            if (namedType.TryGetGenericType(ISET_TYPE_T, 1, out var iSetType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.HashSet,
                     ElementType = iSetType.TypeArguments[0],
-                    IsElementEquatable = iSetType.TypeArguments[0].DetermineIEquatable(),
+                    IsElementEquatable = iSetType.TypeArguments[0].DetermineIEquatable(token),
                 };
             }
 
-            if (namedType.TryGetGenericType(HASH_SET_TYPE_T, 1, out var hashSetType))
+            if (namedType.TryGetGenericType(HASH_SET_TYPE_T, 1, out var hashSetType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.HashSet,
                     ElementType = hashSetType.TypeArguments[0],
-                    IsElementEquatable = hashSetType.TypeArguments[0].DetermineIEquatable(),
+                    IsElementEquatable = hashSetType.TypeArguments[0].DetermineIEquatable(token),
                 };
             }
 
-            if (namedType.TryGetGenericType(QUEUE_TYPE_T, 1, out var queueType))
+            if (namedType.TryGetGenericType(QUEUE_TYPE_T, 1, out var queueType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.Queue,
@@ -853,7 +896,7 @@ namespace EncosyTower.SourceGen.Generators.Data
                 };
             }
 
-            if (namedType.TryGetGenericType(STACK_TYPE_T, 1, out var stackType))
+            if (namedType.TryGetGenericType(STACK_TYPE_T, 1, out var stackType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.Stack,
@@ -861,36 +904,36 @@ namespace EncosyTower.SourceGen.Generators.Data
                 };
             }
 
-            if (namedType.TryGetGenericType(IREADONLY_DICTIONARY_TYPE_T, 2, out var iReadDictType))
+            if (namedType.TryGetGenericType(IREADONLY_DICTIONARY_TYPE_T, 2, out var iReadDictType, token))
             {
                 return new CollectionRef {
                     Kind = isField ? CollectionKind.Dictionary : CollectionKind.ReadOnlyDictionary,
                     KeyType = iReadDictType.TypeArguments[0],
                     ElementType = iReadDictType.TypeArguments[1],
-                    IsKeyEquatable = iReadDictType.TypeArguments[0].DetermineIEquatable(),
-                    IsElementEquatable = iReadDictType.TypeArguments[1].DetermineIEquatable(),
+                    IsKeyEquatable = iReadDictType.TypeArguments[0].DetermineIEquatable(token),
+                    IsElementEquatable = iReadDictType.TypeArguments[1].DetermineIEquatable(token),
                 };
             }
 
-            if (namedType.TryGetGenericType(IDICTIONARY_TYPE_T, 2, out var iDictType))
+            if (namedType.TryGetGenericType(IDICTIONARY_TYPE_T, 2, out var iDictType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.Dictionary,
                     KeyType = iDictType.TypeArguments[0],
                     ElementType = iDictType.TypeArguments[1],
-                    IsKeyEquatable = iDictType.TypeArguments[0].DetermineIEquatable(),
-                    IsElementEquatable = iDictType.TypeArguments[1].DetermineIEquatable(),
+                    IsKeyEquatable = iDictType.TypeArguments[0].DetermineIEquatable(token),
+                    IsElementEquatable = iDictType.TypeArguments[1].DetermineIEquatable(token),
                 };
             }
 
-            if (namedType.TryGetGenericType(DICTIONARY_TYPE_T, 2, out var dictType))
+            if (namedType.TryGetGenericType(DICTIONARY_TYPE_T, 2, out var dictType, token))
             {
                 return new CollectionRef {
                     Kind = CollectionKind.Dictionary,
                     KeyType = dictType.TypeArguments[0],
                     ElementType = dictType.TypeArguments[1],
-                    IsKeyEquatable = dictType.TypeArguments[0].DetermineIEquatable(),
-                    IsElementEquatable = dictType.TypeArguments[1].DetermineIEquatable(),
+                    IsKeyEquatable = dictType.TypeArguments[0].DetermineIEquatable(token),
+                    IsElementEquatable = dictType.TypeArguments[1].DetermineIEquatable(token),
                 };
             }
 
@@ -1036,13 +1079,14 @@ namespace EncosyTower.SourceGen.Generators.Data
             , out bool isMutable
             , out bool withoutPropertySetters
             , out bool withReadOnlyView
+            , CancellationToken token
         )
         {
             isMutable = false;
             withoutPropertySetters = false;
             withReadOnlyView = false;
 
-            if (symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE) is not { } attrib)
+            if (symbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE, token) is not { } attrib)
             {
                 return;
             }
@@ -1066,32 +1110,33 @@ namespace EncosyTower.SourceGen.Generators.Data
             , ITypeSymbol fieldType
             , ITypeSymbol propertyType
             , ITypeSymbol containingTypeSymbol
+            , CancellationToken token
         )
         {
             if (converterType is null)
             {
-                if (TryGetConvertMethod(containingTypeSymbol, out var fc1, propertyType, fieldType, IsAny))
+                if (TryGetConvertMethod(containingTypeSymbol, out var fc1, propertyType, fieldType, IsAny, token))
                 {
                     fieldConverter = Make(containingTypeSymbol, fc1);
                 }
-                else if (TryGetConvertMethod(fieldType, out var fc2, propertyType, fieldType, IsPublic))
+                else if (TryGetConvertMethod(fieldType, out var fc2, propertyType, fieldType, IsPublic, token))
                 {
                     fieldConverter = Make(fieldType, fc2);
                 }
-                else if (TryGetConvertMethod(propertyType, out var fc3, propertyType, fieldType, IsPublic))
+                else if (TryGetConvertMethod(propertyType, out var fc3, propertyType, fieldType, IsPublic, token))
                 {
                     fieldConverter = Make(propertyType, fc3);
                 }
 
-                if (TryGetConvertMethod(containingTypeSymbol, out var pc1, fieldType, propertyType, IsAny))
+                if (TryGetConvertMethod(containingTypeSymbol, out var pc1, fieldType, propertyType, IsAny, token))
                 {
                     propertyConverter = Make(containingTypeSymbol, pc1);
                 }
-                else if (TryGetConvertMethod(propertyType, out var pc2, fieldType, propertyType, IsPublic))
+                else if (TryGetConvertMethod(propertyType, out var pc2, fieldType, propertyType, IsPublic, token))
                 {
                     propertyConverter = Make(propertyType, pc2);
                 }
-                else if (TryGetConvertMethod(fieldType, out var pc3, fieldType, propertyType, IsPublic))
+                else if (TryGetConvertMethod(fieldType, out var pc3, fieldType, propertyType, IsPublic, token))
                 {
                     propertyConverter = Make(fieldType, pc3);
                 }
@@ -1099,12 +1144,12 @@ namespace EncosyTower.SourceGen.Generators.Data
                 return;
             }
 
-            if (TryGetConvertMethod(converterType, out var fm, propertyType, fieldType, IsPublic))
+            if (TryGetConvertMethod(converterType, out var fm, propertyType, fieldType, IsPublic, token))
             {
                 fieldConverter = Make(converterType, fm);
             }
 
-            if (TryGetConvertMethod(converterType, out var pm, fieldType, propertyType, IsPublic))
+            if (TryGetConvertMethod(converterType, out var pm, fieldType, propertyType, IsPublic, token))
             {
                 propertyConverter = Make(converterType, pm);
             }
@@ -1126,8 +1171,11 @@ namespace EncosyTower.SourceGen.Generators.Data
         private static void RegisterConvertMethods(
               ITypeSymbol converterType
             , Dictionary<ReturnTypeName, Dictionary<ParamTypeName, ConvertExpression>> converterMap
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (converterType.IsAbstract)
             {
                 return;
@@ -1145,6 +1193,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 foreach (var ctor in ctors)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (ctor is not IMethodSymbol ctorM
                         || ctorM.DeclaredAccessibility != Accessibility.Public
                     )
@@ -1165,11 +1215,15 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var containerTypeName = converterType.ToFullName();
             var members = converterType.GetMembers("Convert");
 
             foreach (var m in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (m is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.Parameters.Length != 1
@@ -1199,8 +1253,11 @@ namespace EncosyTower.SourceGen.Generators.Data
         private static void RegisterEqualsMethods(
               ITypeSymbol converterType
             , Dictionary<ParamTypeName, EqualsExpression> comparerMap
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (converterType.IsAbstract)
             {
                 return;
@@ -1218,6 +1275,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 foreach (var ctor in ctors)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (ctor is not IMethodSymbol ctorM
                         || ctorM.DeclaredAccessibility != Accessibility.Public
                     )
@@ -1238,12 +1297,15 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
-            var containerTypeName = converterType.ToFullName();
+            token.ThrowIfCancellationRequested();
+
             var members = converterType.GetMembers("Equals");
             var comparer = SymbolEqualityComparer.Default;
 
             foreach (var m in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (m is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.Parameters.Length != 2
@@ -1279,8 +1341,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             , ITypeSymbol paramType
             , ITypeSymbol returnType
             , Predicate<Accessibility> validateAccessibility
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (converterType.IsAbstract)
             {
                 convertMethod = null;
@@ -1300,6 +1365,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 foreach (var ctor in ctors)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (ctor is not IMethodSymbol ctorM
                         || validateAccessibility(ctorM.DeclaredAccessibility) == false
                     )
@@ -1321,11 +1388,15 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var comparer = SymbolEqualityComparer.Default;
             var members = converterType.GetMembers("Convert");
 
             foreach (var m in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (m is not IMethodSymbol method
                     || validateAccessibility(method.DeclaredAccessibility) == false
                     || method.Parameters.Length != 1
@@ -1361,11 +1432,12 @@ namespace EncosyTower.SourceGen.Generators.Data
             , ITypeSymbol propertyType
             , ISymbol targetSymbol
             , ITypeSymbol containingTypeSymbol
+            , CancellationToken token
         )
         {
             ITypeSymbol comparerType = null;
 
-            if (targetSymbol.GetAttribute(DATA_COMPARER_ATTRIBUTE) is AttributeData comparerAttrib
+            if (targetSymbol.GetAttribute(DATA_COMPARER_ATTRIBUTE, token) is AttributeData comparerAttrib
                 && comparerAttrib.ConstructorArguments.Length > 0
                 && comparerAttrib.ConstructorArguments[0].Value is ITypeSymbol comparerTypeCandidate
             )
@@ -1375,22 +1447,22 @@ namespace EncosyTower.SourceGen.Generators.Data
 
             if (comparerType is not null)
             {
-                if (TryGetEqualsMethod(comparerType, out var em, fieldType, IsPublic))
+                if (TryGetEqualsMethod(comparerType, out var em, fieldType, IsPublic, token))
                 {
                     fieldEqualityComparer = Make(comparerType, em);
                     return;
                 }
             }
 
-            if (TryGetEqualsMethod(containingTypeSymbol, out var em1, fieldType, IsAny))
+            if (TryGetEqualsMethod(containingTypeSymbol, out var em1, fieldType, IsAny, token))
             {
                 fieldEqualityComparer = Make(containingTypeSymbol, em1);
             }
-            else if (TryGetEqualsMethod(fieldType, out var em2, fieldType, IsPublic))
+            else if (TryGetEqualsMethod(fieldType, out var em2, fieldType, IsPublic, token))
             {
                 fieldEqualityComparer = Make(fieldType, em2);
             }
-            else if (TryGetEqualsMethod(propertyType, out var em3, fieldType, IsPublic))
+            else if (TryGetEqualsMethod(propertyType, out var em3, fieldType, IsPublic, token))
             {
                 fieldEqualityComparer = Make(propertyType, em3);
             }
@@ -1413,8 +1485,11 @@ namespace EncosyTower.SourceGen.Generators.Data
             , out IMethodSymbol equalsMethod
             , ITypeSymbol paramType
             , Predicate<Accessibility> validateAccessibility
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             if (converterType.IsAbstract)
             {
                 equalsMethod = null;
@@ -1434,6 +1509,8 @@ namespace EncosyTower.SourceGen.Generators.Data
 
                 foreach (var ctor in ctors)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (ctor is not IMethodSymbol ctorM
                         || validateAccessibility(ctorM.DeclaredAccessibility) == false
                     )
@@ -1455,11 +1532,15 @@ namespace EncosyTower.SourceGen.Generators.Data
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var comparer = SymbolEqualityComparer.Default;
             var members = converterType.GetMembers("Equals");
 
             foreach (var m in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (m is not IMethodSymbol method
                     || validateAccessibility(method.DeclaredAccessibility) == false
                     || method.Parameters.Length != 2

@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -119,8 +119,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 result.valueType = types[index];
                 result.valueTypeName = typeNames[index];
             }
-            else if (firstArg.Kind == TypedConstantKind.Type
-                && firstArg.Value is INamedTypeSymbol enumType)
+            else if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is INamedTypeSymbol enumType)
             {
                 if (enumType.TypeKind != TypeKind.Enum)
                 {
@@ -138,16 +137,19 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                 result.valueTypeName = valueTypeName;
                 result.valueType = enumType.ToFullName();
                 result.underlyingTypeName = underlyingType;
-
-                enumType.EnumUnderlyingType.GetUnmanagedSize(ref result.size);
+                enumType.EnumUnderlyingType.GetUnmanagedSize(ref result.size, token);
             }
             else
             {
                 return default;
             }
 
+            token.ThrowIfCancellationRequested();
+
             foreach (var namedArg in attribute.NamedArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (string.Equals(namedArg.Key, "SingleValue", StringComparison.Ordinal)
                     && namedArg.Value.Value is bool singleValue)
                 {

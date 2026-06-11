@@ -20,7 +20,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var providerClassProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   VAULT_ATTRIBUTE_METADATA
@@ -116,6 +116,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             foreach (var attrib in symbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 var attribName = attrib.AttributeClass?.Name ?? string.Empty;
 
                 if (attribName is not ("LabelAttribute" or "DisplayNameAttribute"))
@@ -162,6 +164,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             for (var i = 0; i < constructors.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (constructors[i].Parameters.Length > max)
                 {
                     max = constructors[i].Parameters.Length;
@@ -181,6 +185,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             foreach (var param in parameters)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (ParamDeclaration.TryGetParam(param.Type, out var argType))
                 {
                     var dataTypeHasDefaultConstructor = false;
@@ -192,6 +198,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         foreach (var member in argType.GetMembers())
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (member is IMethodSymbol method
                                 && method.MethodKind == MethodKind.Constructor
                             )
@@ -247,7 +255,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 return;
             }
 
-            context.CancellationToken.ThrowIfCancellationRequested();
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
 
             try
             {
@@ -255,6 +264,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 for (var i = 0; i < accessorInfos.Length; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var aInfo = accessorInfos[i];
 
                     if (string.IsNullOrEmpty(aInfo.vaultMetadataName) == false
@@ -277,15 +288,17 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     return;
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 accessDeclarations.Sort(static (x, y) => {
                     return string.Compare(x.SymbolName, y.SymbolName, StringComparison.Ordinal);
                 });
 
                 var declaration = new UserDataVaultDeclaration(
-                  vaultInfo.className
-                , vaultInfo.isStatic
-                , accessDeclarations
-            );
+                      vaultInfo.className
+                    , vaultInfo.isStatic
+                    , accessDeclarations
+                );
 
                 var openingPrinter = Printer.DefaultLarge;
                 PrinterAction printUsings = compilation.references.unitask
@@ -306,6 +319,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 for (var i = 0; i < containingTypes.Count; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     openingPrinter.PrintLine(containingTypes[i]);
                     openingPrinter.OpenScope();
                 }
@@ -318,6 +333,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 for (var i = 0; i < closingDepth; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     closingPrinter = closingPrinter.DecreasedIndent();
                     closingPrinter.PrintLine("}");
                 }
@@ -329,7 +346,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 context.OutputSource(
                       outputSourceGenFiles
                     , openingSource
-                    , declaration.WriteCode()
+                    , declaration.WriteCode(token)
                     , closingPrinter.Result
                     , vaultInfo.hintName
                     , sourceFilePath

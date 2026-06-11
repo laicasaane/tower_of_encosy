@@ -36,7 +36,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
             if (context.TargetNode is not TypeDeclarationSyntax typeSyntax
                 || (typeSyntax.IsKind(SyntaxKind.ClassDeclaration) == false
-                    && typeSyntax.IsKind(SyntaxKind.StructDeclaration) == false)
+                    && typeSyntax.IsKind(SyntaxKind.StructDeclaration) == false
+                )
                 || typeSyntax.Modifiers.Any(SyntaxKind.StaticKeyword)
                 || context.TargetSymbol is not INamedTypeSymbol typeSymbol
             )
@@ -52,6 +53,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
             foreach (var arg in attribute.ConstructorArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (arg.Kind != TypedConstantKind.Array && arg.Value != null)
                 {
                     nameCasing = arg.Value.ToNameCasing();
@@ -59,11 +62,15 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var assetName = $"DatabaseAsset_{typeName}";
             var withInstanceAPI = false;
 
             foreach (var arg in attribute.NamedArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (arg.Key == "AssetName"
                     && arg.Value.Kind == TypedConstantKind.Primitive
                     && arg.Value.Value?.ToString() is string name
@@ -84,11 +91,15 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var tableList = new List<TableSpec>();
             var members = typeSymbol.GetMembers();
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IPropertySymbol property)
                 {
                     continue;
@@ -99,7 +110,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
-                var tableAttrib = member.GetAttribute(TABLE_ATTRIBUTE);
+                var tableAttrib = member.GetAttribute(TABLE_ATTRIBUTE, token);
 
                 if (tableAttrib == null)
                 {
@@ -109,7 +120,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
                 if (propType.IsAbstract
                     || propType.IsGenericType
                     || propType.BaseType == null
-                    || propType.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _) == false
+                    || propType.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _, token) == false
                 )
                 {
                     continue;

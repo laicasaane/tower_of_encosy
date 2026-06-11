@@ -40,14 +40,15 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
 
         private static void AnalyzeNamedType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(DATABASE_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(DATABASE_ATTRIBUTE, token) == false
             )
             {
                 return;
             }
-
-            var token = context.CancellationToken;
 
             foreach (var member in typeSymbol.GetMembers())
             {
@@ -60,7 +61,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
                     continue;
                 }
 
-                var tableAttrib = member.GetAttribute(TABLE_ATTRIBUTE);
+                var tableAttrib = member.GetAttribute(TABLE_ATTRIBUTE, token);
 
                 if (tableAttrib == null)
                 {
@@ -112,7 +113,7 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
             }
 
             if (propType.BaseType == null
-                || propType.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _) == false
+                || propType.TryGetGenericType(DATA_TABLE_ASSET, 3, 2, out _, token) == false
             )
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -126,9 +127,15 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
             return false;
         }
 
-        private static void ValidateHorizontalAttributes(SymbolAnalysisContext context, ISymbol member, CancellationToken token)
+        private static void ValidateHorizontalAttributes(
+              SymbolAnalysisContext context
+            , ISymbol member
+            , CancellationToken token
+        )
         {
-            var attributes = member.GetAttributes(HORIZONTAL_LIST_ATTRIBUTE);
+            token.ThrowIfCancellationRequested();
+
+            var attributes = member.GetAttributes(HORIZONTAL_LIST_ATTRIBUTE, token);
 
             foreach (var attrib in attributes)
             {
@@ -163,8 +170,8 @@ namespace EncosyTower.SourceGen.Analyzers.Databases
                     continue;
                 }
 
-                if (targetType.HasAttribute(DATA_ATTRIBUTE) == false
-                    && targetType.InheritsFromInterface(IDATA) == false
+                if (targetType.HasAttribute(DATA_ATTRIBUTE, token) == false
+                    && targetType.InheritsFromInterface(IDATA, true, token) == false
                 )
                 {
                     context.ReportDiagnostic(Diagnostic.Create(

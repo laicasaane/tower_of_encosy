@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -104,8 +105,11 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.TypeHandles
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(TYPE_HANDLE_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(TYPE_HANDLE_ATTRIBUTE, token) == false
             )
             {
                 return;
@@ -120,11 +124,15 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.TypeHandles
                 ));
             }
 
+            token.ThrowIfCancellationRequested();
+
             var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
-            foreach (var attrib in typeSymbol.GetAttributes(TYPE_HANDLE_ATTRIBUTE))
+            foreach (var attrib in typeSymbol.GetAttributes(TYPE_HANDLE_ATTRIBUTE, token))
             {
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+                token.ThrowIfCancellationRequested();
+
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 var args = attrib.ConstructorArguments;
@@ -161,7 +169,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.TypeHandles
                     continue;
                 }
 
-                var kind = GetHandleKind(type);
+                var kind = GetHandleKind(type, token);
 
                 if (kind is null)
                 {
@@ -196,17 +204,21 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.TypeHandles
             }
         }
 
-        private static HandleKind? GetHandleKind(INamedTypeSymbol type)
+        private static HandleKind? GetHandleKind(INamedTypeSymbol type, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var iface in type.AllInterfaces)
             {
-                if (iface.HasFullName(I_BUFFER_ELEMENT_DATA))
+                token.ThrowIfCancellationRequested();
+
+                if (iface.HasFullName(I_BUFFER_ELEMENT_DATA, token))
                     return HandleKind.Buffer;
 
-                if (iface.HasFullName(I_COMPONENT_DATA))
+                if (iface.HasFullName(I_COMPONENT_DATA, token))
                     return HandleKind.Component;
 
-                if (iface.HasFullName(I_SHARED_COMPONENT_DATA))
+                if (iface.HasFullName(I_SHARED_COMPONENT_DATA, token))
                     return HandleKind.SharedComponent;
             }
 

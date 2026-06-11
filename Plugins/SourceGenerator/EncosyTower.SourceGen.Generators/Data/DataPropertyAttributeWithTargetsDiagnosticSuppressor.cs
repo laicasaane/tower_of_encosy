@@ -33,14 +33,21 @@ namespace EncosyTower.SourceGen.Generators.Data
     public sealed class DataPropertyAttributeWithTargetsDiagnosticSuppressor : DiagnosticSuppressor
     {
         /// <inheritdoc/>
-        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => ImmutableArray.Create(FieldAttributeListForDataProperty);
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
+            => ImmutableArray.Create(FieldAttributeListForDataProperty);
 
         /// <inheritdoc/>
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (Diagnostic diagnostic in context.ReportedDiagnostics)
             {
-                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken).FindNode(diagnostic.Location.SourceSpan);
+                token.ThrowIfCancellationRequested();
+
+                var syntaxNode = diagnostic.Location.SourceTree?
+                    .GetRoot(token).FindNode(diagnostic.Location.SourceSpan);
 
                 // Check that the target is effectively [field:] over a property declaration with at least one variable, which is the only case we are interested in
                 if (syntaxNode is not AttributeTargetSpecifierSyntax attributeTarget
@@ -54,11 +61,11 @@ namespace EncosyTower.SourceGen.Generators.Data
                 var semanticModel = context.GetSemanticModel(syntaxNode.SyntaxTree);
 
                 // Get the property symbol from the first variable declaration
-                var declaredSymbol = semanticModel.GetDeclaredSymbol(propertyDeclaration, context.CancellationToken);
+                var declaredSymbol = semanticModel.GetDeclaredSymbol(propertyDeclaration, token);
 
                 // Check if the property is using [DataProperty], in which case we should suppress the warning
                 if (declaredSymbol is IPropertySymbol propertySymbol
-                    && propertySymbol.HasAttribute(DATA_PROPERTY_ATTRIBUTE)
+                    && propertySymbol.HasAttribute(DATA_PROPERTY_ATTRIBUTE, token)
                 )
                 {
                     context.ReportSuppression(Suppression.Create(FieldAttributeListForDataProperty, diagnostic));

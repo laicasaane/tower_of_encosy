@@ -13,6 +13,9 @@ namespace EncosyTower.SourceGen.Generators.Data
         {
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
+            var compilationProvider = context.CompilationProvider
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
+
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                       DATA_ATTRIBUTE_METADATA
@@ -20,9 +23,6 @@ namespace EncosyTower.SourceGen.Generators.Data
                     , DataSpec.Extract
                 )
                 .Where(static t => t.IsValid);
-
-            var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
 
             var combined = candidateProvider
                 .Combine(compilationProvider)

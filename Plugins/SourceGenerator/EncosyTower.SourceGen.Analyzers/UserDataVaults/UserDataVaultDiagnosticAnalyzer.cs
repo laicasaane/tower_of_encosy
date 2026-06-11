@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -88,8 +89,11 @@ namespace EncosyTower.SourceGen.Analyzers.UserDataVaults
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol symbol
-                || symbol.GetAttribute(ACCESSOR_ATTRIBUTE) is null
+                || symbol.GetAttribute(ACCESSOR_ATTRIBUTE, token) is null
             )
             {
                 return;
@@ -119,12 +123,16 @@ namespace EncosyTower.SourceGen.Analyzers.UserDataVaults
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var constructors = symbol.Constructors;
             var constructorIndex = -1;
             var max = 0;
 
             for (var i = 0; i < constructors.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (constructors[i].Parameters.Length > max)
                 {
                     max = constructors[i].Parameters.Length;
@@ -143,11 +151,15 @@ namespace EncosyTower.SourceGen.Analyzers.UserDataVaults
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var constructor = constructors[constructorIndex];
 
             foreach (var param in constructor.Parameters)
             {
-                if (TryGetParam(param.Type, out _) == false)
+                token.ThrowIfCancellationRequested();
+
+                if (TryGetParam(param.Type, token) == false)
                 {
                     var location = param.Locations.Length > 0
                         ? param.Locations[0]
@@ -163,27 +175,24 @@ namespace EncosyTower.SourceGen.Analyzers.UserDataVaults
             }
         }
 
-        public static bool TryGetParam(ITypeSymbol type, out ITypeSymbol argType)
+        public static bool TryGetParam(ITypeSymbol type, CancellationToken token)
         {
-            argType = default;
-
             if (type.IsAbstract)
             {
                 return false;
             }
 
             if (type is INamedTypeSymbol namedType
-                && namedType.TryGetGenericType(USER_DATA_STORE_BASE, 1, out var baseType)
+                && namedType.TryGetGenericType(USER_DATA_STORE_BASE, 1, out var baseType, token)
                 && baseType.TypeArguments.Length == 1
                 && baseType.TypeArguments[0].IsAbstract == false
             )
             {
-                argType = baseType.TypeArguments[0];
                 return true;
             }
 
-            return type.Interfaces.DoesMatchInterface(IUSER_DATA_ACCESSOR)
-                || type.AllInterfaces.DoesMatchInterface(IUSER_DATA_ACCESSOR);
+            return type.Interfaces.DoesMatchInterface(IUSER_DATA_ACCESSOR, token)
+                || type.AllInterfaces.DoesMatchInterface(IUSER_DATA_ACCESSOR, token);
         }
     }
 }

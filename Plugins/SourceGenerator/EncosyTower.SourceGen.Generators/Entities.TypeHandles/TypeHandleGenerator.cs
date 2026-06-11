@@ -12,7 +12,6 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
         private const string NAMESPACE = "EncosyTower.Entities";
         private const string SKIP_ATTRIBUTE = $"global::{NAMESPACE}.SkipSourceGeneratorsForAssemblyAttribute";
         private const string HANDLE_ATTRIBUTE_METADATA_NAME = $"{NAMESPACE}.TypeHandleAttribute";
-        private const string GENERATOR_NAME = nameof(TypeHandleGenerator);
 
         private const string I_BUFFER_ELEMENT_DATA = "global::Unity.Entities.IBufferElementData";
         private const string I_COMPONENT_DATA = "global::Unity.Entities.IComponentData";
@@ -33,7 +32,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -80,6 +79,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
 
             foreach (var attribute in context.Attributes)
             {
+                token.ThrowIfCancellationRequested();
+
                 var args = attribute.ConstructorArguments;
 
                 if (args.Length < 1 || args[0].Value is not INamedTypeSymbol type)
@@ -92,7 +93,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
                     continue;
                 }
 
-                var kind = GetHandleKind(type);
+                var kind = GetHandleKind(type, token);
 
                 if (kind == TypeKind.None)
                 {
@@ -140,10 +141,14 @@ namespace EncosyTower.SourceGen.Generators.Entities.TypeHandles
             };
         }
 
-        private static TypeKind GetHandleKind(INamedTypeSymbol structSymbol)
+        private static TypeKind GetHandleKind(INamedTypeSymbol structSymbol, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var iface in structSymbol.AllInterfaces)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (iface.HasFullName(I_BUFFER_ELEMENT_DATA))
                     return TypeKind.Buffer;
 

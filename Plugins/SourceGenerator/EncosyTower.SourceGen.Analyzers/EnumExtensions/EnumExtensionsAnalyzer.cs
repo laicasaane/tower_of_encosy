@@ -32,15 +32,18 @@ namespace EncosyTower.SourceGen.Analyzers.EnumExtensions
 
         private static void AnalyzeStaticClass(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
                 || typeSymbol.IsStatic == false
-                || typeSymbol.HasAttribute(ENUM_EXTENSIONS_FOR_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(ENUM_EXTENSIONS_FOR_ATTRIBUTE, token) == false
             )
             {
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(ENUM_EXTENSIONS_FOR_ATTRIBUTE);
+            var attrib = typeSymbol.GetAttribute(ENUM_EXTENSIONS_FOR_ATTRIBUTE, token);
 
             if (attrib == null || attrib.ConstructorArguments.Length < 1)
             {
@@ -59,7 +62,7 @@ namespace EncosyTower.SourceGen.Analyzers.EnumExtensions
             )
             {
                 var displayName = (typeArg.Value as ISymbol)?.ToDisplayString() ?? typeArg.Value?.ToString() ?? "?";
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 context.ReportDiagnostic(Diagnostic.Create(

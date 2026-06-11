@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 
 namespace EncosyTower.SourceGen
@@ -15,15 +16,16 @@ namespace EncosyTower.SourceGen
         /// </summary>
         public static CompilationInfo GetCompilation(
               Compilation compilation
+            , CancellationToken token
             , string generatorNamespace
             , string skipAttribute
         )
         {
             return new CompilationInfo {
                 assemblyName = compilation.Assembly.Name,
-                references = References.Create(compilation),
+                references = References.Create(compilation, token),
                 enableNullable = compilation.Options.NullableContextOptions != NullableContextOptions.Disable,
-                isValid = compilation.IsValidCompilation(generatorNamespace, skipAttribute),
+                isValid = compilation.IsValidCompilation(token, generatorNamespace, skipAttribute),
             };
         }
 
@@ -50,12 +52,16 @@ namespace EncosyTower.SourceGen
         public bool unitask;
         public bool latiosCore;
 
-        public static References Create(Compilation compilation)
+        public static References Create(Compilation compilation, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var result = new References();
 
             foreach (var assembly in compilation.ReferencedAssemblyNames)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (assembly.Name is "Sirenix.OdinInspector.Attributes")
                 {
                     result.odin = true;

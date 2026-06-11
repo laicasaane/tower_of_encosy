@@ -56,7 +56,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 return default;
             }
 
-            var monoBinderAttr = classSymbol.GetAttribute(MONO_BINDER_ATTRIBUTE);
+            var monoBinderAttr = classSymbol.GetAttribute(MONO_BINDER_ATTRIBUTE, token);
 
             if (monoBinderAttr is null
                 || monoBinderAttr.ConstructorArguments.Length < 1
@@ -71,6 +71,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             foreach (var namedArg in monoBinderAttr.NamedArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (string.Equals(namedArg.Key, "PreprocessorGuard", StringComparison.Ordinal))
                 {
                     preprocessorGuard = namedArg.Value.Value as string ?? string.Empty;
@@ -96,12 +98,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 : string.Empty;
 
             var componentFullTypeName = componentType.ToFullName();
-            var componentLabelName = MemberNameToLabel(componentType.Name);
+            var componentLabelName = MemberNameToLabel(componentType.Name, token);
             var compilation = context.SemanticModel.Compilation;
             var excludedMembers = new HashSet<string>(StringComparer.Ordinal);
 
-            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_EXCLUDE_ATTRIBUTE))
+            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_EXCLUDE_ATTRIBUTE, token))
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attrData.ConstructorArguments.Length < 1
                     || attrData.ConstructorArguments[0].Value is not string excludedName
                     || string.IsNullOrEmpty(excludedName)
@@ -115,7 +119,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             INamedTypeSymbol excludedParentType = null;
             {
-                var excludeParentAttr = classSymbol.GetAttribute(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE);
+                var excludeParentAttr = classSymbol.GetAttribute(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE, token);
 
                 if (excludeParentAttr != null
                     && excludeParentAttr.ConstructorArguments.Length >= 1
@@ -129,8 +133,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var explicitProps = new Dictionary<string, (bool useCustomSetter, string label)>(StringComparer.Ordinal);
             var explicitCmds = new Dictionary<string, (string wrapperTypeName, string label)>(StringComparer.Ordinal);
 
-            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_PROP_ATTRIBUTE))
+            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_PROP_ATTRIBUTE, token))
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attrData.ConstructorArguments.Length < 1
                     || attrData.ConstructorArguments[0].Value is not string memberName
                     || string.IsNullOrEmpty(memberName)
@@ -139,11 +145,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     continue;
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 var useCustomSetter = false;
                 var labelOverride = string.Empty;
 
                 foreach (var namedArg in attrData.NamedArguments)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (string.Equals(namedArg.Key, "UseCustomSetter", StringComparison.Ordinal)
                         && namedArg.Value.Value is bool useCustomSetterVal)
                     {
@@ -158,8 +168,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 explicitProps[memberName] = (useCustomSetter, labelOverride);
             }
 
-            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_CMD_ATTRIBUTE))
+            foreach (var attrData in classSymbol.GetAttributes(MONO_BINDING_CMD_ATTRIBUTE, token))
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attrData.ConstructorArguments.Length < 1
                     || attrData.ConstructorArguments[0].Value is not string memberName
                     || string.IsNullOrEmpty(memberName)
@@ -168,11 +180,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     continue;
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 var wrapperTypeName = string.Empty;
                 var labelOverride = string.Empty;
 
                 foreach (var namedArg in attrData.NamedArguments)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (string.Equals(namedArg.Key, "WrapperType", StringComparison.Ordinal))
                     {
                         if (namedArg.Value.Value is INamedTypeSymbol wrapperType)
@@ -195,8 +211,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var seenCmdMembers = new HashSet<string>(StringComparer.Ordinal);
             var current = componentType as ITypeSymbol;
 
-            while (current != null && current.HasFullName(UNITY_OBJECT_TYPE) == false)
+            while (current != null && current.HasFullName(UNITY_OBJECT_TYPE, token) == false)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (excludedParentType != null
                     && SymbolEqualityComparer.Default.Equals(current, excludedParentType)
                 )
@@ -204,12 +222,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     break;
                 }
 
-                token.ThrowIfCancellationRequested();
-
                 var members = current.GetMembers();
 
                 foreach (var member in members)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member.DeclaredAccessibility != Accessibility.Public || member.IsStatic)
                     {
                         continue;
@@ -219,6 +237,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     {
                         var tryProperty = TryCollectProperty(
                               prop
+                            , token
                             , userClassName
                             , userNamespace
                             , explicitProps
@@ -232,7 +251,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                         if (tryProperty == false)
                         {
                             TryCollectCommand(
-                                  prop.Name
+                                  token
+                                , prop.Name
                                 , prop.Type
                                 , userClassName
                                 , userNamespace
@@ -252,7 +272,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     if (member is IFieldSymbol field)
                     {
                         TryCollectCommand(
-                              field.Name
+                              token
+                            , field.Name
                             , field.Type
                             , userClassName
                             , userNamespace
@@ -270,7 +291,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     if (member is IEventSymbol evt)
                     {
                         TryCollectCommand(
-                              evt.Name
+                              token
+                            , evt.Name
                             , evt.Type
                             , userClassName
                             , userNamespace
@@ -288,8 +310,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 current = current.BaseType;
             }
 
+            token.ThrowIfCancellationRequested();
+
             foreach (var kvp in explicitCmds)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (seenCmdMembers.Contains(kvp.Key))
                 {
                     continue;
@@ -300,7 +326,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                     continue;
                 }
 
-                var memberSymbol = FindMember(componentType, kvp.Key);
+                var memberSymbol = FindMember(componentType, kvp.Key, token);
 
                 if (memberSymbol == null)
                 {
@@ -320,7 +346,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
 
                 TryCollectCommand(
-                      kvp.Key
+                      token
+                    , kvp.Key
                     , memberType
                     , userClassName
                     , userNamespace
@@ -335,19 +362,24 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 );
             }
 
+            token.ThrowIfCancellationRequested();
+
             foreach (var kvp in explicitProps)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (seenPropMembers.Contains(kvp.Key))
                 {
                     continue;
                 }
 
-                var memberSymbol = FindMember(componentType, kvp.Key);
+                var memberSymbol = FindMember(componentType, kvp.Key, token);
 
                 if (memberSymbol is IPropertySymbol propSymbol)
                 {
                     TryCollectProperty(
                           propSymbol
+                        , token
                         , userClassName
                         , userNamespace
                         , explicitProps
@@ -360,12 +392,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
                 else
                 {
-                    var methodSymbol = FindOneParamVoidMethod(componentType, kvp.Key);
+                    var methodSymbol = FindOneParamVoidMethod(componentType, kvp.Key, token);
 
                     if (methodSymbol != null)
                     {
                         TryCollectPropertyFromMethod(
                               methodSymbol
+                            , token
                             , kvp.Key
                             , kvp.Value
                             , userClassName
@@ -386,19 +419,25 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var hasOnBindPropertyFailedMethod = false;
             var hasOnBindCommandFailedMethod = false;
 
+            token.ThrowIfCancellationRequested();
+
             {
                 var walkType = classSymbol;
                 var isCurrentType = true;
 
                 while (walkType != null)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     foreach (var member in walkType.GetMembers("OnBindPropertyFailed"))
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (member is IMethodSymbol checkMethod
                             && isCurrentType == false
                             && checkMethod.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected
                             && checkMethod.Parameters.Length == 1
-                            && checkMethod.Parameters[0].Type.HasFullName(BinderSpec.BINDING_PROPERTY)
+                            && checkMethod.Parameters[0].Type.HasFullName(BinderSpec.BINDING_PROPERTY, token)
                         )
                         {
                             hasOnBindPropertyFailedMethod = true;
@@ -408,11 +447,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                     foreach (var member in walkType.GetMembers("OnBindCommandFailed"))
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (member is IMethodSymbol checkMethod
                             && isCurrentType == false
                             && checkMethod.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected
                             && checkMethod.Parameters.Length == 1
-                            && checkMethod.Parameters[0].Type.HasFullName(BinderSpec.BINDING_COMMAND)
+                            && checkMethod.Parameters[0].Type.HasFullName(BinderSpec.BINDING_COMMAND, token)
                         )
                         {
                             hasOnBindCommandFailedMethod = true;
@@ -425,6 +466,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var outerBindingPropertyNames = new HashSet<string>(StringComparer.Ordinal);
             var outerConverterNames = new HashSet<string>(StringComparer.Ordinal);
             var outerBindingCommandNames = new HashSet<string>(StringComparer.Ordinal);
@@ -436,10 +479,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             foreach (var outerMember in classSymbol.GetMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (outerMember is IMethodSymbol outerMethod)
                 {
-                    var bindingPropAttr = outerMethod.GetAttribute(BinderSpec.BINDING_PROPERTY_ATTRIBUTE);
-                    var bindingCmdAttr = outerMethod.GetAttribute(BinderSpec.BINDING_COMMAND_ATTRIBUTE);
+                    var bindingPropAttr = outerMethod.GetAttribute(BinderSpec.BINDING_PROPERTY_ATTRIBUTE, token);
+                    var bindingCmdAttr = outerMethod.GetAttribute(BinderSpec.BINDING_COMMAND_ATTRIBUTE, token);
 
                     if (bindingPropAttr != null && outerMethod.Parameters.Length < 2)
                     {
@@ -537,11 +582,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             using var outerPropRefBuilder = ImmutableArrayBuilder<BinderSpec.BindingPropertySpec>.Rent();
             using var outerCmdRefBuilder = ImmutableArrayBuilder<BinderSpec.BindingCommandSpec>.Rent();
 
             foreach (var entry in tempOuterPropMethods.WrittenSpan)
             {
+                token.ThrowIfCancellationRequested();
+
                 entry.method.GatherForwardedAttributes(
                       semanticModel
                     , token
@@ -562,8 +611,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 });
             }
 
+            token.ThrowIfCancellationRequested();
+
             foreach (var entry in tempOuterCmdMethods.WrittenSpan)
             {
+                token.ThrowIfCancellationRequested();
+
                 entry.method.GatherForwardedAttributes(
                       semanticModel
                     , token
@@ -582,10 +635,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
                 });
             }
 
+            token.ThrowIfCancellationRequested();
+
             using var outerNonVariantTypesBuilder = ImmutableArrayBuilder<BinderSpec.NonVariantTypeSpec>.Rent();
 
             foreach (var nvt in outerNonVariantTypeFilter.Values)
             {
+                token.ThrowIfCancellationRequested();
+
                 outerNonVariantTypesBuilder.Add(nvt);
             }
 
@@ -616,6 +673,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static bool TryCollectProperty(
               IPropertySymbol prop
+            , CancellationToken token
             , string userClassName
             , string userNamespace
             , Dictionary<string, (bool useCustomSetter, string label)> explicitProps
@@ -657,7 +715,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var isExplicit = explicitProps.ContainsKey(memberName);
-            var (isObsolete, obsoleteMessage) = GetObsoleteInfo(prop);
+            var (isObsolete, obsoleteMessage) = GetObsoleteInfo(prop, token);
 
             if (isObsolete && excludeObsolete && !isExplicit)
             {
@@ -667,14 +725,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             explicitProps.TryGetValue(memberName, out var explicitInfo);
 
             var label = string.IsNullOrEmpty(explicitInfo.label)
-                ? MemberNameToLabel(memberName)
+                ? MemberNameToLabel(memberName, token)
                 : explicitInfo.label;
 
             var memberPascalName = MakeFirstCharUpper(memberName);
             var generatedClassName = $"Binding{memberPascalName}";
             var setterMethodName = $"Set{memberPascalName}";
             var propFullTypeName = prop.Type.ToFullName();
-            var needsIn = NeedsInModifier(prop.Type);
+            var needsIn = NeedsInModifier(prop.Type, token);
 
             var variantConverterPropertyName = propFullTypeName == BinderSpec.VARIANT_TYPE
                 ? string.Empty
@@ -709,7 +767,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
         }
 
         private static bool TryCollectCommand(
-              string memberName
+              CancellationToken token
+            , string memberName
             , ITypeSymbol memberType
             , string userClassName
             , string userNamespace
@@ -743,7 +802,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             var isExplicit = explicitCmds.ContainsKey(memberName);
             var (isObsolete, obsoleteMessage) = memberSymbol != null
-                ? GetObsoleteInfo(memberSymbol)
+                ? GetObsoleteInfo(memberSymbol, token)
                 : (false, string.Empty);
 
             if (isObsolete && excludeObsolete && !isExplicit)
@@ -755,12 +814,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             if (isUnityEvent)
             {
-                var unityEventBase = FindUnityEventBase(memberType);
+                var unityEventBase = FindUnityEventBase(memberType, token);
                 typeArgs = unityEventBase?.TypeArguments ?? ImmutableArray<ITypeSymbol>.Empty;
             }
             else
             {
-                typeArgs = GetDelegateInvokeParameters(memberType);
+                typeArgs = GetDelegateInvokeParameters(memberType, token);
             }
 
             explicitCmds.TryGetValue(memberName, out var explicitInfo);
@@ -774,7 +833,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var label = string.IsNullOrEmpty(explicitInfo.label)
-                ? MemberNameToLabel(memberName)
+                ? MemberNameToLabel(memberName, token)
                 : explicitInfo.label;
 
             var memberPascalName = MakeFirstCharUpper(memberName);
@@ -785,6 +844,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             foreach (var arg in typeArgs)
             {
+                token.ThrowIfCancellationRequested();
+
                 argNamesBuilder.Add(arg.ToFullName());
             }
 
@@ -814,6 +875,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
         private static bool TryCollectPropertyFromMethod(
               IMethodSymbol method
+            , CancellationToken token
             , string memberName
             , (bool useCustomSetter, string label) explicitInfo
             , string userClassName
@@ -843,7 +905,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             }
 
             var label = string.IsNullOrEmpty(explicitInfo.label)
-                ? MemberNameToLabel(memberName)
+                ? MemberNameToLabel(memberName, token)
                 : explicitInfo.label;
 
             var memberPascalName = MakeFirstCharUpper(memberName);
@@ -851,7 +913,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             var setterMethodName = memberPascalName;
 
             var propFullTypeName = paramType.ToFullName();
-            var needsIn = NeedsInModifier(paramType);
+            var needsIn = NeedsInModifier(paramType, token);
 
             var variantConverterPropertyName = propFullTypeName == BinderSpec.VARIANT_TYPE
                 ? string.Empty
@@ -885,14 +947,24 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return true;
         }
 
-        private static IMethodSymbol FindOneParamVoidMethod(INamedTypeSymbol type, string memberName)
+        private static IMethodSymbol FindOneParamVoidMethod(
+              INamedTypeSymbol type
+            , string memberName
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var current = type as ITypeSymbol;
 
             while (current != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var member in current.GetMembers(memberName))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is IMethodSymbol method
                         && method.DeclaredAccessibility == Accessibility.Public
                         && !method.IsStatic
@@ -922,13 +994,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return $"Set_{MakeFirstCharUpper(memberName)}";
         }
 
-        private static (bool isObsolete, string message) GetObsoleteInfo(ISymbol symbol)
+        private static (bool isObsolete, string message) GetObsoleteInfo(ISymbol symbol, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             const string OBSOLETE_ATTRIBUTE = "global::System.ObsoleteAttribute";
 
             foreach (var attr in symbol.GetAttributes())
             {
-                if (attr.AttributeClass.IsType(OBSOLETE_ATTRIBUTE))
+                token.ThrowIfCancellationRequested();
+
+                if (attr.AttributeClass.IsType(OBSOLETE_ATTRIBUTE, token))
                 {
                     var message = attr.ConstructorArguments.Length >= 1
                         ? attr.ConstructorArguments[0].Value as string ?? string.Empty
@@ -941,12 +1017,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return (false, string.Empty);
         }
 
-        private static INamedTypeSymbol FindUnityEventBase(ITypeSymbol type)
+        private static INamedTypeSymbol FindUnityEventBase(ITypeSymbol type, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var walk = type as INamedTypeSymbol;
 
             while (walk != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (walk is {
                     Name: "UnityEvent",
                     ContainingNamespace: {
@@ -964,8 +1044,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return null;
         }
 
-        private static ImmutableArray<ITypeSymbol> GetDelegateInvokeParameters(ITypeSymbol delegateType)
+        private static ImmutableArray<ITypeSymbol> GetDelegateInvokeParameters(
+              ITypeSymbol delegateType
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             if (delegateType is not INamedTypeSymbol named)
             {
                 return ImmutableArray<ITypeSymbol>.Empty;
@@ -973,6 +1058,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             foreach (var member in named.GetMembers("Invoke"))
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is IMethodSymbol invoke)
                 {
                     var count = invoke.Parameters.Length;
@@ -986,6 +1073,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                     foreach (var param in invoke.Parameters)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         builder.Add(param.Type);
                     }
 
@@ -996,14 +1085,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return ImmutableArray<ITypeSymbol>.Empty;
         }
 
-        private static ISymbol FindMember(INamedTypeSymbol type, string memberName)
+        private static ISymbol FindMember(INamedTypeSymbol type, string memberName, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var current = type as ITypeSymbol;
 
             while (current != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var member in current.GetMembers(memberName))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member.DeclaredAccessibility == Accessibility.Public)
                     {
                         return member;
@@ -1016,8 +1111,10 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return null;
         }
 
-        internal static string MemberNameToLabel(string memberName)
+        internal static string MemberNameToLabel(string memberName, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (string.IsNullOrEmpty(memberName))
             {
                 return memberName;
@@ -1027,6 +1124,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
             for (var i = 0; i < memberName.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 var c = memberName[i];
 
                 if (i == 0)
@@ -1047,18 +1146,22 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
             return sb.ToString();
         }
 
-        private static bool NeedsInModifier(ITypeSymbol type)
+        private static bool NeedsInModifier(ITypeSymbol type, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (type == null || type.IsReferenceType || type.TypeKind == TypeKind.Pointer)
             {
                 return false;
             }
 
-            return EstimateTypeSize(type) >= 8;
+            return EstimateTypeSize(type, token) >= 8;
         }
 
-        private static int EstimateTypeSize(ITypeSymbol type)
+        private static int EstimateTypeSize(ITypeSymbol type, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (type == null)
             {
                 return 0;
@@ -1086,10 +1189,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.MonoBinders
 
                 foreach (var member in named.GetMembers())
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is IFieldSymbol field && !field.IsStatic && !field.IsConst)
                     {
                         // Reference-type fields are always an 8-byte pointer on 64-bit
-                        total += field.Type.IsReferenceType ? 8 : EstimateTypeSize(field.Type);
+                        total += field.Type.IsReferenceType ? 8 : EstimateTypeSize(field.Type, token);
                     }
                 }
 

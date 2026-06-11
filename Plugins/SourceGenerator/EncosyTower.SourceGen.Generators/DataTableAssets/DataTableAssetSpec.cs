@@ -61,11 +61,13 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
             while (baseType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 var typeArguments = baseType.TypeArguments;
 
                 if (typeArguments.Length >= 2)
                 {
-                    if (baseType.HasFullNamePrefix(DATA_TABLE_ASSET))
+                    if (baseType.HasFullNamePrefix(DATA_TABLE_ASSET, token))
                     {
                         idType = typeArguments[0];
                         dataType = typeArguments[1];
@@ -97,6 +99,8 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 return default;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var members = symbol.GetMembers();
             var comparer = SymbolEqualityComparer.Default;
             var getIdImpl = false;
@@ -105,6 +109,8 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method)
                 {
                     continue;
@@ -157,11 +163,11 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
 
             if (convertedIdType != null && convertIdImpl == false)
             {
-                convertExpression = GetConvertExpression(idType, convertedIdType, convertedIdTypeName);
+                convertExpression = GetConvertExpression(idType, convertedIdType, convertedIdTypeName, token);
 
                 if (string.IsNullOrEmpty(convertExpression))
                 {
-                    convertExpression = GetConvertExpression(convertedIdType, idType, convertedIdTypeName);
+                    convertExpression = GetConvertExpression(convertedIdType, idType, convertedIdTypeName, token);
                 }
 
                 if (string.IsNullOrEmpty(convertExpression))
@@ -170,7 +176,7 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
                 }
             }
 
-            var dataTypeImplementsIInitializable = dataType.ImplementsInterface(IINITIALIZABLE, onlySelf: true);
+            var dataTypeImplementsIInitializable = dataType.ImplementsInterface(IINITIALIZABLE, onlySelf: true, token);
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
                   classSyntax
@@ -215,13 +221,22 @@ namespace EncosyTower.SourceGen.Generators.DataTableAssets
             p.PrintEndLine();
         }
 
-        private static string GetConvertExpression(ITypeSymbol from, ITypeSymbol to, string typeName)
+        private static string GetConvertExpression(
+              ITypeSymbol from
+            , ITypeSymbol to
+            , string typeName
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var members = from.GetMembers();
             var comparer = SymbolEqualityComparer.Default;
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method)
                 {
                     continue;

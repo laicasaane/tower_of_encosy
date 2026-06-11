@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -99,14 +100,17 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(LOOKUP_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(LOOKUP_ATTRIBUTE, token) == false
             )
             {
                 return;
             }
 
-            var markerCount = CountMarkerInterfaces(typeSymbol);
+            var markerCount = CountMarkerInterfaces(typeSymbol, token);
 
             if (markerCount == 0)
             {
@@ -129,12 +133,14 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
                 return;
             }
 
-            GetRequiredEcsInterfaces(typeSymbol, out var interface1, out var interface2);
+            GetRequiredEcsInterfaces(typeSymbol, out var interface1, out var interface2, token);
 
-            foreach (var attrib in typeSymbol.GetAttributes(LOOKUP_ATTRIBUTE))
+            foreach (var attrib in typeSymbol.GetAttributes(LOOKUP_ATTRIBUTE, token))
             {
+                token.ThrowIfCancellationRequested();
+
                 var args = attrib.ConstructorArguments;
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 if (args.Length < 1
@@ -169,7 +175,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
                     continue;
                 }
 
-                if (interface1 != null && type.InheritsFromInterface(interface1) == false)
+                if (interface1 != null && type.InheritsFromInterface(interface1, true, token) == false)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                           IncompatInterface
@@ -180,7 +186,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
                     continue;
                 }
 
-                if (interface2 != null && type.InheritsFromInterface(interface2) == false)
+                if (interface2 != null && type.InheritsFromInterface(interface2, true, token) == false)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                           IncompatInterface
@@ -192,19 +198,23 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
             }
         }
 
-        private static int CountMarkerInterfaces(INamedTypeSymbol typeSymbol)
+        private static int CountMarkerInterfaces(INamedTypeSymbol typeSymbol, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var count = 0;
 
             foreach (var iface in typeSymbol.AllInterfaces)
             {
-                if (iface.HasFullName(I_BUFFER_LOOKUPS)
-                    || iface.HasFullName(I_COMPONENT_LOOKUPS)
-                    || iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS)
-                    || iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS)
-                    || iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS)
-                    || iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS)
-                    || iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS)
+                token.ThrowIfCancellationRequested();
+
+                if (iface.HasFullName(I_BUFFER_LOOKUPS, token)
+                    || iface.HasFullName(I_COMPONENT_LOOKUPS, token)
+                    || iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS, token)
+                    || iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS, token)
+                    || iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS, token)
+                    || iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS, token)
+                    || iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS, token)
                 )
                 {
                     count++;
@@ -218,38 +228,43 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Lookups
               INamedTypeSymbol typeSymbol
             , out string interface1
             , out string interface2
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             interface1 = null;
             interface2 = null;
 
             foreach (var iface in typeSymbol.AllInterfaces)
             {
-                if (iface.HasFullName(I_BUFFER_LOOKUPS)
-                    || iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS)
+                token.ThrowIfCancellationRequested();
+
+                if (iface.HasFullName(I_BUFFER_LOOKUPS, token)
+                    || iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS, token)
                 )
                 {
                     interface1 = I_BUFFER_ELEMENT_DATA;
                     return;
                 }
 
-                if (iface.HasFullName(I_COMPONENT_LOOKUPS)
-                    || iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS)
+                if (iface.HasFullName(I_COMPONENT_LOOKUPS, token)
+                    || iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS, token)
                 )
                 {
                     interface1 = I_COMPONENT_DATA;
                     return;
                 }
 
-                if (iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS))
+                if (iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS, token))
                 {
                     interface1 = I_BUFFER_ELEMENT_DATA;
                     interface2 = I_ENABLEABLE_COMPONENT;
                     return;
                 }
 
-                if (iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS)
-                    || iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS)
+                if (iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS, token)
+                    || iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS, token)
                 )
                 {
                     interface1 = I_COMPONENT_DATA;

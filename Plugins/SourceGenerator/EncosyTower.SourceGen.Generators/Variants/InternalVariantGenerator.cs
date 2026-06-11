@@ -23,7 +23,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var typeProvider = context.SyntaxProvider.CreateSyntaxProvider(
                   predicate: IsSyntaxMatched
@@ -93,8 +93,8 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 return default;
             }
 
-            if (type.HasFullNamePrefix(VARIANT_T) == false
-                && type.HasFullNamePrefix(CONVERTER_T) == false
+            if (type.HasFullNamePrefix(VARIANT_T, token) == false
+                && type.HasFullNamePrefix(CONVERTER_T, token) == false
             )
             {
                 return default;
@@ -125,7 +125,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             if (isValueType)
             {
                 var size = 0;
-                typeArg.GetUnmanagedSize(ref size);
+                typeArg.GetUnmanagedSize(ref size, token);
                 unmanagedSize = size;
             }
 

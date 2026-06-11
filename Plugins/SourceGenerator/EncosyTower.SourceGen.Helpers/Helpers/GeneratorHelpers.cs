@@ -32,28 +32,39 @@ namespace EncosyTower.SourceGen
 
         public static bool IsValidCompilation(
               this Compilation compilation
+            , CancellationToken token
             , string generatorNamespace
             , string skipAttribute
         )
         {
+            token.ThrowIfCancellationRequested();
+
             var assembly = compilation.Assembly;
-            var skipAllSourceGen = assembly.HasAttribute(SKIP_ATTRIBUTE);
-            var skipThisSourceGen = CanSkipThisSourceGen(assembly, skipAttribute);
-            var isAllowed = IsThisSourceGenAllowed(assembly, generatorNamespace);
+            var skipAllSourceGen = assembly.HasAttribute(SKIP_ATTRIBUTE, token);
+            var skipThisSourceGen = CanSkipThisSourceGen(assembly, skipAttribute, token);
+            var isAllowed = IsThisSourceGenAllowed(assembly, generatorNamespace, token);
 
             return (skipAllSourceGen && isAllowed)
                 || (skipAllSourceGen == false && skipThisSourceGen == false);
 
-            static bool CanSkipThisSourceGen(IAssemblySymbol assembly, string skipAttribute)
+            static bool CanSkipThisSourceGen(
+                  IAssemblySymbol assembly
+                , string skipAttribute
+                , CancellationToken token
+            )
             {
                 return string.IsNullOrWhiteSpace(skipAttribute) == false
-                    && assembly.HasAttribute(skipAttribute);
+                    && assembly.HasAttribute(skipAttribute, token);
             }
 
-            static bool IsThisSourceGenAllowed(IAssemblySymbol assembly, string generatorNamespace)
+            static bool IsThisSourceGenAllowed(
+                  IAssemblySymbol assembly
+                , string generatorNamespace
+                , CancellationToken token
+            )
             {
                 if (string.IsNullOrWhiteSpace(generatorNamespace)
-                    || assembly.TryGetAttribute(ALLOW_ATTRIBUTE, out var allowAttrib) == false
+                    || assembly.TryGetAttribute(ALLOW_ATTRIBUTE, out var allowAttrib, token) == false
                 )
                 {
                     return false;
@@ -70,6 +81,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (var value in values)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (value.Value is string ns
                         && string.Equals(ns, generatorNamespace, StringComparison.Ordinal)
                     )
@@ -122,6 +135,8 @@ namespace EncosyTower.SourceGen
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member.Kind() == syntaxKind
                     && member.HasAttributeCandidate(attributeNamespace, attributeName)
                 )

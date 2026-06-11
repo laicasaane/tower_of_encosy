@@ -93,6 +93,9 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
 
         private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             var invocation = (InvocationExpressionSyntax)context.Node;
 
             if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
@@ -123,15 +126,15 @@ namespace EncosyTower.SourceGen.Analyzers.Types.Caches
             }
 
             var semanticModel = context.SemanticModel;
-            var identifierType = semanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
+            var identifierType = semanticModel.GetTypeInfo(memberAccess.Expression, token).Type;
 
-            if (identifierType is null || !identifierType.HasFullName(RUNTIME_TYPE_CACHE))
+            if (identifierType is null || !identifierType.HasFullName(RUNTIME_TYPE_CACHE, token))
             {
                 return;
             }
 
             var typeArgSyntax = genericName.TypeArgumentList.Arguments[0];
-            var typeInfo = semanticModel.GetTypeInfo(typeArgSyntax, context.CancellationToken);
+            var typeInfo = semanticModel.GetTypeInfo(typeArgSyntax, token);
             var type = typeInfo.Type;
 
             if (type is null)

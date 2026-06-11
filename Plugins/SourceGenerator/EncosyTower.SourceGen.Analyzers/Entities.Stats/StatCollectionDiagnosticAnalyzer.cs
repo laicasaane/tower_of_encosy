@@ -70,8 +70,11 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(STAT_COLLECTION_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(STAT_COLLECTION_ATTRIBUTE, token) == false
             )
             {
                 return;
@@ -107,7 +110,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(STAT_COLLECTION_ATTRIBUTE);
+            var attrib = typeSymbol.GetAttribute(STAT_COLLECTION_ATTRIBUTE, token);
 
             if (attrib == null || attrib.ConstructorArguments.Length < 1)
             {
@@ -123,7 +126,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 
 
             if (typeArg.Value is not INamedTypeSymbol statSystemTypeSymbol
-                || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE) == false
+                || statSystemTypeSymbol.HasAttribute(STAT_SYSTEM_ATTRIBUTE, token) == false
             )
             {
                 var displayName = (typeArg.Value as ISymbol)?.ToDisplayString() ?? typeArg.Value?.ToString() ?? "?";
@@ -139,13 +142,17 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
                 return;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var statDataCount = 0;
 
             foreach (var member in typeSymbol.GetTypeMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member.TypeKind == TypeKind.Struct
                     && member.IsUnboundGenericType == false
-                    && member.HasAttribute(STAT_DATA_ATTRIBUTE))
+                    && member.HasAttribute(STAT_DATA_ATTRIBUTE, token))
                 {
                     statDataCount++;
                 }

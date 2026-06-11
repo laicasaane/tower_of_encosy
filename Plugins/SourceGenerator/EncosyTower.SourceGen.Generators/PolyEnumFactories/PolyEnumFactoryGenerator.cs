@@ -16,7 +16,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         private const string POLY_ENUM_FACTORY_FOR_ATTRIBUTE_METADATA = $"{NAMESPACE}.PolyEnumFactoryForAttribute";
         private const string POLY_ENUM_STRUCT_ATTRIBUTE = $"global::{NAMESPACE}.PolyEnumStructAttribute";
         private const string ENUM_CASE_IGNORE_ATTRIBUTE = $"global::{NAMESPACE}.EnumCaseIgnoreAttribute";
-        private const string GENERATOR_NAME = nameof(PolyEnumFactoryGenerator);
         private const string UNDEFINED_NAME = "Undefined";
         private const string DEFAULT_FIELD_NAME_PREFIX = "_enumStruct_";
 
@@ -25,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   POLY_ENUM_FACTORY_FOR_ATTRIBUTE_METADATA
@@ -100,12 +99,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 return default;
             }
 
-            if (enumStructSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE) == false)
+            if (enumStructSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE, token) == false)
             {
                 return default;
             }
 
-            if (IsPartial(typeSyntax) == false)
+            if (IsPartial(typeSyntax, token) == false)
             {
                 return default;
             }
@@ -129,7 +128,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 wrapperTypeNamespace = wrapperSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
                 wrapperFullyQualifiedName = wrapperSymbol.ToFullName(),
                 wrapperKindKeyword = GetWrapperKindKeyword(typeSyntax),
-                wrapperPreModifiers = GetWrapperPreModifiers(typeSyntax),
+                wrapperPreModifiers = GetWrapperPreModifiers(typeSyntax, token),
                 wrapperAccessibility = GetAccessibilityKeyword(wrapperSymbol.DeclaredAccessibility),
                 enumStructName = enumStructSymbol.Name,
                 enumStructFullyQualifiedName = enumStructSymbol.ToFullName(),
@@ -143,9 +142,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 isStruct = IsStruct(typeSyntax),
             };
 
-            ResolveBackingField(wrapperSymbol, enumStructSymbol, ref result);
+            ResolveBackingField(wrapperSymbol, enumStructSymbol, ref result, token);
             AggregateCases(enumStructSymbol, ref result, token);
-            ResolveExplicitUndefinedMethod(ref result);
+            ResolveExplicitUndefinedMethod(ref result, token);
 
             return result;
         }
@@ -154,10 +153,15 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
               INamedTypeSymbol wrapperSymbol
             , INamedTypeSymbol enumStructSymbol
             , ref PolyEnumFactorySpec result
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var ctor in wrapperSymbol.InstanceConstructors)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (ctor.Parameters.Length != 1)
                 {
                     continue;
@@ -175,12 +179,16 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
             result.emitBackingField = true;
 
+            token.ThrowIfCancellationRequested();
+
             var baseName = $"{DEFAULT_FIELD_NAME_PREFIX}{enumStructSymbol.Name}";
             var fieldName = baseName;
             var suffix = 1;
 
-            while (HasInstanceField(wrapperSymbol, fieldName))
+            while (HasInstanceField(wrapperSymbol, fieldName, token))
             {
+                token.ThrowIfCancellationRequested();
+
                 fieldName = $"{baseName}{suffix}";
                 suffix++;
             }
@@ -188,10 +196,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             result.fieldName = fieldName;
         }
 
-        private static bool HasInstanceField(INamedTypeSymbol typeSymbol, string name)
+        private static bool HasInstanceField(INamedTypeSymbol typeSymbol, string name, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var member in typeSymbol.GetMembers())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is IFieldSymbol field
                     && field.IsStatic == false
                     && string.Equals(field.Name, name, StringComparison.Ordinal)
@@ -210,6 +222,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             using var casesBuilder = ImmutableArrayBuilder<PolyEnumFactorySpec.CaseSpec>.Rent();
 
             var verboseUndefined = $"{enumStructSymbol.Name}_Undefined";
@@ -228,7 +242,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                     continue;
                 }
 
-                if (nested.HasAttribute(ENUM_CASE_IGNORE_ATTRIBUTE))
+                if (nested.HasAttribute(ENUM_CASE_IGNORE_ATTRIBUTE, token))
                 {
                     continue;
                 }
@@ -262,6 +276,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             var isUndefined = string.Equals(caseSymbol.Name, UNDEFINED_NAME, StringComparison.Ordinal)
                 || string.Equals(caseSymbol.Name, verboseUndefined, StringComparison.Ordinal);
 
@@ -288,6 +304,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
                     for (var i = 0; i < ctors.Count; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var count = ctors[i].parameters.Count;
 
                         if (count > maxCtorParamCount)
@@ -342,7 +360,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                     }
                 }
 
-                if (HasOutParameter(ctor))
+                if (HasOutParameter(ctor, token))
                 {
                     continue;
                 }
@@ -365,10 +383,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             return true;
         }
 
-        private static bool HasOutParameter(IMethodSymbol ctor)
+        private static bool HasOutParameter(IMethodSymbol ctor, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var p in ctor.Parameters)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (p.RefKind == RefKind.Out)
                 {
                     return true;
@@ -488,13 +510,17 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             return true;
         }
 
-        private static void ResolveExplicitUndefinedMethod(ref PolyEnumFactorySpec result)
+        private static void ResolveExplicitUndefinedMethod(ref PolyEnumFactorySpec result, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var cases = result.cases;
             var hasParameterlessUndefined = false;
 
             for (var i = 0; i < cases.Count; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 var c = cases[i];
 
                 if (c.isUndefined == false)
@@ -533,10 +559,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             result.emitExplicitUndefinedMethod = hasParameterlessUndefined == false;
         }
 
-        private static bool IsPartial(TypeDeclarationSyntax typeSyntax)
+        private static bool IsPartial(TypeDeclarationSyntax typeSyntax, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var modifier in typeSyntax.Modifiers)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (modifier.IsKind(SyntaxKind.PartialKeyword))
                 {
                     return true;
@@ -578,12 +608,16 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             return string.Empty;
         }
 
-        private static string GetWrapperPreModifiers(TypeDeclarationSyntax typeSyntax)
+        private static string GetWrapperPreModifiers(TypeDeclarationSyntax typeSyntax, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var sb = StringExtensions.RentSb();
 
             foreach (var modifier in typeSyntax.Modifiers)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (modifier.IsKind(SyntaxKind.PartialKeyword))
                 {
                     continue;

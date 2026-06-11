@@ -56,15 +56,18 @@ namespace EncosyTower.SourceGen.Analyzers.NewtonsoftAotHelpers
 
         private static void AnalyzeType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(ATTRIBUTE, token) == false
             )
             {
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(ATTRIBUTE);
-            var location = attrib?.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+            var attrib = typeSymbol.GetAttribute(ATTRIBUTE, token);
+            var location = attrib?.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                 ?? typeSymbol.Locations[0];
 
             if (typeSymbol.IsAbstract)

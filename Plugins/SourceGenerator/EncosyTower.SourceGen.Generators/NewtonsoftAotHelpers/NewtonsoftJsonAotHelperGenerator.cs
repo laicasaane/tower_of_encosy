@@ -19,7 +19,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var helperProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -111,7 +111,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                 baseTypeFullName = baseType.ToFullName(),
                 namespaceName = namespaceName,
                 typeCandidates = typeCandidatesBuilder.ToImmutable().AsEquatableArray(),
-                containingTypes = symbol.GetContainingTypes(),
+                containingTypes = symbol.GetContainingTypes(token),
                 isStatic = symbol.IsStatic,
                 isRecord = symbol.IsRecord,
                 typeKind = symbol.TypeKind,
@@ -125,6 +125,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             var allTypeSymbols = compilation.GetSymbolsWithName(
                   static _ => true
                 , SymbolFilter.Type
@@ -159,6 +161,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                     while (ancestor != null)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (equalityComparer.Equals(ancestor, baseType))
                         {
                             isDerived = true;
@@ -184,6 +188,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                         foreach (var typeMember in typeWalker.GetMembers())
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (typeMember is not IFieldSymbol field
                                 || field.Type is not INamedTypeSymbol fieldType
                             )
@@ -192,7 +198,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                             }
 
                             var fieldTypeFullName = fieldType.ToFullName();
-                            var fieldTypeCanEnsure = CanEnsureType(fieldType);
+                            var fieldTypeCanEnsure = CanEnsureType(fieldType, token);
 
                             if (fieldType.IsGenericType == false || fieldType.IsUnboundGenericType)
                             {
@@ -214,8 +220,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.Dictionary,
-                                    elementOrKey = MakeTypeArgInfo(keyArg),
-                                    dictionaryValue = MakeTypeArgInfo(valueArg),
+                                    elementOrKey = MakeTypeArgInfo(keyArg, token),
+                                    dictionaryValue = MakeTypeArgInfo(valueArg, token),
                                 });
                                 continue;
                             }
@@ -229,7 +235,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.List,
-                                    elementOrKey = MakeTypeArgInfo(listArg),
+                                    elementOrKey = MakeTypeArgInfo(listArg, token),
                                 });
                                 continue;
                             }
@@ -243,7 +249,7 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
                                     fieldTypeFullName = fieldTypeFullName,
                                     fieldTypeCanEnsure = fieldTypeCanEnsure,
                                     collectionKind = AotCollectionKind.HashSet,
-                                    elementOrKey = MakeTypeArgInfo(hashSetArg),
+                                    elementOrKey = MakeTypeArgInfo(hashSetArg, token),
                                 });
                                 continue;
                             }
@@ -252,9 +258,11 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
 
                             foreach (var typeArg in fieldType.TypeArguments)
                             {
+                                token.ThrowIfCancellationRequested();
+
                                 if (typeArg is INamedTypeSymbol namedTypeArg)
                                 {
-                                    otherTypeArgsBuilder.Add(MakeTypeArgInfo(namedTypeArg));
+                                    otherTypeArgsBuilder.Add(MakeTypeArgInfo(namedTypeArg, token));
                                 }
                             }
 
@@ -277,16 +285,20 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             }
         }
 
-        private static AotTypeArgSpec MakeTypeArgInfo(INamedTypeSymbol typeArg)
+        private static AotTypeArgSpec MakeTypeArgInfo(INamedTypeSymbol typeArg, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             return new AotTypeArgSpec {
                 fullName = typeArg.ToFullName(),
-                canEnsure = CanEnsureType(typeArg),
+                canEnsure = CanEnsureType(typeArg, token),
             };
         }
 
-        private static bool CanEnsureType(INamedTypeSymbol type)
+        private static bool CanEnsureType(INamedTypeSymbol type, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (type.IsAbstract
                 || type.SpecialType.IsSystemType()
                 || type.TypeKind is not (TypeKind.Struct or TypeKind.Class)
@@ -299,6 +311,8 @@ namespace EncosyTower.SourceGen.Generators.NewtonsoftAotHelpers
             {
                 foreach (var ctor in type.Constructors)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (ctor.Parameters.Length == 0)
                     {
                         return true;

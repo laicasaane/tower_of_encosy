@@ -107,13 +107,17 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
             while (baseType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var member in baseType.GetMembers("OnBindPropertyFailed"))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is IMethodSymbol checkMethod
                         && isCurrentType == false
                         && checkMethod.DeclaredAccessibility is (Accessibility.Public or Accessibility.Protected)
                         && checkMethod.Parameters.Length == 1
-                        && checkMethod.Parameters[0].Type.HasFullName(BINDING_PROPERTY)
+                        && checkMethod.Parameters[0].Type.HasFullName(BINDING_PROPERTY, token)
                     )
                     {
                         hasOnBindPropertyFailedMethod = true;
@@ -123,11 +127,13 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
                 foreach (var member in baseType.GetMembers("OnBindCommandFailed"))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is IMethodSymbol checkMethod
                         && isCurrentType == false
                         && checkMethod.DeclaredAccessibility is (Accessibility.Public or Accessibility.Protected)
                         && checkMethod.Parameters.Length == 1
-                        && checkMethod.Parameters[0].Type.HasFullName(BINDING_COMMAND)
+                        && checkMethod.Parameters[0].Type.HasFullName(BINDING_COMMAND, token)
                     )
                     {
                         hasOnBindCommandFailedMethod = true;
@@ -139,6 +145,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 baseType = baseType.BaseType;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var members = symbol.GetMembers();
             using var tempPropMethods = ImmutableArrayBuilder<BinderPropertyScanEntry>.Rent();
             using var tempCmdMethods = ImmutableArrayBuilder<BinderCommandScanEntry>.Rent();
@@ -146,10 +154,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is IMethodSymbol method)
                 {
-                    var bindingPropAttribute = method.GetAttribute(BINDING_PROPERTY_ATTRIBUTE);
-                    var bindingCommandAttribute = method.GetAttribute(BINDING_COMMAND_ATTRIBUTE);
+                    var bindingPropAttribute = method.GetAttribute(BINDING_PROPERTY_ATTRIBUTE, token);
+                    var bindingCommandAttribute = method.GetAttribute(BINDING_COMMAND_ATTRIBUTE, token);
 
                     if (bindingPropAttribute != null && method.Parameters.Length < 2)
                     {
@@ -246,10 +256,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             using var propRefBuilder = ImmutableArrayBuilder<BindingPropertySpec>.Rent();
 
             foreach (var entry in tempPropMethods.WrittenSpan)
             {
+                token.ThrowIfCancellationRequested();
+
                 var methodName = entry.method.Name;
 
                 entry.method.GatherForwardedAttributes(
@@ -272,10 +286,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.Binders
                 });
             }
 
+            token.ThrowIfCancellationRequested();
+
             using var cmdRefBuilder = ImmutableArrayBuilder<BindingCommandSpec>.Rent();
 
             foreach (var entry in tempCmdMethods.WrittenSpan)
             {
+                token.ThrowIfCancellationRequested();
+
                 var methodName = entry.method.Name;
 
                 entry.method.GatherForwardedAttributes(

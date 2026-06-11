@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
@@ -8,21 +9,27 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
     partial class UserDataVaultDeclaration
     {
-        public string WriteCode()
+        public string WriteCode(CancellationToken token)
         {
             var accessorDefs = AccessorDefs;
             var storeDefs = new HashSet<StoreSpec>();
 
             foreach (var accessorDef in accessorDefs)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var arg in accessorDef.Args)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (arg.StoreDef.IsValid)
                     {
                         storeDefs.Add(arg.StoreDef);
                     }
                 }
             }
+
+            token.ThrowIfCancellationRequested();
 
             var orderedStoreDefs = storeDefs
                 .OrderBy(x => x.DataTypeName)
@@ -72,7 +79,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // StringIdCollection");
             p.OpenScope();
             {
-                WriteStringIdCollection(ref p, orderedStoreDefs);
+                WriteStringIdCollection(ref p, orderedStoreDefs, token);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -85,7 +92,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // AccessorCollection");
             p.OpenScope();
             {
-                WriteAccessorCollection(ref p, accessorDefs);
+                WriteAccessorCollection(ref p, accessorDefs, token);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -98,7 +105,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // ReadOnlyAccessorCollection");
             p.OpenScope();
             {
-                WriteReadOnlyAccessorCollection(ref p, accessorDefs);
+                WriteReadOnlyAccessorCollection(ref p, accessorDefs, token);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -124,7 +131,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // DataDirectory");
             p.OpenScope();
             {
-                WriteDataDirectory(ref p, orderedStoreDefs);
+                WriteDataDirectory(ref p, orderedStoreDefs, token);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -137,7 +144,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 .PrintEndLine(" // DataCollection");
             p.OpenScope();
             {
-                WriteDataCollection(ref p, orderedStoreDefs);
+                WriteDataCollection(ref p, orderedStoreDefs, token);
             }
             p.CloseScope();
             p.PrintEndLine();
@@ -374,8 +381,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteStringIdCollection(ref Printer p, ReadOnlySpan<StoreSpec> defs)
+        private static void WriteStringIdCollection(ref Printer p, ReadOnlySpan<StoreSpec> defs, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             p.PrintLine("/// <summary>");
             p.PrintLine("/// An immutable collection of <see cref=\"StringId{T}\" /> values identifying");
             p.PrintLine("/// each data type stored in the vault.");
@@ -386,6 +395,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             {
                 foreach (var def in defs)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     p.PrintBeginLine("public readonly StringIdᐸstringᐳ ").Print(def.DataTypeName)
                         .PrintEndLine(";");
                 }
@@ -397,6 +408,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var name = def.DataTypeName;
 
                         p.PrintBeginLine(name)
@@ -413,6 +426,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].DataTypeName).PrintEndLine(",");
                     }
 
@@ -611,14 +626,22 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private static void WriteAccessorCollection(ref Printer p, List<UserDataAccessorDeclaration> defs)
+        private static void WriteAccessorCollection(
+              ref Printer p
+            , List<UserDataAccessorDeclaration> defs
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var typeSet = new HashSet<string>(StringComparer.Ordinal);
             var queue = new Queue<UserDataAccessorDeclaration>(defs.Count);
             var loopMap = new Dictionary<string, int>(defs.Count, StringComparer.Ordinal);
 
             foreach (var def in defs)
             {
+                token.ThrowIfCancellationRequested();
+
                 queue.Enqueue(def);
             }
 
@@ -636,11 +659,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     while (queue.Count > 0)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var def = queue.Dequeue();
                         var needDependency = false;
 
                         foreach (var arg in def.Args)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (string.IsNullOrEmpty(arg.AccessorTypeName) == false && typeSet.Contains(arg.AccessorTypeName) == false)
                             {
                                 needDependency = true;
@@ -667,13 +694,15 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         typeSet.Add(def.FullTypeName);
                         loopMap.Remove(def.FullTypeName);
-                        Write(ref p, def);
+                        Write(ref p, def, token);
                     }
 
                     p.PrintEndLine();
 
                     foreach (var kv in loopMap)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine("LogErrorCyclicDependency(logger, \"").Print(kv.Key).PrintEndLine("\");");
                     }
                 }
@@ -685,6 +714,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     for (var i = 0; i < defs.Count; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].FieldName).PrintEndLine(",");
                     }
 
@@ -704,6 +735,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in defs)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var typeName = def.FullTypeName;
                     var fieldName = def.FieldName;
 
@@ -718,6 +751,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (def.IsInitializable)
                         {
                             p.PrintBeginLine(def.FieldName).PrintEndLine(".Initialize();");
@@ -732,6 +767,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (def.IsDeinitializable)
                         {
                             p.PrintBeginLine(def.FieldName).PrintEndLine(".Deinitialize();");
@@ -872,14 +909,18 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             return;
 
-            static void Write(ref Printer p, UserDataAccessorDeclaration def)
+            static void Write(ref Printer p, UserDataAccessorDeclaration def, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (def.Args.Count < 2)
                 {
                     p.PrintBeginLine(def.FieldName).Print(" = new(");
 
                     foreach (var arg in def.Args)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (string.IsNullOrEmpty(arg.AccessorTypeName) == false)
                         {
                             p.Print(arg.AccessorTypeName);
@@ -901,6 +942,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         for (var i = 0; i < args.Count; i++)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             var arg = args[i];
                             var comma = i == 0 ? " " : ",";
 
@@ -924,8 +967,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             }
         }
 
-        private void WriteReadOnlyAccessorCollection(ref Printer p, List<UserDataAccessorDeclaration> defs)
+        private void WriteReadOnlyAccessorCollection(
+              ref Printer p
+            , List<UserDataAccessorDeclaration> defs
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             p.PrintLine("/// <summary>");
             p.PrintLine("/// A read-only view of <see cref=\"AccessorCollection\" /> that provides immutable,");
             p.PrintLine("/// enumerable access to all typed user data accessors.");
@@ -961,6 +1010,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     for (var i = 0; i < defs.Count; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].FieldName).PrintEndLine(",");
                     }
 
@@ -980,6 +1031,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in defs)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var typeName = def.FullTypeName;
                     var fieldName = def.FieldName;
 
@@ -1113,8 +1166,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private void WriteDataDirectory(ref Printer p, ReadOnlySpan<StoreSpec> defs)
+        private void WriteDataDirectory(ref Printer p, ReadOnlySpan<StoreSpec> defs, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var generateCreateMethods = new List<StoreSpec>(defs.Length);
 
             p.PrintLine("/// <summary>");
@@ -1167,6 +1222,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var hasDefaultConstructor = def.DataTypeHasDefaultConstructor;
 
                         if (hasDefaultConstructor == false)
@@ -1205,6 +1262,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in defs)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     p.PrintBeginLine("public ")
                         .Print(def.FullStoreTypeName).Print(" ")
                         .Print(def.DataTypeName).PrintEndLine(" { get; }")
@@ -1231,6 +1290,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         foreach (var def in defs)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             p.PrintBeginLine(def.DataTypeName)
                                 .PrintEndLine(".UserId = value;");
                         }
@@ -1251,6 +1312,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in generateCreateMethods)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     p.PrintBeginLine("private static partial ").Print(def.FullDataTypeName)
                         .Print(" Create").Print(def.DataTypeName).PrintEndLine("();");
                     p.PrintEndLine();
@@ -1261,6 +1324,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(def.DataTypeName)
                             .PrintEndLine(".Initialize();");
                     }
@@ -1273,6 +1338,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(def.DataTypeName)
                             .PrintEndLine(".Deinitialize();");
                     }
@@ -1293,6 +1360,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine("if (").Print(def.DataTypeName).PrintEndLine(".IsDataValid == false)");
                         p.OpenScope();
                         {
@@ -1310,6 +1379,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(def.DataTypeName).PrintEndLine(".CreateData();");
                     }
                 }
@@ -1321,6 +1392,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(def.DataTypeName).PrintEndLine(".MarkDirty(isDirty);");
                     }
                 }
@@ -1335,6 +1408,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(", bool include").Print(defs[i].DataTypeName).PrintEndLine(" = true");
                     }
                 }
@@ -1344,6 +1419,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine("if (include").Print(def.DataTypeName).PrintEndLine(")");
                         p.OpenScope();
                         {
@@ -1369,6 +1446,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(", bool include").Print(defs[i].DataTypeName).PrintEndLine(" = true");
                     }
                 }
@@ -1385,6 +1464,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         for (var i = 0; i < defs.Length; i++)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             var name = defs[i].DataTypeName;
 
                             p.PrintBeginLine("tasks[").Print(i).Print("] = include").PrintEndLine(name);
@@ -1437,6 +1518,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(", bool include").Print(defs[i].DataTypeName).PrintEndLine(" = true");
                     }
                 }
@@ -1453,6 +1536,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         for (var i = 0; i < defs.Length; i++)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             var name = defs[i].DataTypeName;
 
                             p.PrintBeginLine("tasks[").Print(i).Print("] = include").PrintEndLine(name);
@@ -1499,6 +1584,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine(", bool include").Print(defs[i].DataTypeName).PrintEndLine(" = true");
                     }
                 }
@@ -1508,6 +1595,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine("if (include").Print(def.DataTypeName).PrintEndLine(")");
                         p.OpenScope();
                         {
@@ -1524,8 +1613,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
         }
 
-        private void WriteDataCollection(ref Printer p, ReadOnlySpan<StoreSpec> defs)
+        private void WriteDataCollection(ref Printer p, ReadOnlySpan<StoreSpec> defs, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             p.PrintLine("/// <summary>");
             p.PrintLine("/// A serializable, value-type snapshot of all user data instances belonging to a single user.");
             p.PrintLine("/// Supports copying to and from the vault's <see cref=\"DataDirectory\" />.");
@@ -1539,6 +1630,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                 foreach (var def in defs)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     p.PrintBeginLine("[SerializeField] internal ").Print(def.FullDataTypeName).Print(" ")
                         .Print(def.DataFieldName).PrintEndLine(";");
                 }
@@ -1568,6 +1661,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var def = defs[i];
 
                         p.PrintBeginLine(def.DataFieldName).Print(" = source.").Print(def.DataFieldName).PrintEndLine(";");
@@ -1587,6 +1682,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var def = defs[i];
 
                         p.PrintBeginLine(", ").Print(def.FullDataTypeName).Print(" ").PrintEndLine(def.DataArgName);
@@ -1600,6 +1697,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var def = defs[i];
 
                         p.PrintBeginLine(def.DataFieldName).Print(" = ").Print(def.DataArgName).PrintEndLine(";");
@@ -1616,6 +1715,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 {
                     for (var i = 0; i < defs.Length; i++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         p.PrintBeginLine().Print(i).Print(" => ").Print(defs[i].DataFieldName).PrintEndLine(",");
                     }
 
@@ -1667,6 +1768,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         foreach (var def in defs)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             var name = def.DataTypeName;
 
                             p.PrintBeginLine(", directory.").Print(name).PrintEndLine(".GetData(priority)");
@@ -1699,6 +1802,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                         foreach (var def in defs)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             var name = def.DataTypeName;
                             p.PrintBeginLine(", directory.").Print(name)
                                 .PrintEndLine(".TryCloneData(priority).GetValueOrDefault()");
@@ -1739,6 +1844,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     foreach (var def in defs)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var name = def.DataTypeName;
                         var fieldName = def.DataFieldName;
 

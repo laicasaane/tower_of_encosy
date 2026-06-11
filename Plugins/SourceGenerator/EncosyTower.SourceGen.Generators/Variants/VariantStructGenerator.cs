@@ -17,7 +17,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider.ForAttributeWithMetadataName(
                   VARIANT_ATTRIBUTE
@@ -102,7 +102,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
             if (isValueType)
             {
                 var size = 0;
-                typeArg.GetUnmanagedSize(ref size);
+                typeArg.GetUnmanagedSize(ref size, token);
                 unmanagedSize = size;
             }
 
@@ -127,7 +127,7 @@ namespace EncosyTower.SourceGen.Generators.Variants
                 structFullName = structFullName,
                 fileHintName = fileHintName,
                 namespaceName = namespaceName,
-                containingTypes = structSymbol.GetContainingTypes(),
+                containingTypes = structSymbol.GetContainingTypes(token),
                 isValid = true,
             };
         }

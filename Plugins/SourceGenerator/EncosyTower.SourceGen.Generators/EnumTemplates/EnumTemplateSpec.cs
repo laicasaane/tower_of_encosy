@@ -52,11 +52,11 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
-            var containingTypes = templateSymbol.GetContainingTypes();
+            var containingTypes = templateSymbol.GetContainingTypes(token);
             var ns = templateSymbol.ContainingNamespace;
             var namespaceName = ns is { IsGlobalNamespace: false } ? ns.ToDisplayString() : string.Empty;
             var templateFullName = templateSymbol.ToFullName();
-            var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE);
+            var attributes = templateSymbol.GetAttributes(MEMBERS_FROM_ENUM_ATTRIBUTE, MEMBER_FROM_TYPE_ATTRIBUTE, token);
 
             using var inlineMemberBuilder = ImmutableArrayBuilder<TemplateMemberSpec>.Rent();
 

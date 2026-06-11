@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -176,12 +177,20 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
         private static void AnalyzeAuthoringType(SymbolAnalysisContext context)
         {
-            if (context.Symbol is not INamedTypeSymbol authoringSymbol)
-                return;
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
 
-            var authorAttrib = GetAttribute(authoringSymbol, AUTHOR_DATABASE_ATTRIBUTE);
-            if (authorAttrib == null)
+            if (context.Symbol is not INamedTypeSymbol authoringSymbol)
+            {
                 return;
+            }
+
+            var authorAttrib = authoringSymbol.GetAttribute(AUTHOR_DATABASE_ATTRIBUTE, token);
+
+            if (authorAttrib == null)
+            {
+                return;
+            }
 
             if (authorAttrib.ConstructorArguments.Length != 1
                 || authorAttrib.ConstructorArguments[0].Kind != TypedConstantKind.Type
@@ -191,7 +200,7 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 return;
             }
 
-            var dbAttrib = GetAttribute(databaseSymbol, DATABASE_ATTRIBUTE);
+            var dbAttrib = databaseSymbol.GetAttribute(DATABASE_ATTRIBUTE, token);
 
             if (dbAttrib != null)
             {
@@ -199,6 +208,8 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
                 foreach (var arg in dbAttrib.ConstructorArguments)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (arg.Kind == TypedConstantKind.Array)
                     {
                         ValidateConverterMapArguments(context, arg.Values, dbAttrib, dbConverterMap, 0);
@@ -207,19 +218,30 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             foreach (var member in databaseSymbol.GetMembers())
             {
-                if (member is not IPropertySymbol property)
-                    continue;
+                token.ThrowIfCancellationRequested();
 
-                var tableAttrib = GetAttribute(member, TABLE_ATTRIBUTE);
-                if (tableAttrib == null)
+                if (member is not IPropertySymbol property)
+                {
                     continue;
+                }
+
+                var tableAttrib = member.GetAttribute(TABLE_ATTRIBUTE, token);
+
+                if (tableAttrib == null)
+                {
+                    continue;
+                }
 
                 var tableConverterMap = new Dictionary<string, INamedTypeSymbol>(System.StringComparer.Ordinal);
 
                 foreach (var arg in tableAttrib.ConstructorArguments)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (arg.Kind == TypedConstantKind.Array)
                     {
                         ValidateConverterMapArguments(context, arg.Values, tableAttrib, tableConverterMap, 2);
@@ -236,12 +258,17 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
         private static void ValidateDataMembers(SymbolAnalysisContext context, INamedTypeSymbol tableType)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             var visited = new HashSet<string>(System.StringComparer.Ordinal);
             var queue = new Queue<INamedTypeSymbol>();
             queue.Enqueue(tableType);
 
             while (queue.Count > 0)
             {
+                token.ThrowIfCancellationRequested();
+
                 var type = queue.Dequeue();
                 var fullName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
@@ -254,6 +281,8 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
                 foreach (var member in type.GetMembers())
                 {
+                    token.ThrowIfCancellationRequested();
+
                     ITypeSymbol memberType;
 
                     if (member is IPropertySymbol prop)
@@ -269,14 +298,16 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                         continue;
                     }
 
-                    var converterAttrib = GetAttribute(member, DATA_AUTHORING_CONVERTER_ATTRIBUTE);
+                    var converterAttrib = member.GetAttribute(DATA_AUTHORING_CONVERTER_ATTRIBUTE, token);
 
                     if (converterAttrib != null)
                     {
                         ValidateMemberConverter(context, converterAttrib, memberType);
                     }
 
-                    if (memberType is INamedTypeSymbol namedMemberType && IsImplementingIData(namedMemberType))
+                    if (memberType is INamedTypeSymbol namedMemberType
+                        && namedMemberType.ImplementsInterface(IDATA, false, token)
+                    )
                     {
                         queue.Enqueue(namedMemberType);
                     }
@@ -318,13 +349,20 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             , int offset
         )
         {
-            if (values.IsDefaultOrEmpty)
-                return;
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
 
-            var syntax = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken);
+            if (values.IsDefaultOrEmpty)
+            {
+                return;
+            }
+
+            var syntax = attrib.ApplicationSyntaxReference?.GetSyntax(token);
 
             for (var i = 0; i < values.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (values[i].Value is not INamedTypeSymbol converterType)
                 {
                     if (syntax != null)
@@ -335,14 +373,19 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                             , offset + i
                         ));
                     }
+
                     continue;
                 }
 
                 if (ValidateConverterType(context, converterType, syntax, returnType: null) == false)
+                {
                     continue;
+                }
 
-                if (TryFindConvertReturnType(converterType, out var returnTypeName) == false)
+                if (TryFindConvertReturnType(converterType, out var returnTypeName, token) == false)
+                {
                     continue;
+                }
 
                 if (converterMap.TryGetValue(returnTypeName, out var existing))
                 {
@@ -365,10 +408,18 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             }
         }
 
-        private static bool TryFindConvertReturnType(INamedTypeSymbol converterType, out string returnTypeName)
+        private static bool TryFindConvertReturnType(
+              INamedTypeSymbol converterType
+            , out string returnTypeName
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var member in converterType.GetMembers("Convert"))
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is IMethodSymbol method
                     && method.DeclaredAccessibility == Accessibility.Public
                     && method.IsGenericMethod == false
@@ -385,7 +436,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             return false;
         }
 
-        /// <returns><c>true</c> if the converter type is structurally valid; <c>false</c> if a diagnostic was reported.</returns>
         private static bool ValidateConverterType(
               SymbolAnalysisContext context
             , INamedTypeSymbol converterType
@@ -393,6 +443,9 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             , ITypeSymbol returnType
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             var location = reportSyntax?.GetLocation() ?? Location.None;
 
             if (converterType.IsAbstract)
@@ -413,6 +466,8 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
                 foreach (var ctor in converterType.GetMembers(".ctor"))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (ctor is IMethodSymbol m
                         && m.DeclaredAccessibility == Accessibility.Public
                         && m.Parameters.Length == 0
@@ -430,6 +485,8 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             IMethodSymbol staticMethod = null;
             IMethodSymbol instanceMethod = null;
             var multipleStatic = false;
@@ -437,6 +494,8 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
 
             foreach (var member in converterType.GetMembers("Convert"))
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.IsGenericMethod
                     || method.DeclaredAccessibility != Accessibility.Public
@@ -526,29 +585,6 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             }
 
             return true;
-        }
-
-
-        private static AttributeData GetAttribute(ISymbol symbol, string fullMetadataName)
-        {
-            foreach (var attrib in symbol.GetAttributes())
-            {
-                if (attrib.AttributeClass?.HasFullName(fullMetadataName) == true)
-                    return attrib;
-            }
-
-            return null;
-        }
-
-        private static bool IsImplementingIData(INamedTypeSymbol symbol)
-        {
-            foreach (var iface in symbol.AllInterfaces)
-            {
-                if (iface.HasFullName(IDATA))
-                    return true;
-            }
-
-            return false;
         }
     }
 }

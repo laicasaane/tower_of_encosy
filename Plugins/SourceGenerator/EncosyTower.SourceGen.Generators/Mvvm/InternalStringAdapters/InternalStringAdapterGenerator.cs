@@ -33,7 +33,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var obsCandidatesProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -118,7 +118,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
+            if (context.SemanticModel.Compilation.IsValidCompilation(token, NAMESPACE, SKIP_ATTRIBUTE) == false)
             {
                 return default;
             }
@@ -148,7 +148,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(token, NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.TargetSymbol is not IMethodSymbol methodSymbol
                 || methodSymbol.Parameters.Length != 1
                 || methodSymbol.Parameters[0].Type is not ITypeSymbol typeSymbol
@@ -167,7 +167,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false)
+            if (context.SemanticModel.Compilation.IsValidCompilation(token, NAMESPACE, SKIP_ATTRIBUTE) == false)
             {
                 return default;
             }
@@ -217,7 +217,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.SemanticModel.Compilation.IsValidCompilation(NAMESPACE, SKIP_ATTRIBUTE) == false
+            if (context.SemanticModel.Compilation.IsValidCompilation(token, NAMESPACE, SKIP_ATTRIBUTE) == false
                 || context.TargetSymbol is not INamedTypeSymbol declaredSymbol
             )
             {
@@ -228,6 +228,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             foreach (var iface in declaredSymbol.AllInterfaces)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (iface.Name == "IAdapter"
                     && iface.ContainingNamespace is { Name: "ViewBinding" } ns1
                     && ns1.ContainingNamespace is { Name: "Mvvm" } ns2
@@ -247,6 +249,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.InternalStringAdapters
 
             foreach (var attribute in context.Attributes)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attribute.ConstructorArguments.Length != 2)
                 {
                     continue;

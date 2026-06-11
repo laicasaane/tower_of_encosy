@@ -128,7 +128,7 @@ namespace EncosyTower.SourceGen
                     SymbolDisplayMiscellaneousOptions.UseSpecialTypes
             );
 
-        public static bool IsType(this ITypeSymbol symbol, string fullyQualifiedName)
+        public static bool IsType(this ITypeSymbol symbol, string fullyQualifiedName, CancellationToken token = default)
         {
             if (symbol is null)
             {
@@ -136,11 +136,13 @@ namespace EncosyTower.SourceGen
             }
 
             fullyQualifiedName = PrependGlobalIfMissing(fullyQualifiedName);
-            return symbol.HasFullName(fullyQualifiedName);
+            return symbol.HasFullName(fullyQualifiedName, token);
         }
 
-        public static void GetUnmanagedSize(this ITypeSymbol symbol, ref int size)
+        public static void GetUnmanagedSize(this ITypeSymbol symbol, ref int size, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol == null)
             {
                 return;
@@ -203,7 +205,7 @@ namespace EncosyTower.SourceGen
 
             if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsEnumType())
             {
-                GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
+                GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size, token);
                 return;
             }
 
@@ -214,15 +216,19 @@ namespace EncosyTower.SourceGen
 
             foreach (var field in symbol.GetMembers().OfType<IFieldSymbol>())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (field.IsStatic == false && field.IsConst == false)
                 {
-                    GetUnmanagedSize(field, ref size);
+                    GetUnmanagedSize(field, ref size, token);
                 }
             }
         }
 
-        public static void GetUnmanagedSize(this IFieldSymbol field, ref int size)
+        public static void GetUnmanagedSize(this IFieldSymbol field, ref int size, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (field == null || field.Type is not { } type)
             {
                 return;
@@ -285,7 +291,7 @@ namespace EncosyTower.SourceGen
 
             if (type is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsEnumType())
             {
-                GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size);
+                GetUnmanagedSize(namedTypeSymbol.EnumUnderlyingType, ref size, token);
                 return;
             }
 
@@ -297,7 +303,7 @@ namespace EncosyTower.SourceGen
             if (field.IsFixedSizeBuffer && type is IPointerTypeSymbol pointerType)
             {
                 var pointedAtTypeSize = 0;
-                GetUnmanagedSize(pointerType.PointedAtType, ref pointedAtTypeSize);
+                GetUnmanagedSize(pointerType.PointedAtType, ref pointedAtTypeSize, token);
                 size += field.FixedSize * pointedAtTypeSize;
 
                 return;
@@ -305,9 +311,11 @@ namespace EncosyTower.SourceGen
 
             foreach (var nestedField in type.GetMembers().OfType<IFieldSymbol>())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (nestedField.IsStatic == false && nestedField.IsConst == false)
                 {
-                    GetUnmanagedSize(nestedField, ref size);
+                    GetUnmanagedSize(nestedField, ref size, token);
                 }
             }
         }
@@ -330,7 +338,12 @@ namespace EncosyTower.SourceGen
         public static string ToSimpleNoSpecialTypeValidIdentifier(this ITypeSymbol symbol)
             => symbol.ToDisplayString(SimpleNoSpecialTypeFormat).ToValidIdentifier();
 
-        public static bool ImplementsInterface(this ISymbol symbol, string interfaceName, bool onlySelf = false)
+        public static bool ImplementsInterface(
+              this ISymbol symbol
+            , string interfaceName
+            , bool onlySelf = false
+            , CancellationToken token = default
+        )
         {
             if (symbol is not ITypeSymbol typeSymbol)
             {
@@ -340,14 +353,20 @@ namespace EncosyTower.SourceGen
             interfaceName = PrependGlobalIfMissing(interfaceName);
 
             return onlySelf
-                ? InterfacesImplementInterface(typeSymbol.Interfaces, interfaceName)
-                : AllInterfacesImplementInterface(typeSymbol.AllInterfaces, interfaceName);
+                ? InterfacesImplementInterface(typeSymbol.Interfaces, interfaceName, token)
+                : AllInterfacesImplementInterface(typeSymbol.AllInterfaces, interfaceName, token);
 
-            static bool InterfacesImplementInterface(ImmutableArray<INamedTypeSymbol> interfaces, string interfaceName)
+            static bool InterfacesImplementInterface(
+                  ImmutableArray<INamedTypeSymbol> interfaces
+                , string interfaceName
+                , CancellationToken token
+            )
             {
                 foreach (var @interface in interfaces)
                 {
-                    if (@interface.HasFullName(interfaceName))
+                    token.ThrowIfCancellationRequested();
+
+                    if (@interface.HasFullName(interfaceName, token))
                     {
                         return true;
                     }
@@ -356,11 +375,19 @@ namespace EncosyTower.SourceGen
                 return false;
             }
 
-            static bool AllInterfacesImplementInterface(ImmutableArray<INamedTypeSymbol> interfaces, string interfaceName)
+            static bool AllInterfacesImplementInterface(
+                  ImmutableArray<INamedTypeSymbol> interfaces
+                , string interfaceName
+                , CancellationToken token
+            )
             {
                 foreach (var @interface in interfaces)
                 {
-                    if (@interface.HasFullName(interfaceName) || @interface.InheritsFromInterface(interfaceName))
+                    token.ThrowIfCancellationRequested();
+
+                    if (@interface.HasFullName(interfaceName, token)
+                        || @interface.InheritsFromInterface(interfaceName, token: token)
+                    )
                     {
                         return true;
                     }
@@ -370,35 +397,15 @@ namespace EncosyTower.SourceGen
             }
         }
 
-        public static bool Is(this ITypeSymbol symbol, string nameSpace, string typeName, bool checkBaseType = true)
+        public static bool InheritsFromInterface(
+              this ITypeSymbol symbol
+            , string interfaceName
+            , bool checkBaseType = true
+            , CancellationToken token = default
+        )
         {
-            if (symbol is null)
-            {
-                return false;
-            }
+            token.ThrowIfCancellationRequested();
 
-            if (symbol.Name == typeName && symbol.ContainingNamespace?.Name == nameSpace)
-            {
-                return true;
-            }
-
-            return checkBaseType && symbol.BaseType.Is(nameSpace, typeName);
-        }
-
-        public static ITypeSymbol GetSymbolType(this ISymbol symbol)
-        {
-            return symbol switch {
-                ILocalSymbol localSymbol => localSymbol.Type,
-                IParameterSymbol parameterSymbol => parameterSymbol.Type,
-                INamedTypeSymbol namedTypeSymbol => namedTypeSymbol,
-                IMethodSymbol methodSymbol => methodSymbol.ContainingType,
-                IPropertySymbol propertySymbol => propertySymbol.ContainingType,
-                _ => throw new InvalidOperationException($"Unknown typeSymbol type {symbol.GetType()}")
-            };
-        }
-
-        public static bool InheritsFromInterface(this ITypeSymbol symbol, string interfaceName, bool checkBaseType = true)
-        {
             if (symbol is null)
             {
                 return false;
@@ -408,7 +415,9 @@ namespace EncosyTower.SourceGen
 
             foreach (var @interface in symbol.Interfaces)
             {
-                if (@interface.HasFullName(interfaceName))
+                token.ThrowIfCancellationRequested();
+
+                if (@interface.HasFullName(interfaceName, token))
                 {
                     return true;
                 }
@@ -417,12 +426,14 @@ namespace EncosyTower.SourceGen
                 {
                     foreach (var baseInterface in @interface.AllInterfaces)
                     {
-                        if (baseInterface.HasFullName(interfaceName))
+                        token.ThrowIfCancellationRequested();
+
+                        if (baseInterface.HasFullName(interfaceName, token))
                         {
                             return true;
                         }
 
-                        if (baseInterface.InheritsFromInterface(interfaceName))
+                        if (baseInterface.InheritsFromInterface(interfaceName, token: token))
                         {
                             return true;
                         }
@@ -430,9 +441,11 @@ namespace EncosyTower.SourceGen
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             if (checkBaseType && symbol.BaseType != null)
             {
-                if (symbol.BaseType.InheritsFromInterface(interfaceName))
+                if (symbol.BaseType.InheritsFromInterface(interfaceName, token: token))
                 {
                     return true;
                 }
@@ -466,7 +479,11 @@ namespace EncosyTower.SourceGen
             return false;
         }
 
-        public static bool HasAttribute(this ISymbol symbol, string fullyQualifiedAttributeName)
+        public static bool HasAttribute(
+              this ISymbol symbol
+            , string fullyQualifiedAttributeName
+            , CancellationToken token = default
+        )
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
@@ -474,7 +491,9 @@ namespace EncosyTower.SourceGen
 
             foreach (var attribute in attributes)
             {
-                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName))
+                token.ThrowIfCancellationRequested();
+
+                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName, token))
                 {
                     return true;
                 }
@@ -483,23 +502,38 @@ namespace EncosyTower.SourceGen
             return false;
         }
 
-        public static bool TryGetAttribute(this ISymbol symbol, string fullyQualifiedAttributeName, out AttributeData result)
+        public static bool TryGetAttribute(
+              this ISymbol symbol
+            , string fullyQualifiedAttributeName
+            , out AttributeData result
+            , CancellationToken token = default
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            result = symbol.GetAttribute(fullyQualifiedAttributeName);
+            result = symbol.GetAttribute(fullyQualifiedAttributeName, token);
             return result != null;
         }
 
-        public static AttributeData GetAttribute(this ISymbol symbol, string fullyQualifiedAttributeName)
+        public static AttributeData GetAttribute(
+              this ISymbol symbol
+            , string fullyQualifiedAttributeName
+            , CancellationToken token = default
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
             var attributes = symbol.GetAttributes();
 
             foreach (var attribute in attributes)
             {
-                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName))
+                token.ThrowIfCancellationRequested();
+
+                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName, token))
                 {
                     return attribute;
                 }
@@ -508,44 +542,74 @@ namespace EncosyTower.SourceGen
             return default;
         }
 
-        public static IEnumerable<AttributeData> GetAttributes(this ISymbol symbol, string fullyQualifiedAttributeName)
+        public static IEnumerable<AttributeData> GetAttributes(
+              this ISymbol symbol
+            , string fullyQualifiedAttributeName
+            , CancellationToken token = default
+        )
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            return symbol.GetAttributes()
-                .Where(attribute => attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName));
+            foreach (var attribute in symbol.GetAttributes())
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (attribute.AttributeClass.HasFullName(fullyQualifiedAttributeName, token))
+                {
+                    yield return attribute;
+                }
+            }
         }
 
         public static IEnumerable<AttributeData> GetAttributes(
               this ISymbol symbol
             , string fullyQualifiedAttributeName1
             , string fullyQualifiedAttributeName2
+            , CancellationToken token = default
         )
         {
             fullyQualifiedAttributeName1 = PrependGlobalIfMissing(fullyQualifiedAttributeName1);
             fullyQualifiedAttributeName2 = PrependGlobalIfMissing(fullyQualifiedAttributeName2);
 
-            return symbol.GetAttributes()
-                .Where(attribute => {
-                    var attrClass = attribute.AttributeClass;
-                    return attrClass.HasFullName(fullyQualifiedAttributeName1) || attrClass.HasFullName(fullyQualifiedAttributeName2);
-                });
+            foreach (var attribute in symbol.GetAttributes())
+            {
+                token.ThrowIfCancellationRequested();
+
+                var attrClass = attribute.AttributeClass;
+
+                if (attrClass.HasFullName(fullyQualifiedAttributeName1, token)
+                    || attrClass.HasFullName(fullyQualifiedAttributeName2, token)
+                )
+                {
+                    yield return attribute;
+                }
+            }
         }
 
-        public static bool HasAttributeOrFieldWithAttribute(this ITypeSymbol symbol, string fullyQualifiedAttributeName)
+        public static bool HasAttributeOrFieldWithAttribute(
+              this ITypeSymbol symbol
+            , string fullyQualifiedAttributeName
+            , CancellationToken token = default
+        )
         {
             fullyQualifiedAttributeName = PrependGlobalIfMissing(fullyQualifiedAttributeName);
 
-            return symbol.HasAttribute(fullyQualifiedAttributeName)
+            return symbol.HasAttribute(fullyQualifiedAttributeName, token)
                 || AnyValidField(symbol.GetMembers(), fullyQualifiedAttributeName);
 
-            static bool AnyValidField(ImmutableArray<ISymbol> members, string fullyQualifiedAttributeName)
+            static bool AnyValidField(
+                  ImmutableArray<ISymbol> members
+                , string fullyQualifiedAttributeName
+                , CancellationToken token = default
+            )
             {
                 foreach (var member in members)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member is IFieldSymbol field
                         && field.IsStatic == false
-                        && field.Type.HasAttributeOrFieldWithAttribute(fullyQualifiedAttributeName)
+                        && field.Type.HasAttributeOrFieldWithAttribute(fullyQualifiedAttributeName, token)
                     )
                     {
                         return true;
@@ -567,10 +631,16 @@ namespace EncosyTower.SourceGen
         /// <param name="symbol">The input <see cref="ISymbol"/> instance to check.</param>
         /// <param name="typeSymbol">The <see cref="ITypeSymbol"/> instance for the attribute type to look for.</param>
         /// <returns>Whether or not <paramref name="symbol"/> has an attribute with the specified type.</returns>
-        public static bool HasAttributeWithType(this ISymbol symbol, ITypeSymbol typeSymbol)
+        public static bool HasAttributeWithType(
+              this ISymbol symbol
+            , ITypeSymbol typeSymbol
+            , CancellationToken token = default
+        )
         {
             foreach (AttributeData attribute in symbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, typeSymbol))
                 {
                     return true;
@@ -585,13 +655,16 @@ namespace EncosyTower.SourceGen
             , string startWith
             , int genericArgumentCount
             , out INamedTypeSymbol result
+            , CancellationToken token = default
         )
         {
             var baseType = symbol;
 
             while (baseType != null)
             {
-                if (baseType.HasFullNamePrefix(startWith)
+                token.ThrowIfCancellationRequested();
+
+                if (baseType.HasFullNamePrefix(startWith, token)
                     && baseType.TypeArguments.Length == genericArgumentCount
                 )
                 {
@@ -612,13 +685,16 @@ namespace EncosyTower.SourceGen
             , int genericArgumentCount
             , out INamedTypeSymbol result
             , out string fullTypeName
+            , CancellationToken token = default
         )
         {
             var baseType = symbol;
 
             while (baseType != null)
             {
-                if (baseType.HasFullNamePrefix(startWith)
+                token.ThrowIfCancellationRequested();
+
+                if (baseType.HasFullNamePrefix(startWith, token)
                     && baseType.TypeArguments.Length == genericArgumentCount
                 )
                 {
@@ -640,13 +716,16 @@ namespace EncosyTower.SourceGen
             , string startWith
             , int genericArgumentCount
             , out INamedTypeSymbol result
+            , CancellationToken token = default
         )
         {
             var baseType = symbol.ContainingType;
 
             while (baseType != null)
             {
-                if (baseType.HasFullNamePrefix(startWith)
+                token.ThrowIfCancellationRequested();
+
+                if (baseType.HasFullNamePrefix(startWith, token)
                     && baseType.TypeArguments.Length == genericArgumentCount
                 )
                 {
@@ -667,19 +746,22 @@ namespace EncosyTower.SourceGen
             , int genericArgumentCount1
             , int genericArgumentCount2
             , out INamedTypeSymbol result
+            , CancellationToken token = default
         )
         {
             var baseType = symbol;
 
             while (baseType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 var typeArguments = baseType.TypeArguments;
 
                 if (typeArguments.Length == genericArgumentCount1
                     || typeArguments.Length == genericArgumentCount2
                 )
                 {
-                    if (baseType.HasFullNamePrefix(startWith))
+                    if (baseType.HasFullNamePrefix(startWith, token))
                     {
                         result = baseType;
                         return true;
@@ -761,6 +843,8 @@ namespace EncosyTower.SourceGen
                 , in ImmutableArrayBuilder<AttributeInfo> propertyAttributesInfo
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 if (symbol.DeclaringSyntaxReferences.Length != 1
                     || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
                 )
@@ -775,6 +859,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (AttributeListSyntax attributeList in methodDeclaration.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList.Target == null
                         || attributeList.Target.Identifier.Kind() is not (SyntaxKind.PropertyKeyword or SyntaxKind.FieldKeyword)
                     )
@@ -784,6 +870,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (semanticModel.GetSymbolInfo(attribute, token)
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
@@ -844,6 +932,8 @@ namespace EncosyTower.SourceGen
                 , in ImmutableArrayBuilder<AttributeInfo> propertyAttributesInfo
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 if (symbol.DeclaringSyntaxReferences.Length != 1
                     || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
                 )
@@ -860,6 +950,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (AttributeListSyntax attributeList in fieldDeclaration.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList.Target == null
                         || attributeList.Target.Identifier.Kind() is not SyntaxKind.PropertyKeyword
                     )
@@ -869,6 +961,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (semanticModel.GetSymbolInfo(attribute, token)
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
@@ -922,6 +1016,8 @@ namespace EncosyTower.SourceGen
                 , in ImmutableArrayBuilder<(string, AttributeInfo)> propertyAttributesInfo
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 if (symbol.DeclaringSyntaxReferences.Length != 1
                     || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
                 )
@@ -938,6 +1034,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (AttributeListSyntax attributeList in fieldDeclaration.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList.Target == null
                         || attributeList.Target.Identifier.Kind() is not SyntaxKind.PropertyKeyword
                     )
@@ -947,6 +1045,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (semanticModel.GetSymbolInfo(attribute, token)
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
@@ -1001,6 +1101,8 @@ namespace EncosyTower.SourceGen
                 , in ImmutableArrayBuilder<(string, AttributeInfo)> fieldAttributesInfo
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 if (symbol.DeclaringSyntaxReferences.Length != 1
                     || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
                 )
@@ -1017,6 +1119,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (AttributeListSyntax attributeList in propDeclaration.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList.Target == null
                         || attributeList.Target.Identifier.Kind() is not SyntaxKind.FieldKeyword
                     )
@@ -1026,6 +1130,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (semanticModel.GetSymbolInfo(attribute, token)
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
@@ -1075,6 +1181,8 @@ namespace EncosyTower.SourceGen
                 , string attributeFullyQualifiedTypeName
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 if (symbol.DeclaringSyntaxReferences.Length != 1
                     || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
                 )
@@ -1091,6 +1199,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (AttributeListSyntax attributeList in fieldDeclaration.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList.Target != null
                         && attributeList.Target.Identifier.Kind() is not SyntaxKind.FieldDeclaration
                     )
@@ -1100,6 +1210,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (semanticModel.GetSymbolInfo(attribute, token)
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
@@ -1108,7 +1220,7 @@ namespace EncosyTower.SourceGen
                         }
 
                         if (string.IsNullOrEmpty(attributeFullyQualifiedTypeName) == false
-                            && attributeTypeSymbol.HasFullName(attributeFullyQualifiedTypeName) == false
+                            && attributeTypeSymbol.HasFullName(attributeFullyQualifiedTypeName, token) == false
                         )
                         {
                             continue;
@@ -1156,6 +1268,8 @@ namespace EncosyTower.SourceGen
                 , string attributeFullyQualifiedTypeName
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 if (symbol.DeclaringSyntaxReferences.Length != 1
                     || symbol.DeclaringSyntaxReferences[0] is not SyntaxReference syntaxReference
                 )
@@ -1172,6 +1286,8 @@ namespace EncosyTower.SourceGen
 
                 foreach (AttributeListSyntax attributeList in propDeclaration.AttributeLists)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (attributeList.Target != null
                         && attributeList.Target.Identifier.Kind() is not SyntaxKind.PropertyKeyword
                     )
@@ -1181,6 +1297,8 @@ namespace EncosyTower.SourceGen
 
                     foreach (AttributeSyntax attribute in attributeList.Attributes)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (semanticModel.GetSymbolInfo(attribute, token)
                             .TryGetAttributeTypeSymbol(out INamedTypeSymbol attributeTypeSymbol) == false
                         )
@@ -1189,7 +1307,7 @@ namespace EncosyTower.SourceGen
                         }
 
                         if (string.IsNullOrEmpty(attributeFullyQualifiedTypeName) == false
-                            && attributeTypeSymbol.HasFullName(attributeFullyQualifiedTypeName) == false
+                            && attributeTypeSymbol.HasFullName(attributeFullyQualifiedTypeName, token) == false
                         )
                         {
                             continue;
@@ -1213,13 +1331,18 @@ namespace EncosyTower.SourceGen
         /// Gathers all attributes on a symbol.
         /// </summary>
         /// <param name="symbol">The input <see cref="ISymbol"/> instance to process.</param>
-        public static ImmutableArray<AttributeInfo> GatherAttributes(this ISymbol symbol)
+        public static ImmutableArray<AttributeInfo> GatherAttributes(
+              this ISymbol symbol
+            , CancellationToken token = default
+        )
         {
             using var attributesArrayBuilder = ImmutableArrayBuilder<AttributeInfo>.Rent();
             var candidates = symbol.GetAttributes();
 
             foreach (var candidate in candidates)
             {
+                token.ThrowIfCancellationRequested();
+
                 var attributeInfo = AttributeInfo.From(candidate);
                 attributesArrayBuilder.Add(attributeInfo);
             }
@@ -1227,13 +1350,19 @@ namespace EncosyTower.SourceGen
             return attributesArrayBuilder.ToImmutable();
         }
 
-        public static bool DoesMatchInterface(in this ImmutableArray<INamedTypeSymbol> interfaces, string typeName)
+        public static bool DoesMatchInterface(
+              in this ImmutableArray<INamedTypeSymbol> interfaces
+            , string typeName
+            , CancellationToken token = default
+        )
         {
             typeName = PrependGlobalIfMissing(typeName);
 
             foreach (var interfaceSymbol in interfaces)
             {
-                if (Match(interfaceSymbol, typeName))
+                token.ThrowIfCancellationRequested();
+
+                if (Match(interfaceSymbol, typeName, token))
                 {
                     return true;
                 }
@@ -1241,10 +1370,12 @@ namespace EncosyTower.SourceGen
 
             return false;
 
-            static bool Match(ITypeSymbol symbol, string typeName)
+            static bool Match(ITypeSymbol symbol, string typeName, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
+
                 return symbol is not null
-                    && (symbol.HasFullName(typeName) || Match(symbol.BaseType, typeName));
+                    && (symbol.HasFullName(typeName, token) || Match(symbol.BaseType, typeName, token));
             }
         }
 
@@ -1261,8 +1392,10 @@ namespace EncosyTower.SourceGen
             return symbol;
         }
 
-        public static MemberExistence FindTryParseSpan(this ITypeSymbol symbol)
+        public static MemberExistence FindTryParseSpan(this ITypeSymbol symbol, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol.IsEnumType())
             {
                 return new(true, true, false, 4);
@@ -1295,7 +1428,7 @@ namespace EncosyTower.SourceGen
                         && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
                     )
                     {
-                        var (doestExist, isStatic, _, paramCount) = FindTryParseSpan(typeArgument);
+                        var (doestExist, isStatic, _, paramCount) = FindTryParseSpan(typeArgument, token);
                         return new(doestExist, isStatic, true, paramCount);
                     }
 
@@ -1303,10 +1436,14 @@ namespace EncosyTower.SourceGen
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var members = symbol.GetMembers("TryParse");
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.ReturnType.SpecialType != SpecialType.System_Boolean
@@ -1322,7 +1459,7 @@ namespace EncosyTower.SourceGen
                     continue;
                 }
 
-                if (parameters[0].Type.IsType("global::System.ReadOnlySpan<char>") == false)
+                if (parameters[0].Type.IsType("global::System.ReadOnlySpan<char>", token) == false)
                 {
                     continue;
                 }
@@ -1342,8 +1479,10 @@ namespace EncosyTower.SourceGen
             return default;
         }
 
-        public static MemberExistence FindEquals(this ITypeSymbol symbol)
+        public static MemberExistence FindEquals(this ITypeSymbol symbol, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol.IsEnumType())
             {
                 return new(true, true, false, 1);
@@ -1380,7 +1519,7 @@ namespace EncosyTower.SourceGen
                         && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
                     )
                     {
-                        var (doestExist, isStatic, _, _) = FindEquals(typeArgument);
+                        var (doestExist, isStatic, _, _) = FindEquals(typeArgument, token);
                         return new(doestExist, isStatic, true, 1);
                     }
 
@@ -1388,10 +1527,14 @@ namespace EncosyTower.SourceGen
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var members = symbol.GetMembers("Equals");
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.ReturnType.SpecialType != SpecialType.System_Boolean
@@ -1407,8 +1550,10 @@ namespace EncosyTower.SourceGen
             return default;
         }
 
-        public static MemberExistence FindOpEquality(this ITypeSymbol symbol)
+        public static MemberExistence FindOpEquality(this ITypeSymbol symbol, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol.IsEnumType())
             {
                 return new(true, true, false, 2);
@@ -1445,7 +1590,7 @@ namespace EncosyTower.SourceGen
                         && nullableType.TypeArguments.FirstOrDefault() is { } typeArgument
                     )
                     {
-                        var (doestExist, isStatic, _, _) = FindOpEquality(typeArgument);
+                        var (doestExist, isStatic, _, _) = FindOpEquality(typeArgument, token);
                         return new(doestExist, isStatic, true, 2);
                     }
 
@@ -1453,11 +1598,15 @@ namespace EncosyTower.SourceGen
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             var members = symbol.GetMembers("op_Equality");
             var comparer = SymbolEqualityComparer.Default;
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.IsStatic == false
@@ -1483,8 +1632,10 @@ namespace EncosyTower.SourceGen
             return default;
         }
 
-        public static bool DetermineIEquatable(this ITypeSymbol type)
+        public static bool DetermineIEquatable(this ITypeSymbol type, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             const string IEQUATABLE = "global::System.IEquatable<";
 
             var interfaces = type.AllInterfaces;
@@ -1493,9 +1644,11 @@ namespace EncosyTower.SourceGen
 
             for (var i = 0; i < length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 var iface = interfaces[i];
 
-                if (iface.TryGetGenericType(IEQUATABLE, 1, out var iequatableType)
+                if (iface.TryGetGenericType(IEQUATABLE, 1, out var iequatableType, token)
                     && comparer.Equals(type, iequatableType.TypeArguments[0])
                 )
                 {
@@ -1506,16 +1659,18 @@ namespace EncosyTower.SourceGen
             return false;
         }
 
-        public static Equality DetermineEquality(this ITypeSymbol type)
+        public static Equality DetermineEquality(this ITypeSymbol type, CancellationToken token = default)
         {
-            var (doesExist, isStatic, isNullable, _) = type.FindOpEquality();
+            token.ThrowIfCancellationRequested();
+
+            var (doesExist, isStatic, isNullable, _) = type.FindOpEquality(token);
 
             if (doesExist)
             {
                 return new(EqualityStrategy.Operator, isStatic, isNullable);
             }
 
-            (doesExist, isStatic, isNullable, _) = type.FindEquals();
+            (doesExist, isStatic, isNullable, _) = type.FindEquals(token);
 
             if (doesExist)
             {
@@ -1564,13 +1719,21 @@ namespace EncosyTower.SourceGen
                 && namedType.EnumUnderlyingType is not null;
         }
 
-        public static string GetEnumMemberName(this ITypeSymbol symbol, object rawValue)
+        public static string GetEnumMemberName(
+              this ITypeSymbol symbol
+            , object rawValue
+            , CancellationToken token = default
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var members = symbol.GetMembers();
             var length = members.Length;
 
             for (var i = 0; i < length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (members[i] is IFieldSymbol fieldSymbol
                     && fieldSymbol.IsConst
                     && Equals(fieldSymbol.ConstantValue, rawValue)
@@ -1603,13 +1766,20 @@ namespace EncosyTower.SourceGen
         /// Returns a default (empty) <see cref="EquatableArray{T}"/> when <paramref name="symbol"/>
         /// is not nested inside another type.
         /// </summary>
-        public static EquatableArray<string> GetContainingTypes(this INamedTypeSymbol symbol)
+        public static EquatableArray<string> GetContainingTypes(
+              this INamedTypeSymbol symbol
+            , CancellationToken token = default
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             using var builder = ImmutableArrayBuilder<string>.Rent();
             var containingType = symbol.ContainingType;
 
             while (containingType != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 builder.Add($"{containingType.DeclaredAccessibility.ToKeyword()} partial {containingType.ToPartialTypeKeyword()} {containingType.Name}");
                 containingType = containingType.ContainingType;
             }
@@ -1625,6 +1795,8 @@ namespace EncosyTower.SourceGen
 
             for (int i = 0; i < innerToOuter.Length; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 outerToInner[i] = innerToOuter[innerToOuter.Length - 1 - i];
             }
 
@@ -1635,8 +1807,14 @@ namespace EncosyTower.SourceGen
         /// Checks whether the type symbol has the given fully qualified name without allocating an intermediate string.
         /// For names containing generic arguments (e.g. <c>List&lt;int&gt;</c>), falls back to <see cref="ToFullName"/>.
         /// </summary>
-        public static bool HasFullName(this ITypeSymbol symbol, string fullyQualifiedName)
+        public static bool HasFullName(
+              this ITypeSymbol symbol
+            , string fullyQualifiedName
+            , CancellationToken token = default
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol is null || fullyQualifiedName is null)
             {
                 return false;
@@ -1657,7 +1835,7 @@ namespace EncosyTower.SourceGen
                 span = span.Slice(8);
             }
 
-            return MatchesQualifiedSpan(symbol, span);
+            return MatchesQualifiedSpan(symbol, span, token);
         }
 
         /// <summary>
@@ -1670,8 +1848,10 @@ namespace EncosyTower.SourceGen
         /// the preceding segments are matched as the containing namespace.
         /// </para>
         /// </summary>
-        public static bool HasFullNamePrefix(this ITypeSymbol symbol, string prefix)
+        public static bool HasFullNamePrefix(this ITypeSymbol symbol, string prefix, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol is null || prefix is null)
             {
                 return false;
@@ -1696,7 +1876,7 @@ namespace EncosyTower.SourceGen
                 // e.g. "System.Collections.Generic.Dictionary<" — match the base type name exactly
                 // and verify the symbol has at least one type argument.
                 var namePart = span.Slice(0, indexOfAngle);
-                return MatchesQualifiedSpan(symbol, namePart)
+                return MatchesQualifiedSpan(symbol, namePart, token)
                     && symbol is INamedTypeSymbol named
                     && named.TypeArguments.Length > 0;
             }
@@ -1717,12 +1897,18 @@ namespace EncosyTower.SourceGen
             }
 
             return symbol.ContainingType != null
-                ? MatchesQualifiedSpan(symbol.ContainingType, nsPart)
-                : MatchesNamespaceSpan(symbol.ContainingNamespace, nsPart);
+                ? MatchesQualifiedSpan(symbol.ContainingType, nsPart, token)
+                : MatchesNamespaceSpan(symbol.ContainingNamespace, nsPart, token);
         }
 
-        private static bool MatchesQualifiedSpan(ITypeSymbol symbol, ReadOnlySpan<char> remaining)
+        private static bool MatchesQualifiedSpan(
+              ITypeSymbol symbol
+            , ReadOnlySpan<char> remaining
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             if (symbol is null)
             {
                 return false;
@@ -1735,6 +1921,8 @@ namespace EncosyTower.SourceGen
 
             for (int i = remaining.Length - 1; i >= 0; i--)
             {
+                token.ThrowIfCancellationRequested();
+
                 char c = remaining[i];
                 if (c == '>') depth++;
                 else if (c == '<') depth--;
@@ -1759,12 +1947,18 @@ namespace EncosyTower.SourceGen
             }
 
             return symbol.ContainingType != null
-                ? MatchesQualifiedSpan(symbol.ContainingType, prefixPart)
-                : MatchesNamespaceSpan(symbol.ContainingNamespace, prefixPart);
+                ? MatchesQualifiedSpan(symbol.ContainingType, prefixPart, token)
+                : MatchesNamespaceSpan(symbol.ContainingNamespace, prefixPart, token);
         }
 
-        private static bool MatchesNamespaceSpan(INamespaceSymbol ns, ReadOnlySpan<char> remaining)
+        private static bool MatchesNamespaceSpan(
+              INamespaceSymbol ns
+            , ReadOnlySpan<char> remaining
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             if (ns == null || ns.IsGlobalNamespace)
             {
                 return remaining.IsEmpty;
@@ -1789,7 +1983,7 @@ namespace EncosyTower.SourceGen
                 return ns.ContainingNamespace?.IsGlobalNamespace == true;
             }
 
-            return MatchesNamespaceSpan(ns.ContainingNamespace, prefixPart);
+            return MatchesNamespaceSpan(ns.ContainingNamespace, prefixPart, token);
         }
     }
 }

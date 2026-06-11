@@ -44,31 +44,37 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
         /// <inheritdoc/>
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (Diagnostic diagnostic in context.ReportedDiagnostics)
             {
-                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken)
+                token.ThrowIfCancellationRequested();
+
+                var syntaxNode = diagnostic.Location.SourceTree?.GetRoot(token)
                     .FindNode(diagnostic.Location.SourceSpan);
 
                 // Check that the target is effectively [field:] or [property:] over a method declaration,
                 // which is the case we're looking for
-                if (syntaxNode is AttributeTargetSpecifierSyntax attributeTarget
-                    && attributeTarget.Parent.Parent is MethodDeclarationSyntax methodDeclaration
-                    && attributeTarget.Identifier.Kind() is (SyntaxKind.FieldKeyword or SyntaxKind.PropertyKeyword)
+                if (syntaxNode is not AttributeTargetSpecifierSyntax attributeTarget
+                    || attributeTarget.Parent.Parent is not MethodDeclarationSyntax methodDeclaration
+                    || attributeTarget.Identifier.Kind() is not SyntaxKind.FieldKeyword and not SyntaxKind.PropertyKeyword
                 )
                 {
-                    var semanticModel = context.GetSemanticModel(syntaxNode.SyntaxTree);
+                    continue;
+                }
+                var semanticModel = context.GetSemanticModel(syntaxNode.SyntaxTree);
 
-                    // Get the method symbol from the first variable declaration
-                    var declaredSymbol = semanticModel.GetDeclaredSymbol(methodDeclaration, context.CancellationToken);
+                // Get the method symbol from the first variable declaration
+                var declaredSymbol = semanticModel.GetDeclaredSymbol(methodDeclaration, token);
 
-                    // Check if the method is using [RelayCommand], in which case we should suppress the warning
-                    if (declaredSymbol is IMethodSymbol methodSymbol
-                        && semanticModel.Compilation.GetTypeByMetadataName(ATTRIBUTE) is INamedTypeSymbol attribTypeSymbol
-                        && methodSymbol.HasAttributeWithType(attribTypeSymbol)
-                    )
-                    {
-                        context.ReportSuppression(Suppression.Create(FieldOrPropertyAttributeListForRelayCommandMethod, diagnostic));
-                    }
+                // Check if the method is using [RelayCommand], in which case we should suppress the warning
+                if (declaredSymbol is IMethodSymbol methodSymbol
+                    && semanticModel.Compilation.GetTypeByMetadataName(ATTRIBUTE) is INamedTypeSymbol attribTypeSymbol
+                    && methodSymbol.HasAttributeWithType(attribTypeSymbol, token)
+                )
+                {
+                    context.ReportSuppression(Suppression.Create(FieldOrPropertyAttributeListForRelayCommandMethod, diagnostic));
                 }
             }
         }

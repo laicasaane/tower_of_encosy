@@ -109,20 +109,31 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
         private static void AnalyzeNamedType(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
             {
                 return;
             }
 
-            BuildAttributeDirectories(typeSymbol
+            BuildAttributeDirectories(
+                  typeSymbol
                 , out var monoBinderAttr
                 , out var bindingExcludeAttrs
                 , out var binderExcludeParentAttrs
                 , out var firstOrphanAttr
                 , out var firstOrphanAttrName
+                , token
             );
 
-            if (TryReportOrphanBindingAttribute(context, typeSymbol, monoBinderAttr, firstOrphanAttr, firstOrphanAttrName))
+            if (TryReportOrphanBindingAttribute(
+                  context
+                , typeSymbol
+                , monoBinderAttr
+                , firstOrphanAttr
+                , firstOrphanAttrName
+            ))
             {
                 return;
             }
@@ -134,24 +145,23 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 return;
             }
 
-            var excludeObsolete = ReadExcludeObsoleteFlag(monoBinderAttr);
-            var token = context.CancellationToken;
+            var excludeObsolete = ReadExcludeObsoleteFlag(monoBinderAttr, token);
 
-            AnalyzeComponentType(context, typeSymbol, componentType, monoBinderAttr, token);
+            AnalyzeComponentType(context, typeSymbol, componentType, monoBinderAttr);
 
             if (excludeObsolete)
             {
-                AnalyzeObsoleteConflicts(context, typeSymbol, componentType, token);
+                AnalyzeObsoleteConflicts(context, typeSymbol, componentType);
             }
 
             if (binderExcludeParentAttrs is { Count: > 0 })
             {
-                AnalyzeExcludeParent(context, typeSymbol, componentType, binderExcludeParentAttrs, token);
+                AnalyzeExcludeParent(context, typeSymbol, componentType, binderExcludeParentAttrs);
             }
 
             if (bindingExcludeAttrs is { Count: > 0 })
             {
-                AnalyzeExcludedMembers(context, typeSymbol, componentType, bindingExcludeAttrs, token);
+                AnalyzeExcludedMembers(context, typeSymbol, componentType, bindingExcludeAttrs);
             }
         }
 
@@ -162,8 +172,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             , out List<AttributeData> binderExcludeParentAttrs
             , out AttributeData firstOrphanAttr
             , out string firstOrphanAttrName
+            , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             monoBinderAttr = null;
             bindingExcludeAttrs = null;
             binderExcludeParentAttrs = null;
@@ -172,6 +185,8 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
 
             foreach (var attr in typeSymbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 var attrClass = attr.AttributeClass;
 
                 if (attrClass is null)
@@ -179,11 +194,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     continue;
                 }
 
-                if (attrClass.IsType(MONO_BINDER_ATTRIBUTE))
+                if (attrClass.IsType(MONO_BINDER_ATTRIBUTE, token))
                 {
                     monoBinderAttr = attr;
                 }
-                else if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE))
+                else if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE, token))
                 {
                     if (firstOrphanAttr == null)
                     {
@@ -191,7 +206,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         firstOrphanAttrName = "MonoBindingProperty";
                     }
                 }
-                else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE))
+                else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE, token))
                 {
                     if (firstOrphanAttr == null)
                     {
@@ -199,7 +214,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         firstOrphanAttrName = "MonoBindingCommand";
                     }
                 }
-                else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
+                else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE, token))
                 {
                     (bindingExcludeAttrs ??= new List<AttributeData>()).Add(attr);
 
@@ -209,7 +224,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         firstOrphanAttrName = "MonoBindingExclude";
                     }
                 }
-                else if (attrClass.IsType(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE))
+                else if (attrClass.IsType(MONO_BINDER_EXCLUDE_PARENT_ATTRIBUTE, token))
                 {
                     (binderExcludeParentAttrs ??= new List<AttributeData>()).Add(attr);
 
@@ -262,10 +277,14 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return true;
         }
 
-        private static bool ReadExcludeObsoleteFlag(AttributeData monoBinderAttr)
+        private static bool ReadExcludeObsoleteFlag(AttributeData monoBinderAttr, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             foreach (var namedArg in monoBinderAttr.NamedArguments)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (string.Equals(namedArg.Key, "ExcludeObsolete", StringComparison.Ordinal)
                     && namedArg.Value.Value is bool boolValue
                 )
@@ -282,10 +301,12 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             , INamedTypeSymbol typeSymbol
             , INamedTypeSymbol componentType
             , AttributeData monoBinderAttr
-            , CancellationToken token
         )
         {
-            if (InheritsFromUnityObject(componentType))
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
+            if (InheritsFromUnityObject(componentType, token))
             {
                 return;
             }
@@ -304,9 +325,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
               SymbolAnalysisContext context
             , INamedTypeSymbol typeSymbol
             , INamedTypeSymbol componentType
-            , CancellationToken token
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (var attr in typeSymbol.GetAttributes())
             {
                 token.ThrowIfCancellationRequested();
@@ -318,17 +341,17 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     continue;
                 }
 
-                if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE))
+                if (attrClass.IsType(MONO_BINDING_PROP_ATTRIBUTE, token))
                 {
-                    TryReportObsoleteExplicit(context, typeSymbol, componentType, attr, "MonoBindingProperty", token);
+                    TryReportObsoleteExplicit(context, typeSymbol, componentType, attr, "MonoBindingProperty");
                 }
-                else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE))
+                else if (attrClass.IsType(MONO_BINDING_CMD_ATTRIBUTE, token))
                 {
-                    TryReportObsoleteExplicit(context, typeSymbol, componentType, attr, "MonoBindingCommand", token);
+                    TryReportObsoleteExplicit(context, typeSymbol, componentType, attr, "MonoBindingCommand");
                 }
-                else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE))
+                else if (attrClass.IsType(MONO_BINDING_EXCLUDE_ATTRIBUTE, token))
                 {
-                    TryReportObsoleteRedundantExclude(context, typeSymbol, componentType, attr, token);
+                    TryReportObsoleteRedundantExclude(context, typeSymbol, componentType, attr);
                 }
             }
         }
@@ -339,7 +362,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             , INamedTypeSymbol componentType
             , AttributeData attr
             , string attrName
-            , CancellationToken token
         )
         {
             if (attr.ConstructorArguments.Length < 1
@@ -350,13 +372,13 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 return;
             }
 
-            if (IsObsoleteMember(componentType, memberName) == false)
+            if (IsObsoleteMember(componentType, memberName, context.CancellationToken) == false)
             {
                 return;
             }
 
             var location = attr.ApplicationSyntaxReference
-                ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+                ?.GetSyntax(context.CancellationToken)?.GetLocation() ?? typeSymbol.Locations[0];
 
             context.ReportDiagnostic(Diagnostic.Create(
                   ObsoleteExplicitMemberWithExcludeObsolete
@@ -372,7 +394,6 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             , INamedTypeSymbol typeSymbol
             , INamedTypeSymbol componentType
             , AttributeData attr
-            , CancellationToken token
         )
         {
             if (attr.ConstructorArguments.Length < 1
@@ -383,13 +404,13 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                 return;
             }
 
-            if (IsObsoleteMember(componentType, memberName) == false)
+            if (IsObsoleteMember(componentType, memberName, context.CancellationToken) == false)
             {
                 return;
             }
 
             var location = attr.ApplicationSyntaxReference
-                ?.GetSyntax(token)?.GetLocation() ?? typeSymbol.Locations[0];
+                ?.GetSyntax(context.CancellationToken)?.GetLocation() ?? typeSymbol.Locations[0];
 
             context.ReportDiagnostic(Diagnostic.Create(
                   ExcludeObsoleteMemberRedundant
@@ -403,9 +424,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             , INamedTypeSymbol typeSymbol
             , INamedTypeSymbol componentType
             , List<AttributeData> binderExcludeParentAttrs
-            , CancellationToken token
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (var attr in binderExcludeParentAttrs)
             {
                 token.ThrowIfCancellationRequested();
@@ -428,7 +451,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                         , parentType.ToDisplayString()
                     ));
                 }
-                else if (IsInBaseTypeChain(componentType, parentType) == false)
+                else if (IsInBaseTypeChain(componentType, parentType, token) == false)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                           ExcludeParentTypeNotInHierarchy
@@ -445,9 +468,11 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             , INamedTypeSymbol typeSymbol
             , INamedTypeSymbol componentType
             , List<AttributeData> bindingExcludeAttrs
-            , CancellationToken token
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             foreach (var attr in bindingExcludeAttrs)
             {
                 token.ThrowIfCancellationRequested();
@@ -460,7 +485,7 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     continue;
                 }
 
-                if (ComponentHasMember(componentType, excludedName))
+                if (ComponentHasMember(componentType, excludedName, token))
                 {
                     continue;
                 }
@@ -477,13 +502,17 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             }
         }
 
-        private static bool InheritsFromUnityObject(ITypeSymbol type)
+        private static bool InheritsFromUnityObject(ITypeSymbol type, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var walk = type;
 
             while (walk != null)
             {
-                if (walk.IsType(UNITY_OBJECT_TYPE))
+                token.ThrowIfCancellationRequested();
+
+                if (walk.IsType(UNITY_OBJECT_TYPE, token))
                 {
                     return true;
                 }
@@ -494,13 +523,21 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        private static bool IsInBaseTypeChain(INamedTypeSymbol componentType, INamedTypeSymbol parentType)
+        private static bool IsInBaseTypeChain(
+              INamedTypeSymbol componentType
+            , INamedTypeSymbol parentType
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var walk = componentType.BaseType;
 
             while (walk != null)
             {
-                if (walk.IsType(UNITY_OBJECT_TYPE))
+                token.ThrowIfCancellationRequested();
+
+                if (walk.IsType(UNITY_OBJECT_TYPE, token))
                 {
                     break;
                 }
@@ -516,14 +553,24 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        private static bool ComponentHasMember(INamedTypeSymbol componentType, string memberName)
+        private static bool ComponentHasMember(
+              INamedTypeSymbol componentType
+            , string memberName
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var current = componentType as ITypeSymbol;
 
             while (current != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var member in current.GetMembers(memberName))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (member.DeclaredAccessibility == Accessibility.Public
                         && member.IsStatic == false
                         && (member is IPropertySymbol || member is IFieldSymbol || member is IEventSymbol)
@@ -539,12 +586,20 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
             return false;
         }
 
-        private static bool IsObsoleteMember(INamedTypeSymbol componentType, string memberName)
+        private static bool IsObsoleteMember(
+              INamedTypeSymbol componentType
+            , string memberName
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             var current = componentType as ITypeSymbol;
 
             while (current != null)
             {
+                token.ThrowIfCancellationRequested();
+
                 foreach (var member in current.GetMembers(memberName))
                 {
                     if (member.DeclaredAccessibility == Accessibility.Public
@@ -558,7 +613,9 @@ namespace EncosyTower.SourceGen.Analyzers.Mvvm.MonoBinders
                     {
                         foreach (var attr in member.GetAttributes())
                         {
-                            if (attr.AttributeClass is { } attrib && attrib.IsType(OBSOLETE_ATTRIBUTE))
+                            token.ThrowIfCancellationRequested();
+
+                            if (attr.AttributeClass is { } attrib && attrib.IsType(OBSOLETE_ATTRIBUTE, token))
                             {
                                 return true;
                             }

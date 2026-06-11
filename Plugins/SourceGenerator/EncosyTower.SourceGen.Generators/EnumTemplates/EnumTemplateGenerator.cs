@@ -34,7 +34,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var templateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -131,7 +131,7 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                 || typeArg.Value is not INamedTypeSymbol templateSymbol
                 || templateSymbol.IsUnmanagedType == false
                 || templateSymbol.IsUnboundGenericType
-                || templateSymbol.HasAttribute(ENUM_TEMPLATE_ATTRIBUTE) == false
+                || templateSymbol.HasAttribute(ENUM_TEMPLATE_ATTRIBUTE, token) == false
             )
             {
                 return default;

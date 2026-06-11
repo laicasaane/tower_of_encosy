@@ -11,8 +11,10 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         public readonly bool IsValid => compilation.isValid;
 
-        public static CompilationSpec GetCompilation(Compilation compilation, CancellationToken _)
+        public static CompilationSpec GetCompilation(Compilation compilation, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             if (compilation == null)
             {
                 return default;
@@ -20,6 +22,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             var compilationSlim = CompilationInfo.GetCompilation(
                   compilation
+                , token
                 , Helpers.DATABASES_NAMESPACE
                 , Helpers.SKIP_ATTRIBUTE
             );
@@ -29,6 +32,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             foreach (var assembly in compilation.ReferencedAssemblyNames)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (assembly.Name is Helpers.DATABASES_AUTHORING_NAMESPACE)
                 {
                     databaseAuthoring = true;

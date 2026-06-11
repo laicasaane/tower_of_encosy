@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Threading;
 using EncosyTower.SourceGen.Helpers.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -67,12 +68,15 @@ namespace EncosyTower.SourceGen.Analyzers.Data
 
         private static void AnalyzeNamedType(SymbolAnalysisContext context)
         {
+            var  token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol)
             {
                 return;
             }
 
-            if (HasDataAttribute(typeSymbol) == false)
+            if (HasDataAttribute(typeSymbol, token) == false)
             {
                 return;
             }
@@ -81,9 +85,9 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 ? typeSymbol.Locations[0]
                 : Location.None;
 
-            var isMutable = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE) is not null;
-            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE) is not null;
-            var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE);
+            var isMutable = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE, token) is not null;
+            var withoutId = typeSymbol.GetAttribute(DATA_WITHOUT_ID_ATTRIBUTE, token) is not null;
+            var fieldPolicyAttrib = typeSymbol.GetAttribute(DATA_FIELD_POLICY_ATTRIBUTE, token);
 
             if (isMutable == false && fieldPolicyAttrib != null)
             {
@@ -94,10 +98,8 @@ namespace EncosyTower.SourceGen.Analyzers.Data
                 ));
             }
 
-            var withoutPropertySetters = ReadWithoutPropertySettersFlag(typeSymbol, isMutable);
+            var withoutPropertySetters = ReadWithoutPropertySettersFlag(typeSymbol, isMutable, token);
             var allowOnlyPrivateOrInitSetter = isMutable == false || withoutPropertySetters;
-
-            var token = context.CancellationToken;
 
             foreach (var member in typeSymbol.GetMembers())
             {
@@ -116,10 +118,12 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             }
         }
 
-        private static bool HasDataAttribute(INamedTypeSymbol typeSymbol)
+        private static bool HasDataAttribute(INamedTypeSymbol typeSymbol, CancellationToken token)
         {
-            if (typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA) is not null
-                || typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE_METADATA}") is not null
+            token.ThrowIfCancellationRequested();
+
+            if (typeSymbol.GetAttribute(DATA_ATTRIBUTE_METADATA, token) is not null
+                || typeSymbol.GetAttribute($"global::{DATA_ATTRIBUTE_METADATA}", token) is not null
             )
             {
                 return true;
@@ -127,9 +131,11 @@ namespace EncosyTower.SourceGen.Analyzers.Data
 
             foreach (var attr in typeSymbol.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 if (attr.AttributeClass is { } attrClass
-                    && (attrClass.HasFullName("EncosyTower.Data.DataAttribute")
-                        || attrClass.HasFullName("EncosyTower.Data.Data"))
+                    && (attrClass.HasFullName("EncosyTower.Data.DataAttribute", token)
+                        || attrClass.HasFullName("EncosyTower.Data.Data", token))
                 )
                 {
                     return true;
@@ -139,14 +145,20 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             return false;
         }
 
-        private static bool ReadWithoutPropertySettersFlag(INamedTypeSymbol typeSymbol, bool isMutable)
+        private static bool ReadWithoutPropertySettersFlag(
+              INamedTypeSymbol typeSymbol
+            , bool isMutable
+            , CancellationToken token
+        )
         {
+            token.ThrowIfCancellationRequested();
+
             if (isMutable == false)
             {
                 return false;
             }
 
-            var mutableAttrib = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE);
+            var mutableAttrib = typeSymbol.GetAttribute(DATA_MUTABLE_ATTRIBUTE, token);
 
             if (mutableAttrib == null)
             {
@@ -172,7 +184,10 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             , bool withoutId
         )
         {
-            if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE) == false)
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
+            if (field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE, token) == false)
             {
                 return;
             }
@@ -224,6 +239,9 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             , bool withoutId
         )
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (allowOnlyPrivateOrInitSetter
                 && property.SetMethod is { } setter
                 && setter.IsInitOnly == false
@@ -242,7 +260,7 @@ namespace EncosyTower.SourceGen.Analyzers.Data
             }
 
             if (withoutId == false
-                && property.GetAttribute(DATA_PROPERTY_ATTRIBUTE) is not null
+                && property.GetAttribute(DATA_PROPERTY_ATTRIBUTE, token) is not null
                 && string.Equals(property.Name, "Id", System.StringComparison.Ordinal)
                 && IsCollectionType(property.Type)
             )

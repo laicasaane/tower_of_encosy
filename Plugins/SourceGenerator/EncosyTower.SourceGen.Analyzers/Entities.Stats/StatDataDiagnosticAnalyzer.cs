@@ -68,8 +68,11 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            var token = context.CancellationToken;
+            token.ThrowIfCancellationRequested();
+
             if (context.Symbol is not INamedTypeSymbol typeSymbol
-                || typeSymbol.HasAttribute(STAT_DATA_ATTRIBUTE) == false
+                || typeSymbol.HasAttribute(STAT_DATA_ATTRIBUTE, token) == false
             )
             {
                 return;
@@ -105,7 +108,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
                 return;
             }
 
-            var attrib = typeSymbol.GetAttribute(STAT_DATA_ATTRIBUTE);
+            var attrib = typeSymbol.GetAttribute(STAT_DATA_ATTRIBUTE, token);
 
             if (attrib == null || attrib.ConstructorArguments.Length < 1)
             {
@@ -116,7 +119,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
 
             if (arg.Kind == TypedConstantKind.Enum && arg.Value is byte enumValue && enumValue == 0)
             {
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -134,7 +137,7 @@ namespace EncosyTower.SourceGen.Analyzers.Entities.Stats
             )
             {
                 var displayName = (arg.Value as ISymbol)?.ToDisplayString() ?? arg.Value?.ToString() ?? "?";
-                var location = attrib.ApplicationSyntaxReference?.GetSyntax(context.CancellationToken)?.GetLocation()
+                var location = attrib.ApplicationSyntaxReference?.GetSyntax(token)?.GetLocation()
                     ?? typeSymbol.Locations[0];
 
                 context.ReportDiagnostic(Diagnostic.Create(

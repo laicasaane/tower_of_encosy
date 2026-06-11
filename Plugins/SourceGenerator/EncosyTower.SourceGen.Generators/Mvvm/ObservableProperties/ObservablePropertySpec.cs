@@ -103,6 +103,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                 for (var i = 0; i <= last; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     classNameSb.Append(typeParams[i].Identifier.Text);
 
                     if (i < last)
@@ -113,6 +115,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                 classNameSb.Append(">");
             }
+
+            token.ThrowIfCancellationRequested();
 
             var className = classNameSb.ToString();
             var semanticModel = context.SemanticModel;
@@ -131,7 +135,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             if (classSymbol.BaseType != null
                 && classSymbol.BaseType.TypeKind == TypeKind.Class
-                && classSymbol.BaseType.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE_METADATA)
+                && classSymbol.BaseType.HasAttribute(OBSERVABLE_OBJECT_ATTRIBUTE_METADATA, token)
             )
             {
                 isBaseObservableObject = true;
@@ -140,8 +144,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
             using var fieldRefsBuilder = ImmutableArrayBuilder<FieldMemberSpec>.Rent();
             using var propRefsBuilder = ImmutableArrayBuilder<PropMemberSpec>.Rent();
 
-            var hasSerializableAttribute = classSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE);
-            var hasGeneratePropertyBagAttribute = classSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE);
+            var hasSerializableAttribute = classSymbol.HasAttribute(SERIALIZABLE_ATTRIBUTE, token);
+            var hasGeneratePropertyBagAttribute = classSymbol.HasAttribute(GENERATE_PROPERTY_BAG_ATTRIBUTE, token);
             var hasMemberObservableObject = false;
 
             var observableFieldMap = new Dictionary<string, (
@@ -170,12 +174,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is IFieldSymbol field)
                 {
-                    if (field.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE))
+                    if (field.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE, token))
                     {
                         var fieldTypeName = field.Type.ToFullName();
-                        var isObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
+                        var isObservableObject = field.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE, token: token);
 
                         if (isObservableObject)
                         {
@@ -183,10 +189,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                         }
 
                         var uniqueCommandNames = new HashSet<string>();
-                        var notifyPropChangedFors = field.GetAttributes(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE);
+                        var notifyPropChangedFors = field.GetAttributes(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE, token);
 
                         foreach (var notifyPropChangedFor in notifyPropChangedFors)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (notifyPropChangedFor != null
                                 && notifyPropChangedFor.ConstructorArguments.Length > 0
                                 && notifyPropChangedFor.ConstructorArguments[0].Value is string propName
@@ -201,12 +209,16 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             }
                         }
 
-                        var notifyCanExecuteChangedFors = field.GetAttributes(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE);
+                        token.ThrowIfCancellationRequested();
+
+                        var notifyCanExecuteChangedFors = field.GetAttributes(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE, token);
 
                         using var commandNames = ImmutableArrayBuilder<string>.Rent();
 
                         foreach (var notifyCanExecuteChangedFor in notifyCanExecuteChangedFors)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (notifyCanExecuteChangedFor != null
                                 && notifyCanExecuteChangedFor.ConstructorArguments.Length > 0
                             )
@@ -239,7 +251,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             fieldTypeName = fieldTypeName,
                             fieldTypeValidIdent = field.Type.ToValidIdentifier(),
                             isObservableObject = isObservableObject,
-                            hasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE),
+                            hasSerializeFieldAttribute = field.HasAttribute(SERIALIZE_FIELD_ATTRIBUTE, token),
                             commandNames = commandNames.ToImmutable().AsEquatableArray(),
                             forwardedPropertyAttributes = propertyAttributes.AsEquatableArray(),
                         });
@@ -250,7 +262,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                 if (member is IPropertySymbol property)
                 {
-                    if (property.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE) == false)
+                    if (property.HasAttribute(OBSERVABLE_PROPERTY_ATTRIBUTE, token) == false)
                     {
                         propertyMap[property.Name] = (property.Type.ToFullName(), property.Type.ToValidIdentifier());
                     }
@@ -258,18 +270,22 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                     {
                         var propertyTypeName = property.Type.ToFullName();
                         var fieldName = property.ToPrivateFieldName();
-                        var isObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE);
+                        var isObservableObject = property.Type.ImplementsInterface(IOBSERVABLE_OBJECT_INTERFACE, token: token);
 
                         if (isObservableObject)
                         {
                             hasMemberObservableObject = true;
                         }
 
+                        token.ThrowIfCancellationRequested();
+
                         var uniqueCommandNames = new HashSet<string>();
-                        var notifyPropChangedFors = property.GetAttributes(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE);
+                        var notifyPropChangedFors = property.GetAttributes(NOTIFY_PROPERTY_CHANGED_FOR_ATTRIBUTE, token);
 
                         foreach (var notifyPropChangedFor in notifyPropChangedFors)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (notifyPropChangedFor != null
                                 && notifyPropChangedFor.ConstructorArguments.Length > 0
                                 && notifyPropChangedFor.ConstructorArguments[0].Value is string propName
@@ -284,12 +300,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             }
                         }
 
-                        var notifyCanExecuteChangedFors = property.GetAttributes(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE);
+                        var notifyCanExecuteChangedFors = property.GetAttributes(NOTIFY_CAN_EXECUTE_CHANGED_FOR_ATTRIBUTE, token);
 
                         using var commandNames = ImmutableArrayBuilder<string>.Rent();
 
                         foreach (var notifyCanExecuteChangedFor in notifyCanExecuteChangedFors)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (notifyCanExecuteChangedFor != null
                                 && notifyCanExecuteChangedFor.ConstructorArguments.Length > 0
                             )
@@ -298,6 +316,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                                 foreach (var arg in args)
                                 {
+                                    token.ThrowIfCancellationRequested();
+
                                     if (arg.Value is string commandName)
                                     {
                                         uniqueCommandNames.Add(commandName);
@@ -320,7 +340,12 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                         foreach (var (typeName, attribInfo) in fieldAttributes)
                         {
-                            forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttributeSpec { typeName = typeName, attributeInfo = attribInfo });
+                            token.ThrowIfCancellationRequested();
+
+                            forwardedFieldAttribsBuilder.Add(new ForwardedFieldAttributeSpec {
+                                typeName = typeName,
+                                attributeInfo = attribInfo,
+                            });
                         }
 
                         propRefsBuilder.Add(new PropMemberSpec {
@@ -330,7 +355,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                             propertyTypeName = propertyTypeName,
                             propertyTypeValidIdent = property.Type.ToValidIdentifier(),
                             isObservableObject = isObservableObject,
-                            doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE),
+                            doesCreateProperty = property.HasAttribute(CREATE_PROPERTY_ATTRIBUTE, token),
                             commandNames = commandNames.ToImmutable().AsEquatableArray(),
                             forwardedFieldAttributes = forwardedFieldAttribsBuilder.ToImmutable().AsEquatableArray(),
                         });
@@ -341,7 +366,7 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
 
                 if (member is IMethodSymbol method && method.Parameters.Length <= 1)
                 {
-                    if (method.HasAttribute(RELAY_COMMAND_ATTRIBUTE))
+                    if (method.HasAttribute(RELAY_COMMAND_ATTRIBUTE, token))
                     {
                         methods.Add(method);
                     }
@@ -350,14 +375,20 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             using var notifyForBuilder = ImmutableArrayBuilder<NotifyForEntrySpec>.Rent();
 
             foreach (var kv in propertyChangedMap)
             {
+                token.ThrowIfCancellationRequested();
+
                 var memberKey = kv.Key;
 
                 foreach (var propName in kv.Value)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (propertyMap.TryGetValue(propName, out var propInfo) == false)
                     {
                         continue;
@@ -372,10 +403,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.ObservableProperties
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             using var notifyCanExecBuilder = ImmutableArrayBuilder<string>.Rent();
 
             foreach (var method in methods)
             {
+                token.ThrowIfCancellationRequested();
+
                 var commandName = $"{method.Name}Command";
 
                 if (commandSet.Contains(commandName))

@@ -51,7 +51,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             var projectPathProvider = SourceGenHelpers.GetSourceGenConfigProvider(context);
 
             var compilationProvider = context.CompilationProvider
-                .Select(static (x, _) => CompilationInfo.GetCompilation(x, NAMESPACE, SKIP_ATTRIBUTE));
+                .Select(static (x, c) => CompilationInfo.GetCompilation(x, c, NAMESPACE, SKIP_ATTRIBUTE));
 
             var candidateProvider = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -97,7 +97,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
                 return default;
             }
 
-            var kind = GetLookupKind(structSymbol);
+            var kind = GetLookupKind(structSymbol, token);
 
             if (kind == LookupKind.None)
             {
@@ -111,6 +111,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
 
             foreach (var attribute in context.Attributes)
             {
+                token.ThrowIfCancellationRequested();
+
                 var args = attribute.ConstructorArguments;
 
                 if (args.Length < 1 || args[0].Value is not INamedTypeSymbol type)
@@ -171,29 +173,33 @@ namespace EncosyTower.SourceGen.Generators.Entities.Lookups
             };
         }
 
-        private static LookupKind GetLookupKind(INamedTypeSymbol structSymbol)
+        private static LookupKind GetLookupKind(INamedTypeSymbol structSymbol, CancellationToken token)
         {
-            foreach (var iface in structSymbol.AllInterfaces)
+            token.ThrowIfCancellationRequested();
+
+            foreach (var iface in structSymbol.Interfaces)
             {
-                if (iface.HasFullName(I_BUFFER_LOOKUPS))
+                token.ThrowIfCancellationRequested();
+
+                if (iface.HasFullName(I_BUFFER_LOOKUPS, token))
                     return LookupKind.Buffer;
 
-                if (iface.HasFullName(I_COMPONENT_LOOKUPS))
+                if (iface.HasFullName(I_COMPONENT_LOOKUPS, token))
                     return LookupKind.Component;
 
-                if (iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS))
+                if (iface.HasFullName(I_ENABLEABLE_BUFFER_LOOKUPS, token))
                     return LookupKind.EnableableBuffer;
 
-                if (iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS))
+                if (iface.HasFullName(I_ENABLEABLE_COMPONENT_LOOKUPS, token))
                     return LookupKind.EnableableComponent;
 
-                if (iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS))
+                if (iface.HasFullName(I_PHYSICS_BUFFER_LOOKUPS, token))
                     return LookupKind.PhysicsBuffer;
 
-                if (iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS))
+                if (iface.HasFullName(I_PHYSICS_COMPONENT_LOOKUPS, token))
                     return LookupKind.PhysicsComponent;
 
-                if (iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS))
+                if (iface.HasFullName(I_PHYSICS_ENABLEABLE_COMPONENT_LOOKUPS, token))
                     return LookupKind.PhysicsEnableableComponent;
             }
 

@@ -91,9 +91,9 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
 
                     entryBuilder.Add(new TemplateMemberEntrySpec {
                         name = field.Name,
-                        displayName = GetDisplayName(field) ?? string.Empty,
+                        displayName = GetDisplayName(field, token) ?? string.Empty,
                         value = Convert.ToUInt64(field.ConstantValue),
-                        attributes = new EquatableArray<AttributeInfo>(field.GatherAttributes()),
+                        attributes = new EquatableArray<AttributeInfo>(field.GatherAttributes(token)),
                     });
                 }
 
@@ -114,12 +114,16 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
             };
         }
 
-        private static string GetDisplayName(IFieldSymbol field)
+        private static string GetDisplayName(IFieldSymbol field, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             string displayName = null;
 
             foreach (var attribute in field.GetAttributes())
             {
+                token.ThrowIfCancellationRequested();
+
                 var attributeName = attribute.AttributeClass?.Name ?? string.Empty;
 
                 switch (attributeName)
@@ -149,6 +153,8 @@ namespace EncosyTower.SourceGen.Generators.EnumTemplates
                         {
                             foreach (var arg in attribute.NamedArguments)
                             {
+                                token.ThrowIfCancellationRequested();
+
                                 if (arg.Key is "Name" or "DisplayName"
                                     && arg.Value.Kind == TypedConstantKind.Primitive
                                     && arg.Value.Value?.ToString() is string dn

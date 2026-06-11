@@ -54,6 +54,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 && typeParamList.Parameters.Count > 0
             )
             {
+                token.ThrowIfCancellationRequested();
+
                 classNameBuilder.Append("<");
 
                 var typeParams = typeParamList.Parameters;
@@ -61,6 +63,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
                 for (var i = 0; i <= last; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     classNameBuilder.Append(typeParams[i].Identifier.Text);
 
                     if (i < last)
@@ -85,6 +89,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 , printAdditionalUsings: PrintAdditionalUsings
             );
 
+            token.ThrowIfCancellationRequested();
+
             using var memberRefsBuilder = ImmutableArrayBuilder<MemberSpec>.Rent();
 
             var members = classSymbol.GetMembers();
@@ -93,6 +99,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
             foreach (var member in members)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (member is not IMethodSymbol method || method.Parameters.Length > 1)
                 {
                     continue;
@@ -108,7 +116,9 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                     }
                 }
 
-                var relayCommandAttrib = method.GetAttribute(RELAY_COMMAND_ATTRIBUTE);
+                token.ThrowIfCancellationRequested();
+
+                var relayCommandAttrib = method.GetAttribute(RELAY_COMMAND_ATTRIBUTE, token);
 
                 if (relayCommandAttrib != null)
                 {
@@ -116,6 +126,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                     {
                         foreach (var kv in relayCommandAttrib.NamedArguments)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             if (kv.Key == "CanExecute"
                                 && kv.Value.Value is string canExecuteMethodName
                                 && canExecuteMethodName != method.Name
@@ -145,10 +157,14 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 methodMap[method.Name] = method;
             }
 
+            token.ThrowIfCancellationRequested();
+
             var filtered = new HashSet<string>();
 
             foreach (var (method, canExecuteName) in methodCandidates)
             {
+                token.ThrowIfCancellationRequested();
+
                 filtered.Clear();
 
                 if (methodMap.TryGetValue(canExecuteName, out var canExecuteMethod) == false
@@ -157,6 +173,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 {
                     continue;
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 var isValid = true;
 
@@ -169,11 +187,15 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
                     foreach (var param in method.Parameters)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         filtered.Add(param.Type.ToFullName());
                     }
 
                     foreach (var param in canExecuteMethod.Parameters)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         if (filtered.Contains(param.Type.ToFullName()) == false)
                         {
                             isValid = false;
@@ -199,6 +221,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
                 }
             }
 
+            token.ThrowIfCancellationRequested();
+
             if (memberRefsBuilder.Count == 0)
             {
                 return default;
@@ -209,6 +233,8 @@ namespace EncosyTower.SourceGen.Generators.Mvvm.RelayCommands
 
             foreach (var memberRef in pendingRefs)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (methodMap.TryGetValue(memberRef.methodName, out var method) == false)
                 {
                     continue;
