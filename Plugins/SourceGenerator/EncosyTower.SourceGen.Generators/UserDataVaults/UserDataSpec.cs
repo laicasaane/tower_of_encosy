@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
+using EncosyTower.SourceGen.Helpers.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -41,7 +43,10 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 return default;
             }
 
-            GetMemberDefinitions(symbol, token, out var memberId, out var memberVersion);
+            var semanticModel = context.SemanticModel;
+
+            GetMemberDefinitions(symbol, semanticModel, token, out var memberId, out var memberVersion);
+
             var generateInterface = symbol.InheritsFromInterface(IUSER_DATA, false, token) == false;
 
             if (generateInterface == false
@@ -79,6 +84,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         private static void GetMemberDefinitions(
               INamedTypeSymbol symbol
+            , SemanticModel semanticModel
             , CancellationToken token
             , out MemberDefinition memberId
             , out MemberDefinition memberVersion
@@ -88,7 +94,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             memberId = memberVersion = default;
 
-            GetMembers(symbol, false, token, ref memberId, ref memberVersion);
+            GetMembers(symbol, false, semanticModel, token, ref memberId, ref memberVersion);
 
             if (HasBoth(memberId, memberVersion))
             {
@@ -100,7 +106,8 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             while (baseType is { TypeKind: TypeKind.Class })
             {
                 token.ThrowIfCancellationRequested();
-                GetMembers(baseType, true, token, ref memberId, ref memberVersion);
+
+                GetMembers(baseType, true, semanticModel, token, ref memberId, ref memberVersion);
 
                 if (HasBoth(memberId, memberVersion))
                 {
@@ -116,6 +123,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             static void GetMembers(
                   ITypeSymbol type
                 , bool isBaseTypeSearch
+                , SemanticModel semanticModel
                 , CancellationToken token
                 , ref MemberDefinition memberId
                 , ref MemberDefinition memberVersion
@@ -206,8 +214,27 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
                     if (memberId.IsValid == false && field.Name is ("id" or "_id" or "m_id"))
                     {
+                        field.GatherForwardedAttributes(
+                              semanticModel
+                            , token
+                            , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
+                        );
+
+                        using var attrBuilder = ImmutableArrayBuilder<ForwardedAttributeData>.Rent();
+
+                        foreach (var (fullTypeName, attributeInfo) in propertyAttributes)
+                        {
+                            token.ThrowIfCancellationRequested();
+
+                            attrBuilder.Add(new ForwardedAttributeData {
+                                fullTypeName = fullTypeName,
+                                syntax = attributeInfo.GetSyntax().ToFullString(),
+                            });
+                        }
+
                         memberId = new MemberDefinition {
                             name = field.Name,
+                            forwardedAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
                             isField = true,
                             type = isBaseTypeSearch
                                 ? MemberDefinitionType.DefinedInBaseType
@@ -216,8 +243,27 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                     }
                     else if (memberVersion.IsValid == false && field.Name is ("version" or "_version" or "m_version"))
                     {
+                        field.GatherForwardedAttributes(
+                              semanticModel
+                            , token
+                            , out ImmutableArray<(string, AttributeInfo)> propertyAttributes
+                        );
+
+                        using var attrBuilder = ImmutableArrayBuilder<ForwardedAttributeData>.Rent();
+
+                        foreach (var (fullTypeName, attributeInfo) in propertyAttributes)
+                        {
+                            token.ThrowIfCancellationRequested();
+
+                            attrBuilder.Add(new ForwardedAttributeData {
+                                fullTypeName = fullTypeName,
+                                syntax = attributeInfo.GetSyntax().ToFullString(),
+                            });
+                        }
+
                         memberVersion = new MemberDefinition {
                             name = field.Name,
+                            forwardedAttributes = attrBuilder.ToImmutable().AsEquatableArray(),
                             isField = true,
                             type = isBaseTypeSearch
                                 ? MemberDefinitionType.DefinedInBaseType
@@ -259,6 +305,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
     internal struct MemberDefinition : IEquatable<MemberDefinition>
     {
         public string name;
+        public EquatableArray<ForwardedAttributeData> forwardedAttributes;
         public MemberDefinitionType type;
         public bool isField;
 
@@ -270,6 +317,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
         public readonly bool Equals(MemberDefinition other)
             => string.Equals(name, other.name, StringComparison.Ordinal)
+            && forwardedAttributes.Equals(other.forwardedAttributes)
             && isField == other.isField
             && type == other.type;
 
@@ -277,7 +325,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             => obj is MemberDefinition other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(name, type, isField);
+            => HashValue.Combine(name, forwardedAttributes, type, isField);
     }
 
     internal enum MemberDefinitionType : byte

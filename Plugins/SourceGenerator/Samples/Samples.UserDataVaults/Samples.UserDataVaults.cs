@@ -2,12 +2,14 @@
 using System.ComponentModel;
 using EncosyTower.Initialization;
 using EncosyTower.UserDataVaults;
+using Newtonsoft.Json;
 
 namespace Samples.UserDataVaults
 {
     [UserData]
     internal partial record class UserCommonData
     {
+        [property: JsonIgnore]
         private string _id;
     }
 

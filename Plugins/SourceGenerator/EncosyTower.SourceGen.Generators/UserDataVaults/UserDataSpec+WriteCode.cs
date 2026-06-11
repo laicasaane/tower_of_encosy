@@ -58,6 +58,14 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                 ? "public override string "
                 : "public string ";
 
+            if (member.isField && member.forwardedAttributes.Count > 0)
+            {
+                foreach (var attr in member.forwardedAttributes)
+                {
+                    p.PrintBeginLine("[").Print(attr.syntax).PrintEndLine("]");
+                }
+            }
+
             p.PrintBeginLine(modifier).Print(name);
 
             if (member.isField == false)
