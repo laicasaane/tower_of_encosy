@@ -6,7 +6,10 @@ using EncosyTower.UserDataVaults;
 namespace Samples.UserDataVaults
 {
     [UserData]
-    internal partial record class UserCommonData { }
+    internal partial record class UserCommonData
+    {
+        private string _id;
+    }
 
     [UserData]
     internal partial class UserProgressData { }

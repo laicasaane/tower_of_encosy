@@ -2,8 +2,9 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 {
     internal partial struct UserDataSpec
     {
-        private const string PR_EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
-        private const string PR_GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.UserDataVaults.UserDataGenerator\", \"{SourceGenVersion.VALUE}\")]";
+        private const string AGGRESSIVE_INLINING = "[SRCS.MethodImpl(SRCS.MethodImplOptions.AggressiveInlining)]";
+        private const string EXCLUDE_COVERAGE = "[SDCA.ExcludeFromCodeCoverage]";
+        private const string GENERATED_CODE = $"[SCDC.GeneratedCode(\"EncosyTower.SourceGen.Generators.UserDataVaults.UserDataGenerator\", \"{SourceGenVersion.VALUE}\")]";
 
         public readonly string WriteCode()
         {
@@ -15,7 +16,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
 
             p = p.IncreasedIndent();
             {
-                p.PrintBeginLine(PR_GENERATED_CODE).PrintEndLine(PR_EXCLUDE_COVERAGE);
+                p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
                 p.PrintBeginLine("partial ").Print(typeKeyword).Print(" ").Print(typeName);
 
                 if (generateInterface)
@@ -68,24 +69,16 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
             p.OpenScope();
             {
-                p.PrintLine("get");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine("return ")
-                        .PrintIf(member.type == MemberDefinitionType.DefinedInBaseType, "base", "this")
-                        .Print(".").Print(member.name).PrintEndLine(";");
-                }
-                p.CloseScope();
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("get => ")
+                    .PrintIf(member.type == MemberDefinitionType.DefinedInBaseType, "base", "this")
+                    .Print(".").Print(member.name).PrintEndLine(";");
                 p.PrintEndLine();
 
-                p.PrintLine("set");
-                p.OpenScope();
-                {
-                    p.PrintBeginLine()
-                        .PrintIf(member.type == MemberDefinitionType.DefinedInBaseType, "base", "this")
-                        .Print(".").Print(member.name).PrintEndLine(" = value;");
-                }
-                p.CloseScope();
+                p.PrintLine(AGGRESSIVE_INLINING);
+                p.PrintBeginLine("set => ")
+                    .PrintIf(member.type == MemberDefinitionType.DefinedInBaseType, "base", "this")
+                    .Print(".").Print(member.name).PrintEndLine(" = value;");
             }
             p.CloseScope();
         }

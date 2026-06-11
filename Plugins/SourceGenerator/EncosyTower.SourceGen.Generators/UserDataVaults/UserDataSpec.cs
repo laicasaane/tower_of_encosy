@@ -192,8 +192,13 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
                         return;
                     }
 
-                    if (field.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Protected)
-                        || field.Type.SpecialType != SpecialType.System_String
+                    if (field.Type.SpecialType != SpecialType.System_String)
+                    {
+                        continue;
+                    }
+
+                    if (isBaseTypeSearch
+                        && field.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Protected)
                     )
                     {
                         continue;
@@ -230,6 +235,7 @@ namespace EncosyTower.SourceGen.Generators.UserDataVaults
             p.PrintEndLine();
             p.PrintLine("using SCDC = global::System.CodeDom.Compiler;");
             p.PrintLine("using SDCA = global::System.Diagnostics.CodeAnalysis;");
+            p.PrintLine("using SRCS = global::System.Runtime.CompilerServices;");
             p.PrintLine("using ETUV = global::EncosyTower.UserDataVaults;");
             p.PrintEndLine();
             p.Print("#pragma warning restore CS0105 // Using directive appeared previously in this namespace").PrintEndLine();
