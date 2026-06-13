@@ -26,7 +26,7 @@ to public until the first playable version is published on some marketplaces.
 > [!IMPORTANT]
 > Please keep in mind that this is a personal playground. That implies I may be building APIs, editor tools,
 > extensional functionality for my private projects, while the main features of this project are neglected.
-> 
+>
 > I believe any feature shared within this project can be useful to the broader community,
 > not just the promised gameplay made in ECS.
 
@@ -42,7 +42,7 @@ to public until the first playable version is published on some marketplaces.
 
 ## Technical Notes
 
-- **Unity Version**: 2022.3+
+- **Unity Version**: 6000.3+
 - **Rendering Pipeline**: URP
 - **Enter Play Mode Options > Reload Domain**: Off
 - `csc.rsp`: Enable C# 10 for the Unity Engine
@@ -142,7 +142,7 @@ Thank you for your contributions to the community. Your works greatly ease my de
     </tr>
     <tr>
       <td rowspan=3>DreamingImLatios</td>
-      <td><a href='https://github.com/Dreaming381/Latios-Framework'>Latios fFramework</a></td>
+      <td><a href='https://github.com/Dreaming381/Latios-Framework'>Latios Framework</a></td>
     <tr>
       <td><a href='https://github.com/Dreaming381/lsss-wip'>Latios Space Shooter Sample</a></td>
     </tr>
