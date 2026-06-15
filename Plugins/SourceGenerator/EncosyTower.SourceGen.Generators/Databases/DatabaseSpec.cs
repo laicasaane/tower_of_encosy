@@ -93,7 +93,8 @@ namespace EncosyTower.SourceGen.Generators.Databases
 
             token.ThrowIfCancellationRequested();
 
-            var tableList = new List<TableSpec>();
+            var propList = new List<IPropertySymbol>();
+            var dedupTableAssetMap = new Dictionary<string, bool>(StringComparer.Ordinal);
             var members = typeSymbol.GetMembers();
 
             foreach (var member in members)
@@ -126,11 +127,27 @@ namespace EncosyTower.SourceGen.Generators.Databases
                     continue;
                 }
 
+                propList.Add(property);
+
+                var tableTypeSimpleName = propType.Name;
+                var existingTableAsset = dedupTableAssetMap.ContainsKey(tableTypeSimpleName);
+                dedupTableAssetMap[tableTypeSimpleName] = existingTableAsset;
+            }
+
+            var tableList = new List<TableSpec>();
+
+            foreach (var prop in propList)
+            {
+                var propType = prop.Type;
+
+                dedupTableAssetMap.TryGetValue(propType.Name, out var deduplicateAssetName);
+
                 tableList.Add(new TableSpec {
                     typeFullName = propType.ToFullName(),
                     typeName = propType.Name,
-                    propertyName = property.Name,
+                    propertyName = prop.Name,
                     nameCasing = nameCasing,
+                    deduplicateAssetName = deduplicateAssetName,
                 });
             }
 

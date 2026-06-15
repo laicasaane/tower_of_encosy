@@ -8,6 +8,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         public string typeName;
         public string propertyName;
         public NameCasing nameCasing;
+        public bool deduplicateAssetName;
 
         public readonly bool IsValid
             => string.IsNullOrEmpty(typeFullName) == false
@@ -20,9 +21,11 @@ namespace EncosyTower.SourceGen.Generators.Databases
             => string.Equals(typeFullName, other.typeFullName, StringComparison.Ordinal)
             && string.Equals(typeName, other.typeName, StringComparison.Ordinal)
             && string.Equals(propertyName, other.propertyName, StringComparison.Ordinal)
-            && nameCasing == other.nameCasing;
+            && nameCasing == other.nameCasing
+            && deduplicateAssetName == other.deduplicateAssetName
+            ;
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(typeFullName, typeName, propertyName, (int)nameCasing);
+            => HashValue.Combine(typeFullName, typeName, propertyName, nameCasing, deduplicateAssetName);
     }
 }

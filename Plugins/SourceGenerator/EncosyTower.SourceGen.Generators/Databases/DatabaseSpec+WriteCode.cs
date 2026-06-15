@@ -289,7 +289,10 @@ namespace EncosyTower.SourceGen.Generators.Databases
                         var tableTypeName = table.typeName;
                         var name = table.propertyName;
                         var fieldName = NameCasing.SnakeUpper.ConvertName(name);
-                        var fieldValue = table.nameCasing.ConvertName($"{tableTypeName}_{name}");
+                        var fieldValue = table.deduplicateAssetName
+                            ? table.nameCasing.ConvertName($"{tableTypeName}_{name}")
+                            : table.nameCasing.ConvertName(tableTypeName)
+                            ;
 
                         p.PrintLine(string.Format(PR_GENERATED_ASSET_NAME, containerTypeName, fullTypeName));
                         p.PrintBeginLine("public const string ").Print(fieldName)
