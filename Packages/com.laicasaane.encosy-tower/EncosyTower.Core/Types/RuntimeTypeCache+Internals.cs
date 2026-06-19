@@ -82,7 +82,6 @@ namespace EncosyTower.Types
             GetInfo<Type>();
             GetInfo<Id>();
             GetInfo<Id2>();
-            GetInfo<LongId>();
             GetInfo<TypeId>();
             GetInfo<TypeInfo>();
         }
