@@ -26,7 +26,6 @@ using EncosyTower.Common;
 
 namespace EncosyTower.Entities.Stats
 {
-    [Serializable]
     public struct StatModifierHandle : IEquatable<StatModifierHandle>
     {
         public StatHandle affectedStatHandle;

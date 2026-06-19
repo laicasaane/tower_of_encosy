@@ -28,7 +28,6 @@ using Unity.Entities;
 
 namespace EncosyTower.Entities.Stats
 {
-    [Serializable]
     public struct StatHandle : IEquatable<StatHandle>
     {
         public static readonly StatHandle Null = default;
@@ -115,7 +114,6 @@ namespace EncosyTower.Entities.Stats
         }
     }
 
-    [Serializable]
     public struct StatHandle<TStatData> : IEquatable<StatHandle<TStatData>>
         where TStatData : unmanaged, IStatData
     {
