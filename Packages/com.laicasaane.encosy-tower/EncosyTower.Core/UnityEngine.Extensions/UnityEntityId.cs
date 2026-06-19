@@ -36,13 +36,6 @@ namespace EncosyTower.UnityExtensions
             _value = value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
-        public UnityEntityId(InstanceID value)
-        {
-            _value = (int)value;
-        }
-
         public readonly bool IsValid
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,7 +73,7 @@ namespace EncosyTower.UnityExtensions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly string ToString(string format, IFormatProvider formatProvider = null)
-            => ((int)_value).ToString(format, formatProvider);
+            => _value.ToString(format, formatProvider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFormat(
@@ -90,24 +83,20 @@ namespace EncosyTower.UnityExtensions
             , IFormatProvider provider = null
         )
         {
-            return ((int)_value).TryFormat(destination, out charsWritten, format, provider);
+            return EntityId.ToULong(_value).TryFormat(destination, out charsWritten, format, provider);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator int(UnityEntityId<T> instanceId)
-            => instanceId._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator UnityEntityId<T>(int instanceId)
-            =>  new((EntityId)instanceId);
+        public static ulong ToULong(UnityEntityId<T> instanceId)
+            => EntityId.ToULong(instanceId._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnityEntityId<T>(EntityId entityId)
             => new(entityId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator EntityId(UnityEntityId<T> instanceId)
-            => instanceId._value;
+        public static implicit operator EntityId(UnityEntityId<T> entityId)
+            => entityId._value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnityEntityId<T>([NotNull] T obj)
@@ -121,7 +110,19 @@ namespace EncosyTower.UnityExtensions
         public static bool operator !=(UnityEntityId<T> left, UnityEntityId<T> right)
             => left._value != right._value;
 
-#pragma warning disable CS0618 // Type or member is obsolete
+#if !UNITY_6000_5_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
+        public UnityEntityId(InstanceID value)
+        {
+            _value = (int)value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Obsolete("32-bit integer Instance ID is deprecated. Use EntityId instead.")]
+        public static implicit operator UnityEntityId<T>(int instanceId)
+            => new((EntityId)instanceId);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
         public static implicit operator UnityEntityId<T>(InstanceID instanceId)
@@ -131,7 +132,7 @@ namespace EncosyTower.UnityExtensions
         [Obsolete("UnityInstanceId<T> is deprecated. Use UnityEntityId<T> instead.")]
         public static implicit operator UnityEntityId<T>(UnityInstanceId<T> instanceId)
             => new(instanceId.Value);
-#pragma warning restore CS0618 // Type or member is obsolete
+#endif
 
         [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfInvalid(T obj)

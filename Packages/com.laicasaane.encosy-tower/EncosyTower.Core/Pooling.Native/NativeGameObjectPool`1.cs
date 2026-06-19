@@ -791,8 +791,13 @@ namespace EncosyTower.Pooling.Native
 
             IncreaseCapacityBy(key, amount);
 
+#if UNITY_6000_5_OR_NEWER
+            var gameObjectIds = NativeArray.CreateFast<EntityId>(amount, Allocator.Temp);
+            var transformIds = NativeArray.CreateFast<EntityId>(amount, Allocator.Temp);
+#else
             var gameObjectIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
             var transformIds = NativeArray.CreateFast<int>(amount, Allocator.Temp);
+#endif
 
             GameObject.InstantiateGameObjects(
                   prefab.EntityId
@@ -820,7 +825,12 @@ namespace EncosyTower.Pooling.Native
                 var transformId = transformIds[i];
                 var arrayIndex = transformArray.length;
 
+#if UNITY_6000_5_OR_NEWER
+                transformArray.Add(transformId);
+#else
                 transformArray.Add((EntityId)transformId);
+#endif
+
                 _unusedTransformIndices.Add(arrayIndex);
             }
 

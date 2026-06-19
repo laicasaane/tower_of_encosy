@@ -17,7 +17,7 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_6000_2_OR_NEWER
-using EntityId = System.Int32;
+using EntityId = UnityEngine.EntityId;
 #else
 using EntityId = System.Int32;
 #endif
@@ -1122,12 +1122,17 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
 
             var targetsProp = binderProp.FindPropertyRelative(PROP_TARGETS);
             var currentSize = targetsProp.arraySize;
-            var checkIds = new HashSet<int>(currentSize + length);
+            var checkIds = new HashSet<EntityId>(currentSize + length);
 
             for (var i = 0; i < currentSize; i++)
             {
                 var elementProp = targetsProp.GetArrayElementAtIndex(i);
+
+#if UNITY_6000_5_OR_NEWER
+                checkIds.Add(elementProp.objectReferenceEntityIdValue);
+#else
                 checkIds.Add(elementProp.objectReferenceInstanceIDValue);
+#endif
             }
 
             for (var i = length - 1; i >= 0; i--)
@@ -1158,7 +1163,12 @@ namespace EncosyTower.Editor.Mvvm.ViewBinding.Components
             for (var i = first; i < newSize; i++)
             {
                 var elementProp = targetsProp.GetArrayElementAtIndex(i);
+
+#if UNITY_6000_5_OR_NEWER
+                elementProp.objectReferenceEntityIdValue = instanceIds[i - first];
+#else
                 elementProp.objectReferenceInstanceIDValue = instanceIds[i - first];
+#endif
             }
 
             serializedObject.ApplyModifiedProperties();

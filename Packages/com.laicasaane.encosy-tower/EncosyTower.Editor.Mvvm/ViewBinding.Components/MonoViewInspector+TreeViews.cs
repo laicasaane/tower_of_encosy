@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_6000_2_OR_NEWER
-using EntityId = System.Int32;
+using EntityId = UnityEngine.EntityId;
 #else
 using EntityId = System.Int32;
 #endif

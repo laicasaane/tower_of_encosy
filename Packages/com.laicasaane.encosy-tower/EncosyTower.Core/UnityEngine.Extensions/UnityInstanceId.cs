@@ -17,6 +17,9 @@ namespace EncosyTower.UnityExtensions
 #if UNITY_6000_2_OR_NEWER
     [Obsolete(
         "UnityInstanceId<T> is deprecated. Use UnityEntityId<T> instead."
+#if UNITY_6000_5_OR_NEWER
+        , true
+#endif
     )]
 #endif
     [Serializable, StructLayout(LayoutKind.Sequential, Size = 4)]
