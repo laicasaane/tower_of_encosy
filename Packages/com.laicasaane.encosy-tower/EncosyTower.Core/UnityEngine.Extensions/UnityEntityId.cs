@@ -73,7 +73,11 @@ namespace EncosyTower.UnityExtensions
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly string ToString(string format, IFormatProvider formatProvider = null)
+#if UNITY_6000_5_OR_NEWER
             => _value.ToString(format, formatProvider);
+#else
+            => ((int)_value).ToString(format, formatProvider);
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryFormat(
@@ -83,12 +87,23 @@ namespace EncosyTower.UnityExtensions
             , IFormatProvider provider = null
         )
         {
+#if UNITY_6000_5_OR_NEWER
             return EntityId.ToULong(_value).TryFormat(destination, out charsWritten, format, provider);
+#else
+            return ((int)_value).TryFormat(destination, out charsWritten, format, provider);
+#endif
         }
 
+#if UNITY_6000_5_OR_NEWER
+        /// <inheritdoc cref="EntityId.ToULong(EntityId)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ToULong(UnityEntityId<T> instanceId)
-            => EntityId.ToULong(instanceId._value);
+        public static ulong ToULong(UnityEntityId<T> entityId)
+            => EntityId.ToULong(entityId._value);
+#else
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator int(UnityEntityId<T> entityId)
+            => entityId._value;
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator UnityEntityId<T>(EntityId entityId)
@@ -123,6 +138,7 @@ namespace EncosyTower.UnityExtensions
         public static implicit operator UnityEntityId<T>(int instanceId)
             => new((EntityId)instanceId);
 
+#if !UNITY_6000_2_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [Obsolete("InstanceID is deprecated. Use EntityId instead.")]
         public static implicit operator UnityEntityId<T>(InstanceID instanceId)
@@ -132,6 +148,7 @@ namespace EncosyTower.UnityExtensions
         [Obsolete("UnityInstanceId<T> is deprecated. Use UnityEntityId<T> instead.")]
         public static implicit operator UnityEntityId<T>(UnityInstanceId<T> instanceId)
             => new(instanceId.Value);
+#endif
 #endif
 
         [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
