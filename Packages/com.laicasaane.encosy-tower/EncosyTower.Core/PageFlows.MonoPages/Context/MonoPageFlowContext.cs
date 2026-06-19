@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using EncosyTower.Common;
 using EncosyTower.Ids;
@@ -65,13 +66,13 @@ namespace EncosyTower.PageFlows.MonoPages
 #if UNITY_6000_2_OR_NEWER
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => messageScope == MonoMessageScope.Component
-                ? new(new((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, (int)Owner.GetEntityId()))
-                : new(new((Id<GameObject>)Type<GameObject>.Id, (int)Owner.gameObject.GetEntityId()));
+                ? GetScope((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, Owner.GetEntityId())
+                : GetScope((Id<GameObject>)Type<GameObject>.Id, Owner.gameObject.GetEntityId());
 #else
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => messageScope == MonoMessageScope.Component
-                ? new(new((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, Owner.GetInstanceID()))
-                : new(new((Id<GameObject>)Type<GameObject>.Id, Owner.gameObject.GetInstanceID()));
+                ? GetScope((Id<MonoPageFlow>)Type<MonoPageFlow>.Id, Owner.GetInstanceID())
+                : GetScope((Id<GameObject>)Type<GameObject>.Id, Owner.gameObject.GetInstanceID());
 #endif
         }
 
@@ -189,6 +190,31 @@ namespace EncosyTower.PageFlows.MonoPages
             logContext.GetLogger(context.logEnvironment).LogError(
                 "Addressables is not installed. Mono Page Loader will use Resources instead."
             );
+        }
+#endif
+
+#if !UNITY_6000_2_OR_NEWER
+        private static PageFlowScope GetScope(Id id, InstanceID instanceID)
+        {
+            return new(new(id, (int)instanceID, default));
+        }
+#else
+        private static PageFlowScope GetScope(Id id, EntityId entityId)
+        {
+            var id2 = new Id2EntityIdUnion(entityId).id2;
+            return new(new(id, id2.X, id2.Y));
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct Id2EntityIdUnion
+        {
+            [FieldOffset(0)] public EntityId entityId;
+            [FieldOffset(0)] public Id2 id2;
+
+            public Id2EntityIdUnion(EntityId entityId) : this()
+            {
+                this.entityId = entityId;
+            }
         }
 #endif
     }

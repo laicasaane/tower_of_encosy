@@ -3,12 +3,10 @@
 using System.Threading;
 using EncosyTower.Ids;
 using EncosyTower.PubSub;
-using EncosyTower.TypeWraps;
 
 namespace EncosyTower.PageFlows
 {
-    [WrapRecord]
-    public readonly partial record struct PageFlowScope(Id2 Value);
+    public readonly partial record struct PageFlowScope(Id3 Value);
 
     public readonly record struct AttachPageMessage(IPageFlow Flow, IPage Page, CancellationToken Token) : IMessage;
 
