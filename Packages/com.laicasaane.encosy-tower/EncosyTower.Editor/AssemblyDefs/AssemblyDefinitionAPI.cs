@@ -11,6 +11,12 @@ using UnityEditorInternal;
 
 namespace EncosyTower.Editor.AssemblyDefs
 {
+#if UNITY_6000_5_OR_NEWER
+    using GUID = UnityEngine.GUID;
+#else
+    using GUID = UnityEditor.GUID;
+#endif
+
     public static class AssemblyDefinitionAPI
     {
         private const string NO_ASMDEF_MSG = "No assembly definition found in the project.";

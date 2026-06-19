@@ -2,11 +2,16 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using UnityEditor;
 using UnityEditorInternal;
 
 namespace EncosyTower.Editor.AssemblyDefs
 {
+#if UNITY_6000_5_OR_NEWER
+    using GUID = UnityEngine.GUID;
+#else
+    using GUID = UnityEditor.GUID;
+#endif
+
     public class AssemblyReferenceData
     {
         public GUID guid;
