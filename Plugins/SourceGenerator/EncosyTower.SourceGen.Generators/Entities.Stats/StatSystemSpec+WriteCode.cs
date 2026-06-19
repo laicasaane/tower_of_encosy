@@ -52,6 +52,8 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
         private const string RO_SPAN_MODIFIER_XML = "S.ReadOnlySpan{TStatModifier}";
         private const string RO_SPAN_STAT_XML = "S.ReadOnlySpan{TStat}";
 
+        private const string NATIVE_ARRAY_STAT_RO = "UC.NativeArray<Stat>.ReadOnly";
+
         private const string STAT_SINGLE = $"ETES.StatSingle";
         private const string MODIFIER_RANGE = $"ETES.ModifierRange";
         private const string OBSERVER_RANGE = $"ETES.ObserverRange";
@@ -1828,7 +1830,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(ENTITY).Print(", ").Print(LOOKUP_STAT_XML)
                     .PrintEndLine(")\"/>");
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public static ").Print(RO_SPAN_STAT).Print(" GetStats(")
+                p.PrintBeginLine("public static ").Print(NATIVE_ARRAY_STAT_RO).Print(" GetStats(")
                     .Print(ENTITY).Print(" entity, ").Print(LOOKUP_STAT).PrintEndLine(" lookupStats)");
                 p.WithIncreasedIndent()
                     .PrintBeginLine("=> ").Print(STAT_API)
@@ -2181,7 +2183,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(ENTITY)
                     .PrintEndLine(")\"/>");
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public readonly ").Print(RO_SPAN_STAT).Print(" GetStats(")
+                p.PrintBeginLine("public readonly ").Print(NATIVE_ARRAY_STAT_RO).Print(" GetStats(")
                     .Print(ENTITY).PrintEndLine(" entity)");
                 p.WithIncreasedIndent()
                     .PrintLine("=> this.accessor.GetStats(entity);");
@@ -2667,7 +2669,7 @@ namespace EncosyTower.SourceGen.Generators.Entities.Stats
                     .Print(ENTITY)
                     .PrintEndLine(")\"/>");
                 p.PrintLine(AGGRESSIVE_INLINING);
-                p.PrintBeginLine("public readonly ").Print(RO_SPAN_STAT).Print(" GetStats(")
+                p.PrintBeginLine("public readonly ").Print(NATIVE_ARRAY_STAT_RO).Print(" GetStats(")
                     .Print(ENTITY).PrintEndLine(" entity)");
                 p.WithIncreasedIndent()
                     .PrintLine("=> this.accessor.GetStats(entity);");
