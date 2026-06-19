@@ -4,42 +4,30 @@ namespace EncosyTower.Ids
     using System.Buffers;
     using System.ComponentModel;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
+    using EncosyTower.Common;
     using EncosyTower.Conversion;
     using EncosyTower.Serialization;
     using UnityEngine;
 
     [Serializable]
-    [StructLayout(LayoutKind.Explicit)]
     [TypeConverter(typeof(TypeConverter))]
     public partial struct Id2
         : IEquatable<Id2>
-        , IComparable<Id2>
-        , IComparable
         , ITryParse<Id2>
         , ITryParseSpan<Id2>
         , ISpanFormattable
     {
-        [FieldOffset(0), SerializeField, HideInInspector]
-        private ulong _value;
+        [SerializeField, HideInInspector]
+        private Id _x;
 
-        [FieldOffset(0), NonSerialized]
-        private readonly Id _y;
-
-        [FieldOffset(4), NonSerialized]
-        private readonly Id _x;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Id2(ulong value) : this()
-        {
-            _value = value;
-        }
+        [SerializeField, HideInInspector]
+        private Id _y;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Id2(Id x, Id y) : this()
         {
-            _y = y;
             _x = x;
+            _y = y;
         }
 
         public readonly Id X
@@ -63,7 +51,7 @@ namespace EncosyTower.Ids
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(Id2 other)
-            => _value == other._value;
+            => _x == other._x && _y == other._y;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override bool Equals(object obj)
@@ -71,15 +59,7 @@ namespace EncosyTower.Ids
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
-            => _value.GetHashCode();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int CompareTo(Id2 other)
-            => _value.CompareTo(other._value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int CompareTo(object obj)
-            => obj is Id2 other ? CompareTo(other) : 1;
+            => HashValue.Combine(_x, _y);
 
         public readonly bool TryFormat(
               Span<char> destination
@@ -188,36 +168,16 @@ namespace EncosyTower.Ids
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator ulong(in Id2 id)
-            => id._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Id2(in (Id x, Id y) tuple)
             => new(tuple.x, tuple.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(in Id2 left, in Id2 right)
-            => left._value == right._value;
+            => left.Equals(right);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(in Id2 left, in Id2 right)
-            => left._value != right._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(in Id2 left, in Id2 right)
-            => left._value > right._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator >=(in Id2 left, in Id2 right)
-            => left._value >= right._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(in Id2 left, in Id2 right)
-            => left._value < right._value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator <=(in Id2 left, in Id2 right)
-            => left._value <= right._value;
+            => !left.Equals(right);
 
         public sealed class TypeConverter : ParsableStructConverter<Id2>
         {
