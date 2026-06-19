@@ -722,7 +722,7 @@ namespace EncosyTower.Entities.Stats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<TStat> GetStats<TValuePair, TStat>(
+        public static NativeArray<TStat>.ReadOnly GetStats<TValuePair, TStat>(
               Entity entity
             , BufferLookup<TStat> lookupStats
         )
