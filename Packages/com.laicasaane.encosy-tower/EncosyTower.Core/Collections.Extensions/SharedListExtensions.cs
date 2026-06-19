@@ -167,7 +167,7 @@ namespace EncosyTower.Collections.Extensions
                 , "index and count do not denote a valid range in the SharedList<T, TNative>"
             );
 
-            return self.AsReadOnlySpan().BinarySearch(item, comparer);
+            return MemoryExtensions.BinarySearch(self.AsReadOnlySpan(), item, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -202,7 +202,7 @@ namespace EncosyTower.Collections.Extensions
                 , "index and count do not denote a valid range in the SharedList<T, TNative>"
             );
 
-            return self.AsReadOnlySpan().BinarySearch(item, comparer);
+            return MemoryExtensions.BinarySearch(self.AsReadOnlySpan(), item, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
