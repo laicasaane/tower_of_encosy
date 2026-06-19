@@ -9,10 +9,19 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.AssetKeys;
+using EncosyTower.AtlasedSprites;
 using EncosyTower.Ids;
+using EncosyTower.ResourceKeys;
+using EncosyTower.StringIds;
 using EncosyTower.Types.Internals;
+using EncosyTower.Variants;
 using UnityEngine;
 using UnityEngine.Scripting;
+
+#if UNITY_ADDRESSABLES
+using EncosyTower.AddressableKeys;
+#endif
 
 namespace EncosyTower.Types
 {
@@ -83,8 +92,17 @@ namespace EncosyTower.Types
             GetInfo<Id>();
             GetInfo<Id2>();
             GetInfo<Id3>();
+            GetInfo<StringId>();
             GetInfo<TypeId>();
             GetInfo<TypeInfo>();
+            GetInfo<Variant>();
+            GetInfo<AssetKey>();
+            GetInfo<AtlasedSpriteKey>();
+            GetInfo<ResourceKey>();
+
+#if UNITY_ADDRESSABLES
+            GetInfo<AddressableKey>();
+#endif
         }
 
         [Preserve]
