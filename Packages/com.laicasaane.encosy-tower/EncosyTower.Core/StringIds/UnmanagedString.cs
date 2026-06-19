@@ -113,8 +113,8 @@ namespace EncosyTower.StringIds
             => _value.CompareTo(other._value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<byte> AsSpan()
-            => _value.AsSpan();
+        public readonly unsafe Span<byte> AsSpan()
+            => new(_value.GetUnsafePtr(), _value.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ReadOnlySpan<byte> AsReadOnlySpan()

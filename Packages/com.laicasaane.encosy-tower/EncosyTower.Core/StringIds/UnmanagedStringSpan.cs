@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace EncosyTower.StringIds
 {
-    public readonly ref struct UnmanagedStringSpan
+    internal readonly ref struct UnmanagedStringSpan
     {
         private readonly ReadOnlySpan<Range> _ranges;
         private readonly ReadOnlySpan<byte> _buffer;
@@ -22,25 +22,8 @@ namespace EncosyTower.StringIds
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnmanagedStringSpan Slice(int start)
-            => new(_ranges[start..], _buffer);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnmanagedStringSpan Slice(int start, int length)
             => new(_ranges.Slice(start, length), _buffer);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TrySlice(int start, out UnmanagedStringSpan span)
-        {
-            if ((uint)start > (uint)Length)
-            {
-                span = this;
-                return false;
-            }
-
-            span = this[start..];
-            return true;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TrySlice(int start, int length, out UnmanagedStringSpan span)
@@ -64,10 +47,6 @@ namespace EncosyTower.StringIds
             => CopyTo(0, destination, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
-            => CopyTo(sourceStartIndex, destination, Length);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
             => Copy(Slice(sourceStartIndex, length), destination[..length]);
 
@@ -78,10 +57,6 @@ namespace EncosyTower.StringIds
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryCopyTo(Span<UnmanagedString> destination, int length)
             => TryCopyTo(0, destination, length);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination)
-            => TryCopyTo(sourceStartIndex, destination, Length);
 
         public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
         {

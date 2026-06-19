@@ -118,10 +118,6 @@ namespace EncosyTower.StringIds
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public UnmanagedStringSpan GetUnmanagedStringSpan()
-                => new(_unmanagedStringRanges.AsReadOnlySpan()[1..Count], _unmanagedStringBuffer.AsReadOnlySpan());
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CopyTo(Span<UnmanagedString> destination)
                 => CopyTo(destination, Count);
 
@@ -135,7 +131,8 @@ namespace EncosyTower.StringIds
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
-                => GetUnmanagedStringSpan().CopyTo(sourceStartIndex, destination, length);
+                => new UnmanagedStringSpan(_unmanagedStringRanges.AsReadOnlySpan()[1..Count], _unmanagedStringBuffer.AsReadOnlySpan())
+                    .CopyTo(sourceStartIndex, destination, length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool TryCopyTo(Span<UnmanagedString> destination)
@@ -151,7 +148,8 @@ namespace EncosyTower.StringIds
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool TryCopyTo(int sourceStartIndex, Span<UnmanagedString> destination, int length)
-                => GetUnmanagedStringSpan().TryCopyTo(sourceStartIndex, destination, length);
+                => new UnmanagedStringSpan(_unmanagedStringRanges.AsReadOnlySpan()[1..Count], _unmanagedStringBuffer.AsReadOnlySpan())
+                    .TryCopyTo(sourceStartIndex, destination, length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator GetEnumerator()
