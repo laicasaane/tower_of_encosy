@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.AssetKeys;
@@ -7,6 +8,8 @@ using UnityEngine.U2D;
 
 namespace EncosyTower.AtlasedSprites
 {
+    using Error = AtlasedSpriteKeyError;
+
     public static partial class AtlasedSpriteKeyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -36,10 +39,26 @@ namespace EncosyTower.AtlasedSprites
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<Sprite> TryGetSprite([NotNull] this SpriteAtlas atlas, AssetKey<Sprite> name)
         {
-            if (atlas == false || name.IsValid == false) return Option.None;
+            var result = GetSpriteOrError(atlas, name);
+            return result.Value;
+        }
 
-            var sprite = atlas.GetSprite(name.Value);
-            return Option.SomeIf(sprite, sprite);
+        public static Result<Sprite, Error> GetSpriteOrError([NotNull] this SpriteAtlas atlas, AssetKey<Sprite> name)
+        {
+            if (name.IsValid == false)
+            {
+                return Error.InvalidSpriteKey((AssetKey)name);
+            }
+
+            try
+            {
+                var sprite = atlas.GetSprite(name.Value);
+                return sprite;
+            }
+            catch (Exception ex)
+            {
+                return Error.SpriteException((AssetKey)name, ex);
+            }
         }
     }
 }

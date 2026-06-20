@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Loaders;
@@ -6,15 +7,24 @@ using UnityEngine;
 
 namespace EncosyTower.ResourceKeys
 {
-    partial struct ResourceKey<T> : ILoad<T>, ITryLoad<T>
+    using Error = ResourceKeyError;
+
+    partial struct ResourceKey<T> : ILoad<T>, ITryLoad<T>, ILoadOrError<T, Error>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly T Load()
             => TryLoad().GetValueOrDefault();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Option<T> TryLoad()
+            => LoadOrError().Value;
+
+        public readonly Result<T, Error> LoadOrError()
         {
-            if (IsValid == false) return Option.None;
+            if (IsValid == false)
+            {
+                return Error.InvalidKey((ResourceKey)this);
+            }
 
             try
             {
@@ -24,13 +34,13 @@ namespace EncosyTower.ResourceKeys
                 {
                     return obj;
                 }
-            }
-            catch
-            {
-                // ignored
-            }
 
-            return Option.None;
+                return Error.InvalidObject((ResourceKey)this);
+            }
+            catch (Exception ex)
+            {
+                return Error.Exception((ResourceKey)this, ex);
+            }
         }
     }
 }

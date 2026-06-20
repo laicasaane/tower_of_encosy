@@ -1,5 +1,6 @@
 #if UNITY_ADDRESSABLES
 
+using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.Loaders;
@@ -8,46 +9,83 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace EncosyTower.AddressableKeys
 {
-    partial struct AddressableKey<T> : ILoad<T>, ITryLoad<T>
+    using Error = AddressableKeyError;
+
+    partial struct AddressableKey<T> : ILoad<T>, ITryLoad<T>, ILoadOrError<T, Error>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly T Load()
             => TryLoad().GetValueOrDefault();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly (T, AsyncOperationHandle<T>) LoadGetHandle()
+        public readonly ValueHandlePair<T> LoadGetHandle()
             => TryLoadGetHandle().GetValueOrDefault();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Option<T> TryLoad()
         {
             var result = TryLoadGetHandle();
-            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Value);
         }
 
-        public readonly Option<(T, AsyncOperationHandle<T>)> TryLoadGetHandle()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Result<T, Error> LoadOrError()
+        {
+            var result = LoadGetHandleOrError();
+
+            if (result.TryGetValue(out var value))
+            {
+                return value.Value;
+            }
+
+            if (result.TryGetError(out var error))
+            {
+                return error;
+            }
+
+            return Error.Undefined((AddressableKey)this);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Option<ValueHandlePair<T>> TryLoadGetHandle()
+            => LoadGetHandleOrError().Value;
+
+        public readonly Result<ValueHandlePair<T>, Error> LoadGetHandleOrError()
         {
             if (IsValid == false)
             {
-                return Option.None;
+                return Error.InvalidKey((AddressableKey)this);
             }
 
-            var handle = Addressables.LoadAssetAsync<T>(Value.Value);
-            var asset = handle.WaitForCompletion();
-
-            if (handle.IsValid() == false || handle.Status != AsyncOperationStatus.Succeeded)
+            try
             {
+                var handle = Addressables.LoadAssetAsync<T>(Value.Value);
+                var asset = handle.WaitForCompletion();
+
+                if (handle.IsValid() == false)
+                {
+                    handle.TryRelease();
+                    return Error.InvalidHandle((AddressableKey)this);
+                }
+
+                if (handle.Status != AsyncOperationStatus.Succeeded)
+                {
+                    handle.TryRelease();
+                    return Error.FailedStatus((AddressableKey)this, handle.Status);
+                }
+
+                if (asset is UnityEngine.Object obj && obj || asset != null)
+                {
+                    return new ValueHandlePair<T>(asset, handle);
+                }
+
                 handle.TryRelease();
-                return Option.None;
+                return Error.InvalidObject((AddressableKey)this);
             }
-
-            if (asset is UnityEngine.Object obj && obj || asset != null)
+            catch (Exception ex)
             {
-                return (asset, handle);
+                return Error.Exception((AddressableKey)this, ex);
             }
-
-            handle.TryRelease();
-            return Option.None;
         }
     }
 }

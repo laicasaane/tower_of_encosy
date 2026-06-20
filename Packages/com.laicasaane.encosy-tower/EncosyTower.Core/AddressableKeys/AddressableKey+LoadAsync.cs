@@ -8,10 +8,13 @@ using EncosyTower.Loaders;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using EncosyTower.Tasks;
+using System;
 
 namespace EncosyTower.AddressableKeys
 {
-    partial struct AddressableKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
+    using Error = AddressableKeyError;
+
+    partial struct AddressableKey<T> : ILoadAsync<T>, ITryLoadAsync<T>, ILoadOrErrorAsync<T, Error>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly async
@@ -29,9 +32,9 @@ namespace EncosyTower.AddressableKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly async
 #if UNITASK
-            Cysharp.Threading.Tasks.UniTask<(T, AsyncOperationHandle<T>)>
+            Cysharp.Threading.Tasks.UniTask<ValueHandlePair<T>>
 #else
-            UnityEngine.Awaitable<T>
+            UnityEngine.Awaitable<ValueHandlePair<T>>
 #endif
             LoadGetHandleAsync(CancellationToken token = default)
         {
@@ -39,6 +42,7 @@ namespace EncosyTower.AddressableKeys
             return result.GetValueOrDefault();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly async
 #if UNITASK
             Cysharp.Threading.Tasks.UniTask<Option<T>>
@@ -48,66 +52,110 @@ namespace EncosyTower.AddressableKeys
             TryLoadAsync(CancellationToken token = default)
         {
             var result = await TryLoadGetHandleAsync(token);
-            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<Result<T, Error>>
+#else
+            UnityEngine.Awaitable<Result<T, Error>>
+#endif
+            LoadOrErrorAsync(CancellationToken token = default)
+        {
+            var result = await LoadGetHandleOrErrorAsync(token);
+
+            if (result.TryGetValue(out var value))
+            {
+                return value.Value;
+            }
+
+            if (result.TryGetError(out var error))
+            {
+                return error;
+            }
+
+            return Error.Undefined((AddressableKey)this);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly async
+#if UNITASK
+    Cysharp.Threading.Tasks.UniTask<Option<ValueHandlePair<T>>>
+#else
+            UnityEngine.Awaitable<Option<ValueHandlePair<T>>>
+#endif
+            TryLoadGetHandleAsync(CancellationToken token = default)
+        {
+            var result = await LoadGetHandleOrErrorAsync(token);
+            return result.Value;
         }
 
         public readonly async
 #if UNITASK
-            Cysharp.Threading.Tasks.UniTask<Option<(T, AsyncOperationHandle<T>)>>
+            Cysharp.Threading.Tasks.UniTask<Result<ValueHandlePair<T>, Error>>
 #else
-            UnityEngine.Awaitable<Option<T>>
+            UnityEngine.Awaitable<Result<ValueHandlePair<T>, Error>>
 #endif
-            TryLoadGetHandleAsync(CancellationToken token = default)
+            LoadGetHandleOrErrorAsync(CancellationToken token = default)
         {
             if (IsValid == false)
             {
-                return Option.None;
+                return Error.InvalidKey((AddressableKey)this);
             }
 
-            var handle = Addressables.LoadAssetAsync<T>(Value.Value);
-
-            if (handle.IsValid() == false)
+            try
             {
-                handle.TryRelease();
-                return Option.None;
-            }
+                var handle = Addressables.LoadAssetAsync<T>(Value.Value);
 
-            while (handle.IsDone == false)
-            {
-                if (token.IsCancellationRequested)
+                if (handle.IsValid() == false)
                 {
-                    break;
+                    handle.TryRelease();
+                    return Error.InvalidHandle((AddressableKey)this);
                 }
 
-                await UnityTasks.NextFrameAsync(token);
+                while (handle.IsDone == false)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    await UnityTasks.NextFrameAsync(token);
+
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                }
 
                 if (token.IsCancellationRequested)
                 {
-                    break;
+                    handle.TryRelease();
+                    return Error.CancelledRequest((AddressableKey)this);
                 }
-            }
 
-            if (token.IsCancellationRequested)
-            {
+                if (handle.Status != AsyncOperationStatus.Succeeded)
+                {
+                    handle.TryRelease();
+                    return Error.FailedStatus((AddressableKey)this, handle.Status);
+                }
+
+                var asset = handle.Result;
+
+                if ((asset is UnityEngine.Object obj && obj) || asset != null)
+                {
+                    return new ValueHandlePair<T>(asset, handle);
+                }
+
                 handle.TryRelease();
-                return Option.None;
+                return Error.InvalidObject((AddressableKey)this);
             }
-
-            if (handle.Status != AsyncOperationStatus.Succeeded)
+            catch (Exception ex)
             {
-                handle.TryRelease();
-                return Option.None;
+                return Error.Exception((AddressableKey)this, ex);
             }
-
-            var asset = handle.Result;
-
-            if ((asset is UnityEngine.Object obj && obj) || asset != null)
-            {
-                return (asset, handle);
-            }
-
-            handle.TryRelease();
-            return Option.None;
         }
     }
 }

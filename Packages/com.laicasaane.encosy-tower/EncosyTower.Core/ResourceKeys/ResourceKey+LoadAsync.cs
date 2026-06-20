@@ -1,5 +1,6 @@
 #if UNITASK || UNITY_6000_0_OR_NEWER
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using EncosyTower.Common;
@@ -10,7 +11,9 @@ using UnityEngine;
 
 namespace EncosyTower.ResourceKeys
 {
-    partial struct ResourceKey<T> : ILoadAsync<T>, ITryLoadAsync<T>
+    using Error = ResourceKeyError;
+
+    partial struct ResourceKey<T> : ILoadAsync<T>, ITryLoadAsync<T>, ILoadOrErrorAsync<T, Error>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly async
@@ -25,6 +28,7 @@ namespace EncosyTower.ResourceKeys
             return result.GetValueOrDefault();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly async
 #if UNITASK
             Cysharp.Threading.Tasks.UniTask<Option<T>>
@@ -33,18 +37,33 @@ namespace EncosyTower.ResourceKeys
 #endif
             TryLoadAsync(CancellationToken token = default)
         {
-            if (IsValid == false) return Option.None;
+            var result = await LoadOrErrorAsync(token);
+            return result.Value;
+        }
+
+        public readonly async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<Result<T, ResourceKeyError>>
+#else
+            UnityEngine.Awaitable<Result<T, ResourceKeyError>>
+#endif
+             LoadOrErrorAsync(CancellationToken token = default)
+        {
+            if (IsValid == false)
+            {
+                return Error.InvalidKey((ResourceKey)this);
+            }
 
             try
             {
-                var handle = Resources.LoadAsync<T>(Value.Value);
+                var request = Resources.LoadAsync<T>(Value.Value);
 
-                if (handle == null)
+                if (request == null)
                 {
-                    return Option.None;
+                    return Error.InvalidRequest((ResourceKey)this);
                 }
 
-                while (handle.isDone == false)
+                while (request.isDone == false)
                 {
                     if (token.IsCancellationRequested)
                     {
@@ -61,22 +80,27 @@ namespace EncosyTower.ResourceKeys
 
                 if (token.IsCancellationRequested)
                 {
-                    return Option.None;
+                    return Error.CancelledRequest((ResourceKey)this);
                 }
 
-                var obj = handle.asset;
+                var obj = request.asset;
 
-                if (obj is T asset && asset.IsValid())
+                if (obj.IsInvalid())
+                {
+                    return Error.InvalidObject((ResourceKey)this);
+                }
+
+                if (obj.AssumeValid() is T asset)
                 {
                     return asset;
                 }
-            }
-            catch
-            {
-                // ignored
-            }
 
-            return Option.None;
+                return Error.InvalidObjectOfType((ResourceKey)this, typeof(T), obj.GetType());
+            }
+            catch (Exception ex)
+            {
+                return Error.Exception((ResourceKey)this, ex);
+            }
         }
     }
 }

@@ -11,8 +11,11 @@ using UnityEngine.U2D;
 
 namespace EncosyTower.AtlasedSprites
 {
+    using Error = AtlasedSpriteKeyError;
+    using ValueHandlePair = ValueHandlePair<Sprite, SpriteAtlas>;
+
     [Serializable]
-    public partial struct AtlasedSpriteKeyAddressables : ILoad<Sprite>, ITryLoad<Sprite>
+    public partial struct AtlasedSpriteKeyAddressables : ILoad<Sprite>, ITryLoad<Sprite>, ILoadOrError<Sprite, Error>
         , IEquatable<AtlasedSpriteKeyAddressables>
     {
         [SerializeField] private AssetKey<SpriteAtlas> _atlas;
@@ -23,6 +26,12 @@ namespace EncosyTower.AtlasedSprites
         {
             _atlas = value.Atlas;
             _sprite = value.Sprite;
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _atlas.IsValid && _sprite.IsValid;
         }
 
         public readonly AddressableKey<SpriteAtlas> Atlas
@@ -73,22 +82,81 @@ namespace EncosyTower.AtlasedSprites
         public readonly Sprite Load()
             => TryLoad().GetValueOrDefault();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ValueHandlePair LoadGetHandle()
+            => TryLoadGetHandle().GetValueOrDefault();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Option<Sprite> TryLoad()
         {
-            if (_atlas.IsValid == false || _sprite.IsValid == false)
+            var result = TryLoadGetHandle();
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Result<Sprite, Error> LoadOrError()
+        {
+            var result = LoadGetHandleOrError();
+
+            if (result.TryGetValue(out var value))
             {
-                return Option.None;
+                return value.Value;
             }
 
-            var atlasOpt = Atlas.TryLoad();
-            return atlasOpt.HasValue ? atlasOpt.GetValueOrThrow().TryGetSprite(_sprite) : Option.None;
+            if (result.TryGetError(out var error))
+            {
+                return error;
+            }
+
+            return Error.Undefined();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Option<ValueHandlePair> TryLoadGetHandle()
+        {
+            var result = LoadGetHandleOrError();
+            return result.Value;
+        }
+
+        public readonly Result<ValueHandlePair, Error> LoadGetHandleOrError()
+        {
+            if (IsValid == false)
+            {
+                return Error.InvalidKey((AtlasedSpriteKey)this);
+            }
+
+            var atlasResult = Atlas.LoadGetHandleOrError();
+
+            if (atlasResult.TryGetError(out var atlasError))
+            {
+                return Error.From(atlasError, (AtlasedSpriteKey)this);
+            }
+
+            if (atlasResult.TryGetValue(out var atlasValue) == false)
+            {
+                return Error.Undefined((AtlasedSpriteKey)this);
+            }
+
+            var spriteResult = atlasValue.Value.GetSpriteOrError(_sprite);
+
+            if (spriteResult.TryGetValue(out var spriteValue))
+            {
+                return new ValueHandlePair(spriteValue, atlasValue.Handle);
+            }
+
+            if (spriteResult.TryGetError(out var spriteError))
+            {
+                return spriteError;
+            }
+
+            return Error.Undefined((AtlasedSpriteKey)this);
         }
     }
 
     public static partial class AtlasedSpriteKeyExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static AtlasedSpriteKeyAddressables ViaAddressables(this AtlasedSpriteKey value)
+        public static AtlasedSpriteKeyAddressables AsAddressable(this AtlasedSpriteKey value)
             => value;
     }
 }

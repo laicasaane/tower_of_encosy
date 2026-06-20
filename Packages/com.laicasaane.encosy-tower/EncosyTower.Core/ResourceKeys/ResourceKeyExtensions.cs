@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.AssetKeys;
 using EncosyTower.Common;
@@ -7,6 +8,7 @@ using UnityEngine;
 namespace EncosyTower.ResourceKeys
 {
     using UnityObject = UnityEngine.Object;
+    using Error = ResourceKeyError;
 
     public static partial class ResourceKeyExtensions
     {
@@ -27,6 +29,43 @@ namespace EncosyTower.ResourceKeys
             => ((ResourceKey<T>)key).TryLoad();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<T, Error> LoadOrError<T>(this ResourceKey key) where T : UnityObject
+            => ((ResourceKey<T>)key).LoadOrError();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GameObject Instantiate(
+              this ResourceKey key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+        {
+            return ((ResourceKey<GameObject>)key).Instantiate(parent, inWorldSpace, trimCloneSuffix);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<GameObject> TryInstantiate(
+              this ResourceKey key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+        {
+            return ((ResourceKey<GameObject>)key).TryInstantiate(parent, inWorldSpace, trimCloneSuffix);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<GameObject, Error> InstantiateOrError(
+              this ResourceKey key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+        {
+            return ((ResourceKey<GameObject>)key).InstantiateOrError(parent, inWorldSpace, trimCloneSuffix);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GameObject Instantiate(
               this ResourceKey<GameObject> key
             , TransformOrScene parent = default
@@ -34,8 +73,8 @@ namespace EncosyTower.ResourceKeys
             , bool trimCloneSuffix = false
         )
         {
-            return InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix)
-                .GetValueOrDefault();
+            var result = InstantiateOrError(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.Value.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,8 +86,8 @@ namespace EncosyTower.ResourceKeys
         )
             where TComponent : Component
         {
-            var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
-            return result.HasValue ? result.GetValueOrThrow().GetComponent<TComponent>() : default;
+            var result = InstantiateOrError<TComponent>(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.Value.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -59,7 +98,8 @@ namespace EncosyTower.ResourceKeys
             , bool trimCloneSuffix = false
         )
         {
-            return InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
+            var result = InstantiateOrError(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.Value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,52 +111,111 @@ namespace EncosyTower.ResourceKeys
         )
             where TComponent : Component
         {
-            var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
+            var result = InstantiateOrError<TComponent>(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.Value;
+        }
 
-            if (result.HasValue)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Result<GameObject, Error> InstantiateOrError(
+              this ResourceKey<GameObject> key
+            , TransformOrScene parent
+            , bool inWorldSpace
+            , bool trimCloneSuffix
+        )
+        {
+            var result = InstantiateOrErrorInternal(key, parent, inWorldSpace, trimCloneSuffix);
+
+            if (result.TryGetValue(out var value))
             {
-                if (result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp))
-                {
-                    return comp;
-                }
+                return value.Instanced;
             }
 
-            return Option.None;
+            if (result.TryGetError(out var error))
+            {
+                return error;
+            }
+
+            return Error.Undefined((ResourceKey)key);
         }
-        private static Option<GameObject> InstantiateInternal(
+
+        public static Result<TComponent, Error> InstantiateOrError<TComponent>(
+              this ResourceKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+            where TComponent : Component
+        {
+            var result = InstantiateOrErrorInternal(key, parent, inWorldSpace, trimCloneSuffix);
+
+            if (result.TryGetError(out var error))
+            {
+                return error;
+            }
+
+            if (result.TryGetValue(out var value) == false)
+            {
+                return Error.InvalidObject((ResourceKey)key);
+            }
+
+            if (value.Instanced.TryGetComponent<TComponent>(out var comp))
+            {
+                return comp;
+            }
+
+            UnityObject.Destroy(value.Instanced);
+            return Error.MissingComponent((ResourceKey)key, value.Prefab, typeof(TComponent));
+        }
+
+        private static Result<InstancedAndPrefab, Error> InstantiateOrErrorInternal(
               ResourceKey<GameObject> key
             , TransformOrScene parent
             , bool inWorldSpace
             , bool trimCloneSuffix
         )
         {
-            if (key.IsValid == false) return Option.None;
-
-            var goOpt = key.TryLoad();
-
-            if (goOpt.HasValue == false || goOpt.TryGetValue(out var prefab) == false)
+            if (key.IsValid == false)
             {
-                return Option.None;
+                return Error.InvalidKey((ResourceKey)key);
             }
 
-            var go = UnityObject.Instantiate(prefab, parent.Transform, inWorldSpace);
+            var loadResult = key.LoadOrError();
 
-            if (go.IsInvalid())
+            if (loadResult.TryGetError(out var loadError))
             {
-                return Option.None;
+                return loadError;
             }
 
-            if (parent is { IsValid: true, IsScene: true })
+            if (loadResult.TryGetValue(out var prefab) == false)
             {
-                go.MoveToScene(parent.Scene);
+                return Error.InvalidObject((ResourceKey)key);
             }
 
-            if (trimCloneSuffix)
+            try
             {
-                go.TrimCloneSuffix();
-            }
+                var go = UnityObject.Instantiate(prefab, parent.Transform, inWorldSpace);
 
-            return go;
+                if (go.IsInvalid())
+                {
+                    return Error.InvalidInstantiation((ResourceKey)key, prefab);
+                }
+
+                if (parent is { IsValid: true, IsScene: true })
+                {
+                    go.MoveToScene(parent.Scene);
+                }
+
+                if (trimCloneSuffix)
+                {
+                    go.TrimCloneSuffix();
+                }
+
+                return new InstancedAndPrefab(go, prefab);
+            }
+            catch (Exception ex)
+            {
+                return Error.Exception((ResourceKey)key, ex);
+            }
         }
     }
 }
