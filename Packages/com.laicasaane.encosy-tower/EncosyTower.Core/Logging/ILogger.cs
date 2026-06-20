@@ -1,8 +1,8 @@
+using System;
+
 namespace EncosyTower.Logging
 {
-    using System;
-
-    public partial interface ILogger
+    public interface ILogger
     {
         void LogException(Exception value);
 
@@ -19,24 +19,3 @@ namespace EncosyTower.Logging
         void LogErrorFormat(string format, params object[] args);
     }
 }
-
-#if UNITY_COLLECTIONS
-
-namespace EncosyTower.Logging
-{
-    using Unity.Collections;
-
-    partial interface ILogger
-    {
-        void LogFixedInfo<TFixedString>(in TFixedString message)
-            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes;
-
-        void LogFixedWarning<TFixedString>(in TFixedString message)
-            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes;
-
-        void LogFixedError<TFixedString>(in TFixedString message)
-            where TFixedString : unmanaged, INativeList<byte>, IUTF8Bytes;
-    }
-}
-
-#endif

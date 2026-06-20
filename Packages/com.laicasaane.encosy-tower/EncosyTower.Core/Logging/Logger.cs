@@ -5,7 +5,7 @@ namespace EncosyTower.Logging
     using System.Runtime.CompilerServices;
     using UnityEngine;
 
-    public partial class Logger : ILogger
+    public partial class Logger : ILogger, IUnityLogger
     {
         public static readonly Logger Default = new();
 
@@ -50,6 +50,48 @@ namespace EncosyTower.Logging
         {
             StaticLogger.LogErrorFormat(format, args);
         }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogException(UnityEngine.Object context, Exception value)
+        {
+            StaticLogger.LogException(context, value);
+        }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogInfo(UnityEngine.Object context, object message)
+        {
+            StaticLogger.LogInfo(context, message);
+        }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogInfoFormat(UnityEngine.Object context, string format, params object[] args)
+        {
+            StaticLogger.LogInfoFormat(context, format, args);
+        }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogWarning(UnityEngine.Object context, object message)
+        {
+            StaticLogger.LogWarning(context, message);
+        }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogWarningFormat(UnityEngine.Object context, string format, params object[] args)
+        {
+            StaticLogger.LogWarningFormat(context, format, args);
+        }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogError(UnityEngine.Object context, object message)
+        {
+            StaticLogger.LogError(context, message);
+        }
+
+        [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LogErrorFormat(UnityEngine.Object context, string format, params object[] args)
+        {
+            StaticLogger.LogErrorFormat(context, format, args);
+        }
     }
 }
 
@@ -62,7 +104,7 @@ namespace EncosyTower.Logging
     using Unity.Collections;
     using UnityEngine;
 
-    partial class Logger
+    partial class Logger : IFixedLogger
     {
         [HideInCallstack, StackTraceHidden, MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LogFixedInfo<TFixedString>(in TFixedString message)
