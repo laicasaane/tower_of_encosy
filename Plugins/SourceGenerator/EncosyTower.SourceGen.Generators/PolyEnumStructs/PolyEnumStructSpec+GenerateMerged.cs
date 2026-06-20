@@ -62,7 +62,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             public List<MethodDeclaration> Methods { get; } = new();
         }
 
-        public class TempCollections
+        public class DimCollections
         {
             public List<PropertyDeclaration> Properties { get; } = new();
 

@@ -24,7 +24,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         public readonly string WriteCode(in CompilationInfo compilation)
         {
-            var tempCollections = new TempCollections();
+            var dimCollection = new DimCollections();
 
             GenerateMerged(
                   out var structRefs
@@ -119,13 +119,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                     WriteConstructors(ref p, structRefs);
                     WriteUnionPattern(ref p, structRefs, compilation.enableNullable);
-                    WriteMergedProperties(ref p, mergedStructRef.PropertyDimMap, tempCollections.Properties);
-                    WriteMergedIndexers(ref p, mergedStructRef.IndexerDimMap, tempCollections.Indexers);
+                    WriteMergedProperties(ref p, mergedStructRef.PropertyDimMap, dimCollection.Properties);
+                    WriteMergedIndexers(ref p, mergedStructRef.IndexerDimMap, dimCollection.Indexers);
                     WriteImplicitOperators(ref p, structRefs, mergedStructRef.Size);
                     WriteGetValueMethods(ref p, structRefs);
                     WriteConstructFromMethods(ref p, mergedStructRef, undefinedType);
                     WriteTryGetConstructionValueMethods(ref p, mergedStructRef, undefinedType);
-                    WriteMergedMethods(ref p, mergedStructRef.MethodDimMap, tempCollections.Methods);
+                    WriteMergedMethods(ref p, mergedStructRef.MethodDimMap, dimCollection.Methods);
                     WriteAdditionalMethods(ref p, mergedStructRef);
                     WriteCastableMethods(ref p);
                 }
@@ -144,9 +144,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     p.PrintLine("private static partial class EnumCaseAPI");
                     p.OpenScope();
                     {
-                        WriteEnumCaseApiProperties(ref p, tempCollections.Properties);
-                        WriteEnumCaseApiIndexers(ref p, tempCollections.Indexers);
-                        WriteEnumCaseApiMethods(ref p, tempCollections.Methods);
+                        WriteEnumCaseApiProperties(ref p, dimCollection.Properties);
+                        WriteEnumCaseApiIndexers(ref p, dimCollection.Indexers);
+                        WriteEnumCaseApiMethods(ref p, dimCollection.Methods);
                     }
                     p.CloseScope();
                 }
