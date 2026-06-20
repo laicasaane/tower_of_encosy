@@ -1985,6 +1985,56 @@ namespace EncosyTower.SourceGen
 
             return MatchesNamespaceSpan(ns.ContainingNamespace, prefixPart, token);
         }
+
+        public static string GetDisplayNameOrDefault(
+              this ISymbol symbol
+            , string defaultValue
+            , CancellationToken token = default
+        )
+        {
+            var displayName = defaultValue;
+            Get(symbol, ref displayName, token);
+            return displayName;
+
+            static void Get(ISymbol symbol, ref string displayName, CancellationToken token)
+            {
+                token.ThrowIfCancellationRequested();
+
+                foreach (var attribute in symbol.GetAttributes())
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var attrClass = attribute.AttributeClass;
+
+                    if (attrClass is null)
+                    {
+                        continue;
+                    }
+
+                    if (attribute.ConstructorArguments.Length < 1)
+                    {
+                        continue;
+                    }
+
+                    var arg = attribute.ConstructorArguments[0];
+
+                    if (arg.Kind != TypedConstantKind.Primitive || arg.Value is not string displayNameValue)
+                    {
+                        continue;
+                    }
+
+                    switch (attrClass.Name)
+                    {
+                        case "Label":
+                        case "Description":
+                        case "Display":
+                        case "DisplayName":
+                            displayName = displayNameValue;
+                            return;
+                    }
+                }
+            }
+        }
     }
 }
 

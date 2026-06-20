@@ -885,12 +885,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             dimList.Clear();
 
+            var isReadOnly = this.isReadOnly;
+
             foreach (var kv in dimMap)
             {
                 var def = kv.Key;
                 var isDim = kv.Value;
 
-                Write(ref p, def, isDim, structs);
+                Write(ref p, isReadOnly, def, isDim, structs);
 
                 if (isDim)
                 {
@@ -900,7 +902,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             return;
 
-            static void Write(ref Printer p, PropertyDeclaration def, bool isDim, ReadOnlySpan<StructSpec> structs)
+            static void Write(
+                  ref Printer p
+                , bool isReadOnly
+                , PropertyDeclaration def
+                , bool isDim
+                , ReadOnlySpan<StructSpec> structs
+            )
             {
                 var readonlyWritten = def.IsReadOnly && def.CanHaveSetter == false;
 
@@ -932,7 +940,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                     p.PrintBeginLine("case EnumCase.").Print(structDef.identifier).PrintEndLine(":");
                                     p.OpenScope();
                                     {
-                                        WriteGetterCase(ref p, def, isDim, structDef);
+                                        WriteGetterCase(ref p, isReadOnly, def, isDim, structDef);
                                     }
                                     p.CloseScope();
                                     p.PrintEndLine();
@@ -941,7 +949,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                 p.PrintLine("default:");
                                 p.OpenScope();
                                 {
-                                    WriteGetterCase(ref p, def, isDim, structs[last]);
+                                    WriteGetterCase(ref p, isReadOnly, def, isDim, structs[last]);
                                 }
                                 p.CloseScope();
                             }
@@ -969,7 +977,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                     p.PrintBeginLine("case EnumCase.").Print(structDef.identifier).PrintEndLine(":");
                                     p.OpenScope();
                                     {
-                                        WriteSetterCase(ref p, def, isDim, structDef);
+                                        WriteSetterCase(ref p, isReadOnly, def, isDim, structDef);
                                     }
                                     p.CloseScope();
                                     p.PrintEndLine();
@@ -978,7 +986,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                 p.PrintLine("default:");
                                 p.OpenScope();
                                 {
-                                    WriteSetterCase(ref p, def, isDim, structs[last]);
+                                    WriteSetterCase(ref p, isReadOnly, def, isDim, structs[last]);
                                 }
                                 p.CloseScope();
                             }
@@ -992,11 +1000,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             }
 
             static void WriteGetterCase(
-                      ref Printer p
-                    , PropertyDeclaration def
-                    , bool isDim
-                    , StructSpec structDef
-                )
+                  ref Printer p
+                , bool isReadOnly
+                , PropertyDeclaration def
+                , bool isDim
+                , StructSpec structDef
+            )
             {
                 p.PrintBeginLine(structDef.name).Print(" enum_case = (").Print(structDef.name).PrintEndLine(")this;");
                 p.PrintBeginLine()
@@ -1016,7 +1025,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 }
                 p.PrintEndLine(";");
 
-                p.PrintLineIf(structDef.isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
+                p.PrintLineIf(isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
                 p.PrintBeginLine("return ")
                     .Print(GetAnyRef(def.refKind))
                     .PrintEndLine("result_for_enum_case;");
@@ -1024,6 +1033,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             static void WriteSetterCase(
                   ref Printer p
+                , bool isReadOnly
                 , PropertyDeclaration def
                 , bool isDim
                 , StructSpec structDef
@@ -1043,7 +1053,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     }
                 }
 
-                p.PrintLineIf(structDef.isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
+                p.PrintLineIf(isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
                 p.PrintLine("return;");
             }
         }
@@ -1056,12 +1066,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             dimList.Clear();
 
+            var isReadOnly = this.isReadOnly;
+
             foreach (var kv in dimMap)
             {
                 var def = kv.Key;
                 var isDim = kv.Value;
 
-                Write(ref p, def, isDim, structs);
+                Write(ref p, isReadOnly, def, isDim, structs);
 
                 if (isDim)
                 {
@@ -1071,7 +1083,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             return;
 
-            static void Write(ref Printer p, IndexerDeclaration def, bool isDim, ReadOnlySpan<StructSpec> structs)
+            static void Write(
+                  ref Printer p
+                , bool isReadOnly
+                , IndexerDeclaration def
+                , bool isDim
+                , ReadOnlySpan<StructSpec> structs
+            )
             {
                 var readonlyWritten = def.IsReadOnly && def.CanHaveSetter == false;
 
@@ -1106,7 +1124,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                     p.PrintBeginLine("case EnumCase.").Print(structDef.identifier).PrintEndLine(":");
                                     p.OpenScope();
                                     {
-                                        WriteGetterCase(ref p, def, isDim, structDef);
+                                        WriteGetterCase(ref p, isReadOnly, def, isDim, structDef);
                                     }
                                     p.CloseScope();
                                     p.PrintEndLine();
@@ -1115,7 +1133,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                 p.PrintLine("default:");
                                 p.OpenScope();
                                 {
-                                    WriteGetterCase(ref p, def, isDim, structs[last]);
+                                    WriteGetterCase(ref p, isReadOnly, def, isDim, structs[last]);
                                 }
                                 p.CloseScope();
                             }
@@ -1143,7 +1161,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                     p.PrintBeginLine("case EnumCase.").Print(structDef.identifier).PrintEndLine(":");
                                     p.OpenScope();
                                     {
-                                        WriteSetterCase(ref p, def, isDim, structDef);
+                                        WriteSetterCase(ref p, isReadOnly, def, isDim, structDef);
                                     }
                                     p.CloseScope();
                                     p.PrintEndLine();
@@ -1152,7 +1170,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                                 p.PrintLine("default:");
                                 p.OpenScope();
                                 {
-                                    WriteSetterCase(ref p, def, isDim, structs[last]);
+                                    WriteSetterCase(ref p, isReadOnly, def, isDim, structs[last]);
                                 }
                                 p.CloseScope();
                             }
@@ -1167,6 +1185,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             static void WriteGetterCase(
                   ref Printer p
+                , bool isReadOnly
                 , IndexerDeclaration def
                 , bool isDim
                 , StructSpec structDef
@@ -1183,7 +1202,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     WriteArguments(ref p, def.parameters);
                 }
                 p.PrintEndLineIf(isDim, ");", "];");
-                p.PrintLineIf(structDef.isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
+                p.PrintLineIf(isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
                 p.PrintBeginLine("return ")
                     .Print(GetAnyRef(def.refKind))
                     .PrintEndLine("result_for_enum_case;");
@@ -1191,6 +1210,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             static void WriteSetterCase(
                   ref Printer p
+                , bool isReadOnly
                 , IndexerDeclaration def
                 , bool isDim
                 , StructSpec structDef
@@ -1216,7 +1236,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     p.Print("]").PrintEndLine(" = value;");
                 }
 
-                p.PrintLineIf(structDef.isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
+                p.PrintLineIf(isReadOnly == false && def.getter.isReadOnly == false, "this = enum_case;");
                 p.PrintLine("return;");
             }
         }
@@ -1277,12 +1297,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             dimList.Clear();
 
+            var isReadOnly = this.isReadOnly;
+
             foreach (var kv in dimMap)
             {
                 var def = kv.Key;
                 var isDim = kv.Value;
 
-                Write(ref p, def, isDim, structs);
+                Write(ref p, isReadOnly, def, isDim, structs);
 
                 if (isDim)
                 {
@@ -1292,7 +1314,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             return;
 
-            static void Write(ref Printer p, MethodDeclaration def, bool isDim, ReadOnlySpan<StructSpec> structs)
+            static void Write(
+                  ref Printer p
+                , bool isReadOnly
+                , MethodDeclaration def
+                , bool isDim
+                , ReadOnlySpan<StructSpec> structs
+            )
             {
                 p.PrintBeginLine("public ")
                     .PrintIf(def.isReadOnly, "readonly ")
@@ -1318,7 +1346,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                             p.PrintBeginLine("case EnumCase.").Print(structDef.identifier).PrintEndLine(":");
                             p.OpenScope();
                             {
-                                WriteCase(ref p, def, isDim, structDef);
+                                WriteCase(ref p, isReadOnly, def, isDim, structDef);
                             }
                             p.CloseScope();
                             p.PrintEndLine();
@@ -1327,7 +1355,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         p.PrintLine("default:");
                         p.OpenScope();
                         {
-                            WriteCase(ref p, def, isDim, structs[last]);
+                            WriteCase(ref p, isReadOnly, def, isDim, structs[last]);
                         }
                         p.CloseScope();
                     }
@@ -1339,6 +1367,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             static void WriteCase(
                   ref Printer p
+                , bool isReadOnly
                 , MethodDeclaration def
                 , bool isDim
                 , StructSpec structDef
@@ -1355,7 +1384,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     WriteArguments(ref p, def.parameters);
                 }
                 p.PrintEndLine(");");
-                p.PrintLineIf(structDef.isReadOnly == false && def.isReadOnly == false, "this = enum_case;");
+                p.PrintLineIf(isReadOnly == false && def.isReadOnly == false, "this = enum_case;");
                 p.PrintBeginLine("return")
                     .Print(GetAnyRefSpacePrefix(def.refKind))
                     .PrintIf(def.returnsVoid == false, " result_for_enum_case")
@@ -1980,7 +2009,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             static void Write(
                   ref Printer p
-                , Dictionary<SlimTypeSpec, List<ConstructionValue>> typeToValues
+                , Dictionary<TypeSpec, List<ConstructionValue>> typeToValues
             )
             {
                 foreach (var kv in typeToValues)

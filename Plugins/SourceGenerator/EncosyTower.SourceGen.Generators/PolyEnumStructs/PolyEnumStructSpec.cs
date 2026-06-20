@@ -83,7 +83,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             TOut Cast();
         }
 
-        internal struct SlimTypeSpec : IEquatable<SlimTypeSpec>
+        internal struct TypeSpec : IEquatable<TypeSpec>
         {
             public string name;
             public string identifier;
@@ -94,22 +94,16 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 && string.IsNullOrEmpty(identifier) == false
                 ;
 
-            public readonly bool HasFullName
-                => string.IsNullOrEmpty(name) == false && name.IndexOf('.', 0) > 0;
-
             public readonly override bool Equals(object obj)
-                => obj is SlimTypeSpec other && Equals(other);
+                => obj is TypeSpec other && Equals(other);
 
-            public readonly bool Equals(SlimTypeSpec other)
+            public readonly bool Equals(TypeSpec other)
                 => string.Equals(name, other.name, StringComparison.Ordinal)
                 && isEnum == other.isEnum
                 ;
 
             public readonly override int GetHashCode()
-                => HashValue.Combine(
-                      name
-                    , isEnum
-                );
+                => HashValue.Combine(name, isEnum);
         }
 
         internal struct SlimMethodSpec : IEquatable<SlimMethodSpec>
@@ -245,7 +239,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         internal struct FieldSpec : IEquatable<FieldSpec>
         {
             public string name;
-            public SlimTypeSpec returnType;
+            public TypeSpec returnType;
             public int size;
             public bool implicityDeclared;
             public bool isReadOnly;
@@ -282,7 +276,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             , ICast<PropertySignature>
         {
             public string name;
-            public SlimTypeSpec returnType;
+            public TypeSpec returnType;
             public RefKind refKind;
             public PropertyMethodDeclaration getter;
             public PropertyMethodDeclaration setter;
@@ -374,7 +368,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             , ICloneWithDim<IndexerDeclaration>
             , ICast<IndexerSignature>
         {
-            public SlimTypeSpec returnType;
+            public TypeSpec returnType;
             public EquatableArray<ParameterSpec> parameters;
             public PropertyMethodDeclaration getter;
             public PropertyMethodDeclaration setter;
@@ -430,7 +424,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             , ICast<MethodSignature>
         {
             public string name;
-            public SlimTypeSpec returnType;
+            public TypeSpec returnType;
             public EquatableArray<ParameterSpec> parameters;
             public RefKind refKind;
             public bool returnsVoid;
@@ -478,7 +472,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         internal struct ParameterSpec : IEquatable<ParameterSpec>
         {
             public string name;
-            public SlimTypeSpec type;
+            public TypeSpec type;
             public RefKind refKind;
 
             public readonly bool IsValid
@@ -505,7 +499,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         internal struct ConstructionSpec : IEquatable<ConstructionSpec>
         {
-            public SlimTypeSpec type;
+            public TypeSpec type;
             public string value;
 
             public readonly bool IsValid

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -16,7 +17,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         private const string POLY_ENUM_STRUCT_ATTRIBUTE_METADATA = $"{NAMESPACE}.PolyEnumStructAttribute";
         private const string ENUM_CASE_VALUE_ATTRIBUTE = $"global::{NAMESPACE}.EnumCaseValueAttribute";
         private const string ENUM_CASE_IGNORE_ATTRIBUTE = $"global::{NAMESPACE}.EnumCaseIgnoreAttribute";
-        private const string GENERATOR_NAME = nameof(PolyEnumStructGenerator);
         private const string UNDEFINED_NAME = "Undefined";
         private const string INTERFACE_NAME = "IEnumCase";
         private const string READ_ONLY_ATTRIBUTE = "global::System.ComponentModel.ReadOnlyAttribute";
@@ -133,7 +133,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 }
             }
 
-            AggregateInterfaceAndStructs(structSymbol, ref result, semanticModel, token);
+            AggregateInterfaceAndStructs(ref result, structSymbol, token);
 
             return result;
         }
@@ -221,9 +221,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         }
 
         private static void AggregateInterfaceAndStructs(
-              INamedTypeSymbol structSymbol
-            , ref PolyEnumStructSpec polyEnumStruct
-            , SemanticModel semanticModel
+              ref PolyEnumStructSpec polyEnumStruct
+            , INamedTypeSymbol structSymbol
             , CancellationToken token
         )
         {
@@ -231,64 +230,50 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             var structName = structSymbol.Name;
             var verboseUndefinedName = $"{structName}_{UNDEFINED_NAME}";
+            var paramList = new List<PolyEnumStructSpec.ParameterSpec>();
 
             PolyEnumStructSpec.StructSpec undefinedStruct = default;
 
-            foreach (var syntaxRef in structSymbol.DeclaringSyntaxReferences)
+            foreach (var memberType in structSymbol.GetTypeMembers())
             {
                 token.ThrowIfCancellationRequested();
 
-                var parentSyntaxNode = syntaxRef.GetSyntax(token);
-
-                if (parentSyntaxNode is not TypeDeclarationSyntax typeDecl
-                    || typeDecl.Identifier.Text != structName
-                )
+                if (memberType.IsUnboundGenericType)
                 {
                     continue;
                 }
 
-                foreach (var childNode in parentSyntaxNode.ChildNodes())
+                if (memberType.TypeKind == TypeKind.Struct)
                 {
-                    token.ThrowIfCancellationRequested();
+                    if (memberType.HasAttribute("global::EncosyTower.PolyEnumStructs.EnumCaseIgnore", token))
+                    {
+                        continue;
+                    }
 
-                    if (childNode is TypeDeclarationSyntax structSyntax
-                        && structSyntax.TypeParameterList is null
-                        && (structSyntax is StructDeclarationSyntax
-                            || structSyntax is RecordDeclarationSyntax { ClassOrStructKeyword.Text: "struct" }
-                        )
+                    var @struct = GetStruct(memberType, paramList, token);
+
+                    if (@struct.IsValid == false)
+                    {
+                        continue;
+                    }
+
+                    if (polyEnumStruct.definedUndefinedStruct == PolyEnumStructSpec.DefinedUndefinedStruct.None
+                        && TryGetUndefinedCase(@struct.name, UNDEFINED_NAME, verboseUndefinedName, out var result)
                     )
                     {
-                        if (structSyntax.HasAttribute("EncosyTower.PolyEnumStructs", "EnumCaseIgnore", token))
-                        {
-                            continue;
-                        }
-
-                        var @struct = GetStruct(structSyntax, semanticModel, token);
-
-                        if (@struct.IsValid == false)
-                        {
-                            continue;
-                        }
-
-                        if (polyEnumStruct.definedUndefinedStruct == PolyEnumStructSpec.DefinedUndefinedStruct.None
-                            && TryGetUndefinedCase(@struct.name, UNDEFINED_NAME, verboseUndefinedName, out var result)
-                        )
-                        {
-                            undefinedStruct = @struct;
-                            polyEnumStruct.definedUndefinedStruct = result;
-                        }
-                        else
-                        {
-                            structsBuilder.Add(@struct);
-                        }
+                        undefinedStruct = @struct;
+                        polyEnumStruct.definedUndefinedStruct = result;
                     }
-                    else if (childNode is InterfaceDeclarationSyntax interfaceSyntax
-                        && interfaceSyntax.TypeParameterList is null
-                        && string.Equals(interfaceSyntax.Identifier.Text, INTERFACE_NAME, StringComparison.Ordinal)
-                    )
+                    else
                     {
-                        polyEnumStruct.interfaceDef = GetInterface(interfaceSyntax, semanticModel, token);
+                        structsBuilder.Add(@struct);
                     }
+                }
+                else if (memberType.TypeKind == TypeKind.Interface
+                    && string.Equals(memberType.Name, INTERFACE_NAME, StringComparison.Ordinal)
+                )
+                {
+                    polyEnumStruct.interfaceDef = GetInterface(memberType, token);
                 }
             }
 
@@ -337,26 +322,18 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         }
 
         private static PolyEnumStructSpec.InterfaceSpec GetInterface(
-              InterfaceDeclarationSyntax syntax
-            , SemanticModel semanticModel
+              INamedTypeSymbol symbol
             , CancellationToken token
         )
         {
+            token.ThrowIfCancellationRequested();
+
             var result = new PolyEnumStructSpec.InterfaceSpec {
                 name = INTERFACE_NAME,
                 definedInterface = true,
             };
 
-            var members = syntax.Members;
-
-            if (members.Count > 0)
-            {
-                token.ThrowIfCancellationRequested();
-
-                var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
-
-                AggregateInterfaceMembers(symbol, ref result, token);
-            }
+            AggregateInterfaceMembers(symbol, ref result, token);
 
             return result;
         }
@@ -412,14 +389,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         }
 
         private static PolyEnumStructSpec.StructSpec GetStruct(
-              TypeDeclarationSyntax syntax
-            , SemanticModel semanticModel
+              INamedTypeSymbol symbol
+            , List<PolyEnumStructSpec.ParameterSpec> paramList
             , CancellationToken token
         )
         {
             token.ThrowIfCancellationRequested();
-
-            var symbol = semanticModel.GetDeclaredSymbol(syntax, token);
 
             if (symbol.HasAttribute(ENUM_CASE_IGNORE_ATTRIBUTE, token))
             {
@@ -427,25 +402,25 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             }
 
             var result = new PolyEnumStructSpec.StructSpec {
-                name = syntax.Identifier.Text,
-                displayName = syntax.GetDisplayNameOrDefault(syntax.Identifier.Text),
-                identifier = syntax.Identifier.Text.ToValidIdentifier(),
+                name = symbol.Name,
+                displayName = symbol.GetDisplayNameOrDefault(symbol.Name, token),
+                identifier = symbol.ToSimpleValidIdentifier(),
                 isUndefined = false,
                 isReadOnly = symbol.IsReadOnly,
                 isRecord = symbol.IsRecord,
             };
 
-            AggregateConstructions(symbol, token, ref result);
-            AggregatePrimaryParameters(syntax, token, ref result);
-            AggregateStructMembers(symbol, token, ref result);
+            AggregateConstructions(ref result, symbol, token);
+            AggregatePrimaryParameters(ref result, symbol, paramList, token);
+            AggregateStructMembers(ref result, symbol, token);
 
             return result;
         }
 
         private static void AggregateConstructions(
-              INamedTypeSymbol symbol
+              ref PolyEnumStructSpec.StructSpec structDef
+            , ITypeSymbol symbol
             , CancellationToken token
-            , ref PolyEnumStructSpec.StructSpec structDef
         )
         {
             using var arrayBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ConstructionSpec>.Rent();
@@ -477,30 +452,51 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         }
 
         private static void AggregatePrimaryParameters(
-              TypeDeclarationSyntax syntax
+              ref PolyEnumStructSpec.StructSpec structDef
+            , INamedTypeSymbol symbol
+            , List<PolyEnumStructSpec.ParameterSpec> paramList
             , CancellationToken token
-            , ref PolyEnumStructSpec.StructSpec structDef
         )
         {
+            paramList.Clear();
+
             var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec>.Rent();
 
-            if (syntax is RecordDeclarationSyntax recordSyntax && recordSyntax.ParameterList is { } paramList)
+            foreach (var syntaxRef in symbol.DeclaringSyntaxReferences)
             {
-                Aggregate(paramList, token, parametersBuilder);
+                token.ThrowIfCancellationRequested();
+
+                var node = syntaxRef.GetSyntax(token);
+
+                if (node is RecordDeclarationSyntax recordSyntax
+                    && recordSyntax.ParameterList is { } paramListSyntax
+                )
+                {
+                    AggregateParamList(paramListSyntax, paramList, token);
+                    FillParametersBuilder(ref parametersBuilder, symbol, paramList, token);
+                    break;
+                }
             }
 
             structDef.parameters = parametersBuilder.ToImmutable();
 
-            static void Aggregate(
-                  ParameterListSyntax paramList
+            return;
+
+            static void AggregateParamList(
+                  ParameterListSyntax paramListSyntax
+                , List<PolyEnumStructSpec.ParameterSpec> paramList
                 , CancellationToken token
-                , ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec> parametersBuilder
             )
             {
                 token.ThrowIfCancellationRequested();
 
-                var parameters = paramList.Parameters;
+                var parameters = paramListSyntax.Parameters;
                 var paramCount = parameters.Count;
+
+                if (paramList.Capacity < paramCount)
+                {
+                    paramList.Capacity = paramCount;
+                }
 
                 for (var i = 0; i < paramCount; i++)
                 {
@@ -528,7 +524,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                     var paramDef = new PolyEnumStructSpec.ParameterSpec {
                         name = parameter.Identifier.Text,
-                        type = new PolyEnumStructSpec.SlimTypeSpec {
+                        type = new PolyEnumStructSpec.TypeSpec {
                             name = typeName,
                             identifier = typeName.ToValidIdentifier(),
                         },
@@ -556,15 +552,73 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         }
                     }
 
-                    parametersBuilder.Add(paramDef);
+                    paramList.Add(paramDef);
+                }
+            }
+
+            static void FillParametersBuilder(
+                  ref ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec> parametersBuilder
+                , INamedTypeSymbol symbol
+                , List<PolyEnumStructSpec.ParameterSpec> paramList
+                , CancellationToken token
+            )
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (paramList.Count < 1)
+                {
+                    return;
+                }
+
+                var length = paramList.Count;
+
+                foreach (var constructor in symbol.Constructors)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    if (constructor.Parameters.Length != length)
+                    {
+                        continue;
+                    }
+
+                    for (var i = 0; i < length; i++)
+                    {
+                        token.ThrowIfCancellationRequested();
+
+                        var ctorParam = constructor.Parameters[i];
+                        var paramDef = paramList[i];
+
+                        if (ctorParam.RefKind != paramDef.refKind)
+                        {
+                            break;
+                        }
+
+                        if (ctorParam.Name != paramDef.name)
+                        {
+                            break;
+                        }
+
+                        var fullName = ctorParam.Type.ToFullName();
+
+                        if (fullName.EndsWith(paramDef.type.name) == false)
+                        {
+                            continue;
+                        }
+
+                        parametersBuilder.Add(new PolyEnumStructSpec.ParameterSpec {
+                            type = GetSlimType(ctorParam.Type),
+                            name = paramDef.name,
+                            refKind = paramDef.refKind,
+                        });
+                    }
                 }
             }
         }
 
         private static void AggregateStructMembers(
-              INamedTypeSymbol symbol
+              ref PolyEnumStructSpec.StructSpec structDef
+            , ITypeSymbol symbol
             , CancellationToken token
-            , ref PolyEnumStructSpec.StructSpec structDef
         )
         {
             token.ThrowIfCancellationRequested();
@@ -915,9 +969,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             }
         }
 
-        private static PolyEnumStructSpec.SlimTypeSpec GetSlimType(ITypeSymbol typeSymbol)
+        private static PolyEnumStructSpec.TypeSpec GetSlimType(ITypeSymbol typeSymbol)
         {
-            return new PolyEnumStructSpec.SlimTypeSpec {
+            return new PolyEnumStructSpec.TypeSpec {
                 name = typeSymbol.ToFullName(),
                 identifier = typeSymbol.ToValidIdentifier(),
                 isEnum = typeSymbol.IsEnumType(),

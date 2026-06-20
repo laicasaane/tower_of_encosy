@@ -41,11 +41,11 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             public Dictionary<MethodDeclaration, bool> MethodDimMap { get; } = new();
 
-            public Dictionary<SlimTypeSpec, Dictionary<ConstructionValue, StructId>> TypeValueToStructMap { get; } = new();
+            public Dictionary<TypeSpec, Dictionary<ConstructionValue, StructId>> TypeValueToStructMap { get; } = new();
 
-            public Dictionary<SlimTypeSpec, HashSet<StructId>> TypeToStructsMap { get; } = new();
+            public Dictionary<TypeSpec, HashSet<StructId>> TypeToStructsMap { get; } = new();
 
-            public Dictionary<StructId, Dictionary<SlimTypeSpec, List<ConstructionValue>>> StructToValuesMap { get; } = new();
+            public Dictionary<StructId, Dictionary<TypeSpec, List<ConstructionValue>>> StructToValuesMap { get; } = new();
 
             public int Size { get; set; }
 
@@ -122,7 +122,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 Name = "enumCase",
                 Value = new FieldSpec {
                     name = "enumCase",
-                    returnType = new SlimTypeSpec { name = "EnumCase", isEnum = true },
+                    returnType = new TypeSpec { name = "EnumCase", isEnum = true },
                     size = enumCaseSize,
                 }
             });

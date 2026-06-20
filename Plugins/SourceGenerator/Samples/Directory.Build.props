@@ -16,11 +16,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER;MODULE_CORE_LOG_INTERNAL_UNIONS_REGISTRIES;UNITY_EDITOR;DATABASE_AUTHORING;UNITASK</DefineConstants>
+        <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER;MODULE_CORE_LOG_INTERNAL_UNIONS_REGISTRIES;UNITY_EDITOR;DATABASE_AUTHORING;UNITASK;UNITY_ADDRESSABLES</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER;MODULE_CORE_LOG_INTERNAL_UNIONS_REGISTRIES;UNITY_EDITOR;DATABASE_AUTHORING;UNITASK</DefineConstants>
+        <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER;MODULE_CORE_LOG_INTERNAL_UNIONS_REGISTRIES;UNITY_EDITOR;DATABASE_AUTHORING;UNITASK;UNITY_ADDRESSABLES</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
@@ -33,6 +33,8 @@
         <Reference Include="$(UnityEditorPath)" Private="false" />
         <Reference Remove="$(UnityEnginePath)" />
         <Reference Include="$(UnityModulesPath)/UnityEngine.CoreModule.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.Addressables.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.ResourceManager.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Burst.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Collections.dll" Private="false" />
         <Reference Include="$(UnityScriptAssembliesPath)/Unity.Entities.dll" Private="false" />
