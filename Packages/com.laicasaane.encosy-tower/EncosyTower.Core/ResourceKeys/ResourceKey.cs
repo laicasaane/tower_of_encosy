@@ -41,6 +41,10 @@ namespace EncosyTower.ResourceKeys
             => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ResourceKey(string value)
             => new(value);
 
@@ -98,6 +102,10 @@ namespace EncosyTower.ResourceKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
             => _value.GetHashCode();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator ResourceKey<T>(string value)

@@ -43,6 +43,10 @@ namespace EncosyTower.AddressableKeys
             => _value.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => _value.ToString();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AddressableKey(string value)
             => new(value);
 
@@ -99,6 +103,10 @@ namespace EncosyTower.AddressableKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
             => _value.GetHashCode();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly override string ToString()
+            => _value.ToString();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator AddressableKey<T>(string value)

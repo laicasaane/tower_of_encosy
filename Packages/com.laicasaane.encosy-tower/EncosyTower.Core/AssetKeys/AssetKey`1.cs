@@ -134,7 +134,7 @@ namespace EncosyTower.AssetKeys
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly string ToString()
-            => _value.ToString();
+            => _value ?? string.Empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool TryParse(
