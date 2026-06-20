@@ -109,7 +109,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         internal struct SlimMethodSpec : IEquatable<SlimMethodSpec>
         {
             public string name;
-            public EquatableArray<ParameterSpec> parameters;
+            public EquatableArray<SlimParameterSpec> parameters;
 
             public readonly bool IsValid
                 => string.IsNullOrEmpty(name) == false
@@ -369,7 +369,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             , ICast<IndexerSignature>
         {
             public TypeSpec returnType;
-            public EquatableArray<ParameterSpec> parameters;
+            public EquatableArray<SlimParameterSpec> parameters;
             public PropertyMethodDeclaration getter;
             public PropertyMethodDeclaration setter;
             public RefKind refKind;
@@ -425,7 +425,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         {
             public string name;
             public TypeSpec returnType;
-            public EquatableArray<ParameterSpec> parameters;
+            public EquatableArray<SlimParameterSpec> parameters;
             public RefKind refKind;
             public bool returnsVoid;
             public bool isReadOnly;
@@ -471,6 +471,26 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         internal struct ParameterSpec : IEquatable<ParameterSpec>
         {
+            public FieldSpec field;
+            public RefKind refKind;
+
+            public readonly bool IsValid
+                => field.IsValid;
+
+            public readonly override bool Equals(object obj)
+                => obj is ParameterSpec other && Equals(other);
+
+            public readonly bool Equals(ParameterSpec other)
+                => field.Equals(other.field)
+                && refKind == other.refKind
+                ;
+
+            public readonly override int GetHashCode()
+                => HashValue.Combine(field, refKind);
+        }
+
+        internal struct SlimParameterSpec : IEquatable<SlimParameterSpec>
+        {
             public string name;
             public TypeSpec type;
             public RefKind refKind;
@@ -481,9 +501,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 ;
 
             public readonly override bool Equals(object obj)
-                => obj is ParameterSpec other && Equals(other);
+                => obj is SlimParameterSpec other && Equals(other);
 
-            public readonly bool Equals(ParameterSpec other)
+            public readonly bool Equals(SlimParameterSpec other)
                 => string.Equals(name, other.name, StringComparison.Ordinal)
                 && type.Equals(other.type)
                 && refKind == other.refKind
@@ -594,7 +614,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             : IEquatable<IndexerSignature>
             , ICloneWithDim<IndexerSignature>
         {
-            public EquatableArray<ParameterSpec> parameters;
+            public EquatableArray<SlimParameterSpec> parameters;
             public PropertyMethodDeclaration getter;
             public PropertyMethodDeclaration setter;
             public RefKind refKind;
@@ -640,7 +660,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             , ICloneWithDim<MethodSignature>
         {
             public string name;
-            public EquatableArray<ParameterSpec> parameters;
+            public EquatableArray<SlimParameterSpec> parameters;
             public RefKind refKind;
             public bool returnsVoid;
             public bool isReadOnly;

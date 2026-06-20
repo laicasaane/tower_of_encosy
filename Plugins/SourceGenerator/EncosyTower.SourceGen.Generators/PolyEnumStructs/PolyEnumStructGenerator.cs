@@ -230,7 +230,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             var structName = structSymbol.Name;
             var verboseUndefinedName = $"{structName}_{UNDEFINED_NAME}";
-            var paramList = new List<PolyEnumStructSpec.ParameterSpec>();
+            var paramList = new List<PolyEnumStructSpec.SlimParameterSpec>();
 
             PolyEnumStructSpec.StructSpec undefinedStruct = default;
 
@@ -390,7 +390,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         private static PolyEnumStructSpec.StructSpec GetStruct(
               INamedTypeSymbol symbol
-            , List<PolyEnumStructSpec.ParameterSpec> paramList
+            , List<PolyEnumStructSpec.SlimParameterSpec> paramList
             , CancellationToken token
         )
         {
@@ -442,7 +442,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 )
                 {
                     arrayBuilder.Add(new PolyEnumStructSpec.ConstructionSpec {
-                        type = GetSlimType(arg.Type),
+                        type = GetType(arg.Type),
                         value = GetCreationValue(arg.Type, arg.Value, token),
                     });
                 }
@@ -454,7 +454,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         private static void AggregatePrimaryParameters(
               ref PolyEnumStructSpec.StructSpec structDef
             , INamedTypeSymbol symbol
-            , List<PolyEnumStructSpec.ParameterSpec> paramList
+            , List<PolyEnumStructSpec.SlimParameterSpec> paramList
             , CancellationToken token
         )
         {
@@ -468,13 +468,14 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 var node = syntaxRef.GetSyntax(token);
 
-                if (node is RecordDeclarationSyntax recordSyntax
-                    && recordSyntax.ParameterList is { } paramListSyntax
-                )
+                if (node is RecordDeclarationSyntax recordSyntax)
                 {
-                    AggregateParamList(paramListSyntax, paramList, token);
-                    FillParametersBuilder(ref parametersBuilder, symbol, paramList, token);
-                    break;
+                    if (recordSyntax.ParameterList is { } paramListSyntax)
+                    {
+                        AggregateParamList(paramListSyntax, paramList, token);
+                        FillParametersBuilder(ref parametersBuilder, symbol, paramList, token);
+                        break;
+                    }
                 }
             }
 
@@ -484,7 +485,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             static void AggregateParamList(
                   ParameterListSyntax paramListSyntax
-                , List<PolyEnumStructSpec.ParameterSpec> paramList
+                , List<PolyEnumStructSpec.SlimParameterSpec> paramList
                 , CancellationToken token
             )
             {
@@ -522,7 +523,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         continue;
                     }
 
-                    var paramDef = new PolyEnumStructSpec.ParameterSpec {
+                    var paramDef = new PolyEnumStructSpec.SlimParameterSpec {
                         name = parameter.Identifier.Text,
                         type = new PolyEnumStructSpec.TypeSpec {
                             name = typeName,
@@ -559,7 +560,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             static void FillParametersBuilder(
                   ref ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec> parametersBuilder
                 , INamedTypeSymbol symbol
-                , List<PolyEnumStructSpec.ParameterSpec> paramList
+                , List<PolyEnumStructSpec.SlimParameterSpec> paramList
                 , CancellationToken token
             )
             {
@@ -571,6 +572,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 }
 
                 var length = paramList.Count;
+                var isReadOnly = symbol.IsReadOnly;
 
                 foreach (var constructor in symbol.Constructors)
                 {
@@ -605,10 +607,18 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                             continue;
                         }
 
+                        int fieldSize = 0;
+                        ctorParam.Type.GetUnmanagedSize(ref fieldSize, token);
+
                         parametersBuilder.Add(new PolyEnumStructSpec.ParameterSpec {
-                            type = GetSlimType(ctorParam.Type),
-                            name = paramDef.name,
                             refKind = paramDef.refKind,
+                            field = new PolyEnumStructSpec.FieldSpec {
+                                name = paramDef.name,
+                                returnType = GetType(ctorParam.Type),
+                                size = fieldSize,
+                                implicityDeclared = true,
+                                isReadOnly = isReadOnly,
+                            },
                         });
                     }
                 }
@@ -681,7 +691,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                     fieldsBuilder.Add(new PolyEnumStructSpec.FieldSpec {
                         name = fieldName,
-                        returnType = GetSlimType(fieldSymbol.Type),
+                        returnType = GetType(fieldSymbol.Type),
                         size = fieldSize,
                         implicityDeclared = fieldSymbol.IsImplicitlyDeclared,
                         isReadOnly = fieldSymbol.IsReadOnly,
@@ -776,19 +786,19 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 if (propertySymbol.IsIndexer)
                 {
                     var indexerDef = new PolyEnumStructSpec.IndexerDeclaration {
-                        returnType = GetSlimType(propertySymbol.Type),
+                        returnType = GetType(propertySymbol.Type),
                         getter = GetPropertyMethod(propertySymbol.GetMethod, token, isGetter: true, getterIsDim),
                         setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, setterIsDim),
                         refKind = propertySymbol.RefKind,
                     };
 
-                    using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec>.Rent();
+                    using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.SlimParameterSpec>.Rent();
 
                     foreach (var parameter in propertySymbol.Parameters)
                     {
-                        parametersBuilder.Add(new PolyEnumStructSpec.ParameterSpec {
+                        parametersBuilder.Add(new PolyEnumStructSpec.SlimParameterSpec {
                             name = parameter.Name,
-                            type = GetSlimType(parameter.Type),
+                            type = GetType(parameter.Type),
                             refKind = parameter.RefKind,
                         });
                     }
@@ -807,7 +817,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 {
                     var propertyDef = new PolyEnumStructSpec.PropertyDeclaration {
                         name = propertySymbol.Name,
-                        returnType = GetSlimType(propertySymbol.Type),
+                        returnType = GetType(propertySymbol.Type),
                         refKind = propertySymbol.RefKind,
                         getter = GetPropertyMethod(propertySymbol.GetMethod, token, isGetter: true, getterIsDim),
                         setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, setterIsDim),
@@ -843,22 +853,22 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 var methodDef = new PolyEnumStructSpec.MethodDeclaration {
                     name = methodSymbol.Name,
-                    returnType = GetSlimType(methodSymbol.ReturnType),
+                    returnType = GetType(methodSymbol.ReturnType),
                     refKind = methodSymbol.RefKind,
                     returnsVoid = methodSymbol.ReturnsVoid,
                     isReadOnly = methodSymbol.IsReadOnly,
                     isDim = isDim,
                 };
 
-                using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec>.Rent();
+                using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.SlimParameterSpec>.Rent();
 
                 foreach (var parameter in methodSymbol.Parameters)
                 {
                     token.ThrowIfCancellationRequested();
 
-                    parametersBuilder.Add(new PolyEnumStructSpec.ParameterSpec {
+                    parametersBuilder.Add(new PolyEnumStructSpec.SlimParameterSpec {
                         name = parameter.Name,
-                        type = GetSlimType(parameter.Type),
+                        type = GetType(parameter.Type),
                         refKind = parameter.RefKind,
                     });
                 }
@@ -891,7 +901,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 if (propertySymbol.IsIndexer)
                 {
                     var indexerDecl = new PolyEnumStructSpec.IndexerDeclaration {
-                        returnType = GetSlimType(propertySymbol.Type),
+                        returnType = GetType(propertySymbol.Type),
                         refKind = propertySymbol.RefKind,
                         getter = GetPropertyMethod(propertySymbol.GetMethod, token, isGetter: true, false),
                     };
@@ -901,15 +911,15 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         indexerDecl.setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, false);
                     }
 
-                    using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec>.Rent();
+                    using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.SlimParameterSpec>.Rent();
 
                     foreach (var parameter in propertySymbol.Parameters)
                     {
                         token.ThrowIfCancellationRequested();
 
-                        parametersBuilder.Add(new PolyEnumStructSpec.ParameterSpec {
+                        parametersBuilder.Add(new PolyEnumStructSpec.SlimParameterSpec {
                             name = parameter.Name,
-                            type = GetSlimType(parameter.Type),
+                            type = GetType(parameter.Type),
                             refKind = parameter.RefKind,
                         });
                     }
@@ -921,7 +931,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 {
                     var propDecl = new PolyEnumStructSpec.PropertyDeclaration {
                         name = propertySymbol.Name,
-                        returnType = GetSlimType(propertySymbol.Type),
+                        returnType = GetType(propertySymbol.Type),
                         refKind = propertySymbol.RefKind,
                         getter = GetPropertyMethod(propertySymbol.GetMethod, token, isGetter: true, false),
                     };
@@ -945,21 +955,21 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 var methodDef = new PolyEnumStructSpec.MethodDeclaration {
                     name = methodSymbol.Name,
-                    returnType = GetSlimType(methodSymbol.ReturnType),
+                    returnType = GetType(methodSymbol.ReturnType),
                     refKind = methodSymbol.RefKind,
                     returnsVoid = methodSymbol.ReturnsVoid,
                     isReadOnly = methodSymbol.IsReadOnly,
                 };
 
-                using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec>.Rent();
+                using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.SlimParameterSpec>.Rent();
 
                 foreach (var parameter in methodSymbol.Parameters)
                 {
                     token.ThrowIfCancellationRequested();
 
-                    parametersBuilder.Add(new PolyEnumStructSpec.ParameterSpec {
+                    parametersBuilder.Add(new PolyEnumStructSpec.SlimParameterSpec {
                         name = parameter.Name,
-                        type = GetSlimType(parameter.Type),
+                        type = GetType(parameter.Type),
                         refKind = parameter.RefKind,
                     });
                 }
@@ -969,7 +979,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             }
         }
 
-        private static PolyEnumStructSpec.TypeSpec GetSlimType(ITypeSymbol typeSymbol)
+        private static PolyEnumStructSpec.TypeSpec GetType(ITypeSymbol typeSymbol)
         {
             return new PolyEnumStructSpec.TypeSpec {
                 name = typeSymbol.ToFullName(),

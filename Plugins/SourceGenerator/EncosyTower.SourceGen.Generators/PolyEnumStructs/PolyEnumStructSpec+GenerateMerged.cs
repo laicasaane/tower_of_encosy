@@ -162,8 +162,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 var @struct = structRef.Value;
 
-                structRefs.Add(structRef);
-
                 Aggregator.AggregateMergedFieldRefs(
                       ref structRef
                     , mergedStructRef.FieldRefs
@@ -186,6 +184,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         order = (ulong)(i + 1),
                     });
                 }
+
+                structRefs.Add(structRef);
             }
 
             var maxCount = definedUndefinedStruct == DefinedUndefinedStruct.None
@@ -221,6 +221,59 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             )
             {
                 usedIndexesInList.Clear();
+
+                var fieldMergedFieldMap = structRef.FieldToMergedFieldMap;
+                var parameters = structRef.Value.parameters;
+                var parameterCount = parameters.Count;
+
+                for (int i = 0; i < parameterCount; i++)
+                {
+                    ref readonly var field = ref parameters[i].field;
+                    var matchingListIndex = -1;
+                    var mergedFieldRefCount = mergedFieldRefs.Count;
+
+                    for (int mergedIndex = 0; mergedIndex < mergedFieldRefCount; mergedIndex++)
+                    {
+                        if (usedIndexesInList.Contains(mergedIndex) == false)
+                        {
+                            if (field.returnType.Equals(mergedFieldRefs[mergedIndex].Value.returnType))
+                            {
+                                matchingListIndex = mergedIndex;
+                                break;
+                            }
+                        }
+                    }
+
+                    MergedFieldRef mergedField;
+
+                    if (matchingListIndex < 0)
+                    {
+                        int newListIndex = mergedFieldRefs.Count;
+
+                        if (pool.Count > 0)
+                        {
+                            mergedField = pool.Dequeue();
+                        }
+                        else
+                        {
+                            mergedField = new MergedFieldRef();
+                        }
+
+                        mergedField.Value = field;
+                        mergedField.Name = $"field_{field.returnType.identifier.ToValidIdentifier()}_{newListIndex}";
+
+                        structSize += field.size;
+                        mergedFieldRefs.Add(mergedField);
+                        usedIndexesInList.Add(newListIndex);
+                    }
+                    else
+                    {
+                        mergedField = mergedFieldRefs[matchingListIndex];
+                        usedIndexesInList.Add(matchingListIndex);
+                    }
+
+                    fieldMergedFieldMap[field.name] = mergedField.Name;
+                }
 
                 var fields = structRef.Value.fields;
                 var fieldCount = fields.Count;
@@ -271,7 +324,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         usedIndexesInList.Add(matchingListIndex);
                     }
 
-                    structRef.FieldToMergedFieldMap[field.name] = mergedField.Name;
+                    fieldMergedFieldMap[field.name] = mergedField.Name;
                 }
             }
 
