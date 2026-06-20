@@ -596,7 +596,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 p.PrintLine(AGGRESSIVE_INLINING);
                 p.PrintBeginLine("public ").Print(typeName).Print("(")
-                    .Print(structIn).Print(def.name).Print(" @case) : this()");
+                    .Print(structIn).Print(def.name).PrintEndLine(" @case) : this()");
                 p.OpenScope();
                 {
                     p.PrintBeginLine("this.enumCase = EnumCase.").Print(def.identifier).PrintEndLine(";");
