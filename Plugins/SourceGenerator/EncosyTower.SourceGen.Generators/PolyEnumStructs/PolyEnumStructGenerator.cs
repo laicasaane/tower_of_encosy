@@ -337,7 +337,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         }
 
         private static PolyEnumStructSpec.InterfaceSpec GetInterface(
-                InterfaceDeclarationSyntax syntax
+              InterfaceDeclarationSyntax syntax
             , SemanticModel semanticModel
             , CancellationToken token
         )
@@ -362,7 +362,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
         }
 
         private static void AggregateInterfaceMembers(
-                INamedTypeSymbol symbol
+              INamedTypeSymbol symbol
             , ref PolyEnumStructSpec.InterfaceSpec interfaceDef
             , CancellationToken token
         )
@@ -575,6 +575,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
             using var methodsBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.MethodDeclaration>.Rent();
 
             int structSize = 0;
+            var isReadOnly = symbol.IsReadOnly;
 
             foreach (var member in symbol.GetMembers())
             {
@@ -639,7 +640,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                     && accessibility is Accessibility.Public or Accessibility.Internal
                 )
                 {
-                    GetStructMember(member, token, propertiesBuilder, indexersBuilder, methodsBuilder);
+                    GetStructMember(member, isReadOnly, token, propertiesBuilder, indexersBuilder, methodsBuilder);
                 }
             }
 
@@ -817,6 +818,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
         private static void GetStructMember(
               ISymbol member
+            , bool isReadOnly
             , CancellationToken token
             , ImmutableArrayBuilder<PolyEnumStructSpec.PropertyDeclaration> propertiesBuilder
             , ImmutableArrayBuilder<PolyEnumStructSpec.IndexerDeclaration> indexersBuilder
@@ -834,12 +836,16 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
                 if (propertySymbol.IsIndexer)
                 {
-                    var indexerDef = new PolyEnumStructSpec.IndexerDeclaration {
+                    var indexerDecl = new PolyEnumStructSpec.IndexerDeclaration {
                         returnType = GetSlimType(propertySymbol.Type),
                         refKind = propertySymbol.RefKind,
                         getter = GetPropertyMethod(propertySymbol.GetMethod, token, isGetter: true, false),
-                        setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, false),
                     };
+
+                    if (isReadOnly == false && propertySymbol.IsReadOnly == false)
+                    {
+                        indexerDecl.setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, false);
+                    }
 
                     using var parametersBuilder = ImmutableArrayBuilder<PolyEnumStructSpec.ParameterSpec>.Rent();
 
@@ -854,18 +860,24 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                         });
                     }
 
-                    indexerDef.parameters = parametersBuilder.ToImmutable();
-                    indexersBuilder.Add(indexerDef);
+                    indexerDecl.parameters = parametersBuilder.ToImmutable();
+                    indexersBuilder.Add(indexerDecl);
                 }
                 else
                 {
-                    propertiesBuilder.Add(new PolyEnumStructSpec.PropertyDeclaration {
+                    var propDecl = new PolyEnumStructSpec.PropertyDeclaration {
                         name = propertySymbol.Name,
                         returnType = GetSlimType(propertySymbol.Type),
                         refKind = propertySymbol.RefKind,
                         getter = GetPropertyMethod(propertySymbol.GetMethod, token, isGetter: true, false),
-                        setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, false),
-                    });
+                    };
+
+                    if (isReadOnly == false && propertySymbol.IsReadOnly == false)
+                    {
+                        propDecl.setter = GetPropertyMethod(propertySymbol.SetMethod, token, isGetter: false, false);
+                    }
+
+                    propertiesBuilder.Add(propDecl);
                 }
             }
             else if (member is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Ordinary)
