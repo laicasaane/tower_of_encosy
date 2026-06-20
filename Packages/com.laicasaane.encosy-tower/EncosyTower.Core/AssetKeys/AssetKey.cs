@@ -27,7 +27,7 @@ namespace EncosyTower.AssetKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public AssetKey(string value)
         {
-            _value = value;
+            _value = value ?? string.Empty;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace EncosyTower.AssetKeys
         public readonly string Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value;
+            get => _value ?? string.Empty;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace EncosyTower.AssetKeys
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly override int GetHashCode()
-            => _value?.GetHashCode() ?? 0;
+            => (_value ?? string.Empty).GetHashCode();
 
         /// <summary>
         /// Returns a string representation of this <see cref="AssetKey"/>.
@@ -130,7 +130,7 @@ namespace EncosyTower.AssetKeys
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator string(AssetKey value)
-            => value._value;
+            => value._value ?? string.Empty;
 
         /// <summary>
         /// Converts the specified <see cref="string"/> to an <see cref="AssetKey"/>.

@@ -30,7 +30,7 @@ namespace EncosyTower.AssetKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public AssetKey(string value)
         {
-            _value = value;
+            _value = value ?? string.Empty;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace EncosyTower.AssetKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public AssetKey(AssetKey value)
         {
-            _value = value.Value;
+            _value = value.Value ?? string.Empty;
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace EncosyTower.AssetKeys
         public readonly string Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _value;
+            get => _value ?? string.Empty;
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace EncosyTower.AssetKeys
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(AssetKey<T> other)
-            => _value.Equals(other._value);
+            => string.Equals(_value, other._value, StringComparison.Ordinal);
 
         /// <summary>
         /// Determines whether the specified <see cref="AssetKey"/> is equal to the current <see cref="AssetKey{T}"/>.
@@ -94,7 +94,7 @@ namespace EncosyTower.AssetKeys
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Equals(AssetKey other)
-            => _value.Equals(other._value);
+            => string.Equals(_value, other._value, StringComparison.Ordinal);
 
         /// <summary>
         /// Determines whether the specified object is equal to the current <see cref="AssetKey{T}"/>.
@@ -113,8 +113,8 @@ namespace EncosyTower.AssetKeys
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly bool Equals(object obj)
             => obj is AssetKey<T> otherT
-                ? _value.Equals(otherT._value)
-                : obj is AssetKey other && _value.Equals(other._value);
+                ? string.Equals(_value, otherT._value, StringComparison.Ordinal)
+                : obj is AssetKey other && string.Equals(_value, other._value, StringComparison.Ordinal);
 
         /// <summary>
         /// Returns the hash code for this <see cref="AssetKey{TagHandle}"/>.
@@ -124,7 +124,7 @@ namespace EncosyTower.AssetKeys
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override readonly int GetHashCode()
-            => _value.GetHashCode();
+            => (_value ?? string.Empty).GetHashCode();
 
         /// <summary>
         /// Returns a string representation of this <see cref="AssetKey{TagHandle}"/>.
@@ -160,7 +160,7 @@ namespace EncosyTower.AssetKeys
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator AssetKey(AssetKey<T> value)
-            => value._value;
+            => value._value ?? string.Empty;
 
         /// <summary>
         /// Converts the current <see cref="AssetKey{T}"/> to an instance of <see cref="string"/>.
@@ -168,7 +168,7 @@ namespace EncosyTower.AssetKeys
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator string(AssetKey<T> value)
-            => value._value.ToString();
+            => value._value ?? string.Empty;
 
         /// <summary>
         /// Converts the specified <see cref="string"/> to an instance of <see cref="AssetKey{T}"/>.
