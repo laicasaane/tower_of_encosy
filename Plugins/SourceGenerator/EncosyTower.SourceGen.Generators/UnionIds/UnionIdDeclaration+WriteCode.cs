@@ -2181,8 +2181,7 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("ETColE.")
-                                .Print("EncosyICollectionExtensions.AddRange(result, ")
+                            p.PrintBeginLine("ETColE.EncosyICollectionExtensions.AddRangeFast(result, ")
                                 .Print(kind.enumExtensionsName)
                                 .PrintEndLine(".Names.AsSpan());");
 
@@ -2230,7 +2229,7 @@
 
                         if (kind.isEnum)
                         {
-                            p.PrintBeginLine("ETColE.EncosyICollectionExtensions.AddRange(result, ")
+                            p.PrintBeginLine("ETColE.EncosyICollectionExtensions.AddRangeFast(result, ")
                                 .Print(kind.enumExtensionsName)
                                 .PrintEndLine(".DisplayNames.AsSpan());");
 
