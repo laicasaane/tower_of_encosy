@@ -6,6 +6,7 @@ using EncosyTower.Common;
 using EncosyTower.UnityExtensions;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace EncosyTower.AddressableKeys
 {
@@ -28,6 +29,14 @@ namespace EncosyTower.AddressableKeys
             => ((AddressableKey<T>)key).TryLoad();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static (T, AsyncOperationHandle<T>) LoadGetHandle<T>(this AddressableKey key)
+            => ((AddressableKey<T>)key).LoadGetHandle();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Option<(T, AsyncOperationHandle<T>)> TryLoadGetHandle<T>(this AddressableKey key)
+            => ((AddressableKey<T>)key).TryLoadGetHandle();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static GameObject Instantiate(
               this AddressableKey<GameObject> key
             , TransformOrScene parent = default
@@ -35,8 +44,8 @@ namespace EncosyTower.AddressableKeys
             , bool trimCloneSuffix = false
         )
         {
-            return InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix)
-                .GetValueOrDefault();
+            var result = TryInstantiateGetHandle(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.GetValueOrDefault().Item1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,8 +57,33 @@ namespace EncosyTower.AddressableKeys
         )
             where TComponent : Component
         {
-            var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
-            return result.HasValue ? result.GetValueOrThrow().GetComponent<TComponent>() : default;
+            var result = TryInstantiateGetHandle<TComponent>(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.GetValueOrDefault().Item1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static (GameObject, AsyncOperationHandle<GameObject>) InstantiateGetHandle(
+              this AddressableKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+        {
+            var result = TryInstantiateGetHandle(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.GetValueOrDefault();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static (TComponent, AsyncOperationHandle<GameObject>) InstantiateGetHandle<TComponent>(
+              this AddressableKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+            where TComponent : Component
+        {
+            var result = TryInstantiateGetHandle<TComponent>(key, parent, inWorldSpace, trimCloneSuffix);
+            return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,7 +94,8 @@ namespace EncosyTower.AddressableKeys
             , bool trimCloneSuffix = false
         )
         {
-            return InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
+            var result = TryInstantiateGetHandle(key, parent, inWorldSpace, trimCloneSuffix);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,30 +107,28 @@ namespace EncosyTower.AddressableKeys
         )
             where TComponent : Component
         {
-            var result = InstantiateInternal(key, parent, inWorldSpace, trimCloneSuffix);
-
-            if (result.HasValue == false)
-            {
-                return Option.None;
-            }
-
-            return Option.SomeIf(result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp), comp);
+            var result = TryInstantiateGetHandle<TComponent>(key, parent, inWorldSpace, trimCloneSuffix);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
         }
 
-        private static Option<GameObject> InstantiateInternal(
-              AddressableKey<GameObject> key
+        public static Option<(GameObject, AsyncOperationHandle<GameObject>)> TryInstantiateGetHandle(
+              this AddressableKey<GameObject> key
             , TransformOrScene parent
             , bool inWorldSpace
             , bool trimCloneSuffix
         )
         {
-            if (key.IsValid == false) return Option.None;
+            if (key.IsValid == false)
+            {
+                return Option.None;
+            }
 
             var handle = Addressables.InstantiateAsync(key.Value.Value, parent.Transform, inWorldSpace);
             var go = handle.WaitForCompletion();
 
             if (go.IsInvalid())
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
@@ -109,8 +142,34 @@ namespace EncosyTower.AddressableKeys
                 go.TrimCloneSuffix();
             }
 
-            return go;
+            return (go, handle);
 
+        }
+
+        public static Option<(TComponent, AsyncOperationHandle<GameObject>)> TryInstantiateGetHandle<TComponent>(
+              this AddressableKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+        )
+            where TComponent : Component
+        {
+            var result = TryInstantiateGetHandle(key, parent, inWorldSpace, trimCloneSuffix);
+
+            if (result.HasValue == false)
+            {
+                return Option.None;
+            }
+
+            var (go, handle) = result.GetValueOrDefault();
+
+            if (go.TryGetComponent<TComponent>(out var comp))
+            {
+                return (comp, handle);
+            }
+
+            handle.TryRelease();
+            return Option.None;
         }
     }
 }

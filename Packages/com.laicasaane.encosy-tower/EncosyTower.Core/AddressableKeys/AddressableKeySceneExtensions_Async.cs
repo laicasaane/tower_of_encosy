@@ -14,10 +14,14 @@ namespace EncosyTower.AddressableKeys
 {
 #if UNITASK
     using UnityTask = Cysharp.Threading.Tasks.UniTask<SceneInstance>;
+    using UnityTaskHandle = Cysharp.Threading.Tasks.UniTask<(SceneInstance, AsyncOperationHandle<SceneInstance>)>;
     using UnityTaskOpt = Cysharp.Threading.Tasks.UniTask<Option<SceneInstance>>;
+    using UnityTaskHandleOpt = Cysharp.Threading.Tasks.UniTask<Option<(SceneInstance, AsyncOperationHandle<SceneInstance>)>>;
 #else
     using UnityTask = UnityEngine.Awaitable<SceneInstance>;
+    using UnityTaskHandle = UnityEngine.Awaitable<(SceneInstance, AsyncOperationHandle<SceneInstance>)>;
     using UnityTaskOpt = UnityEngine.Awaitable<Option<SceneInstance>>;
+    using UnityTaskHandleOpt = UnityEngine.Awaitable<Option<(SceneInstance, AsyncOperationHandle<SceneInstance>)>>;
 #endif
 
     public static partial class AddressableKeySceneExtensions
@@ -31,12 +35,12 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token = default
         )
         {
-            var result = await TryLoadAsyncInternal(key, mode, activateOnLoad, priority, token);
-            return result.GetValueOrDefault();
+            var result = await TryLoadGetHandleAsync(key, mode, activateOnLoad, priority, token);
+            return result.GetValueOrDefault().Item1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityTaskOpt TryLoadAsync(
+        public static async UnityTaskOpt TryLoadAsync(
               this AddressableKey<Scene> key
             , LoadSceneMode mode = LoadSceneMode.Single
             , bool activateOnLoad = true
@@ -44,11 +48,25 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token = default
         )
         {
-            return TryLoadAsyncInternal(key, mode, activateOnLoad, priority, token);
+            var result = await TryLoadGetHandleAsync(key, mode, activateOnLoad, priority, token);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
         }
 
-        private static async UnityTaskOpt TryLoadAsyncInternal(
-              AddressableKey<Scene> key
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async UnityTaskHandle LoadGetHandleAsync(
+              this AddressableKey<Scene> key
+            , LoadSceneMode mode = LoadSceneMode.Single
+            , bool activateOnLoad = true
+            , int priority = 100
+            , CancellationToken token = default
+        )
+        {
+            var result = await TryLoadGetHandleAsync(key, mode, activateOnLoad, priority, token);
+            return result.GetValueOrDefault();
+        }
+
+        public static async UnityTaskHandleOpt TryLoadGetHandleAsync(
+              this AddressableKey<Scene> key
             , LoadSceneMode mode
             , bool activateOnLoad
             , int priority
@@ -61,6 +79,7 @@ namespace EncosyTower.AddressableKeys
 
             if (handle.IsValid() == false)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
@@ -81,12 +100,17 @@ namespace EncosyTower.AddressableKeys
 
             if (token.IsCancellationRequested)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
-            return handle.Status == AsyncOperationStatus.Succeeded
-                ? handle.Result
-                : Option.None;
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                return (handle.Result, handle);
+            }
+
+            handle.TryRelease();
+            return Option.None;
         }
     }
 }

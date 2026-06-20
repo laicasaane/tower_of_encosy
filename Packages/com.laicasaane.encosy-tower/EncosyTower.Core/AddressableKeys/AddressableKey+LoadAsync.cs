@@ -26,6 +26,19 @@ namespace EncosyTower.AddressableKeys
             return result.GetValueOrDefault();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<(T, AsyncOperationHandle<T>)>
+#else
+            UnityEngine.Awaitable<T>
+#endif
+            LoadGetHandleAsync(CancellationToken token = default)
+        {
+            var result = await TryLoadGetHandleAsync(token);
+            return result.GetValueOrDefault();
+        }
+
         public readonly async
 #if UNITASK
             Cysharp.Threading.Tasks.UniTask<Option<T>>
@@ -34,12 +47,28 @@ namespace EncosyTower.AddressableKeys
 #endif
             TryLoadAsync(CancellationToken token = default)
         {
-            if (IsValid == false) return Option.None;
+            var result = await TryLoadGetHandleAsync(token);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
+        }
+
+        public readonly async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<Option<(T, AsyncOperationHandle<T>)>>
+#else
+            UnityEngine.Awaitable<Option<T>>
+#endif
+            TryLoadGetHandleAsync(CancellationToken token = default)
+        {
+            if (IsValid == false)
+            {
+                return Option.None;
+            }
 
             var handle = Addressables.LoadAssetAsync<T>(Value.Value);
 
             if (handle.IsValid() == false)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
@@ -60,17 +89,25 @@ namespace EncosyTower.AddressableKeys
 
             if (token.IsCancellationRequested)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
             if (handle.Status != AsyncOperationStatus.Succeeded)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
             var asset = handle.Result;
 
-            return Option.SomeIf((asset is UnityEngine.Object obj && obj) || asset != null, asset);
+            if ((asset is UnityEngine.Object obj && obj) || asset != null)
+            {
+                return (asset, handle);
+            }
+
+            handle.TryRelease();
+            return Option.None;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace EncosyTower.AddressableKeys
             UnityEngine.Awaitable<T>
 #endif
             LoadAsync<T>(this AddressableKey key, CancellationToken token = default)
-            => ((AddressableKey<T>)key).LoadAsync(token);
+                => ((AddressableKey<T>)key).LoadAsync(token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static
@@ -32,7 +32,27 @@ namespace EncosyTower.AddressableKeys
             UnityEngine.Awaitable<Option<T>>
 #endif
             TryLoadAsync<T>(this AddressableKey key, CancellationToken token = default)
-            => ((AddressableKey<T>)key).TryLoadAsync(token);
+                => ((AddressableKey<T>)key).TryLoadAsync(token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static
+#if UNITASK
+    Cysharp.Threading.Tasks.UniTask<(T, AsyncOperationHandle<T>)>
+#else
+            UnityEngine.Awaitable<(T, AsyncOperationHandle<T>)>
+#endif
+            LoadGetHandleAsync<T>(this AddressableKey key, CancellationToken token = default)
+                => ((AddressableKey<T>)key).LoadGetHandleAsync(token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<Option<(T, AsyncOperationHandle<T>)>>
+#else
+            UnityEngine.Awaitable<Option<(T, AsyncOperationHandle<T>)>>
+#endif
+            TryLoadGetHandleAsync<T>(this AddressableKey key, CancellationToken token = default)
+                => ((AddressableKey<T>)key).TryLoadGetHandleAsync(token);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static async
@@ -49,8 +69,8 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token = default
         )
         {
-            var result = await InstantiateAsyncInternal(key, parent, inWorldSpace, trimCloneSuffix, token);
-            return result.GetValueOrDefault();
+            var result = await TryInstantiateGetHandleAsync(key, parent, inWorldSpace, trimCloneSuffix, token);
+            return result.GetValueOrDefault().Item1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -69,8 +89,47 @@ namespace EncosyTower.AddressableKeys
         )
             where TComponent : Component
         {
-            var result = await InstantiateAsyncInternal(key, parent, inWorldSpace, trimCloneSuffix, token);
-            return result.HasValue ? result.GetValueOrThrow().GetComponent<TComponent>() : default;
+            var result = await TryInstantiateGetHandleAsync<TComponent>(key, parent, inWorldSpace, trimCloneSuffix, token);
+            return result.GetValueOrDefault().Item1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<(GameObject, AsyncOperationHandle<GameObject>)>
+#else
+            UnityEngine.Awaitable<(GameObject, AsyncOperationHandle<GameObject>)>
+#endif
+            InstantiateGetHandleAsync(
+              this AddressableKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+            , CancellationToken token = default
+        )
+        {
+            var result = await TryInstantiateGetHandleAsync(key, parent, inWorldSpace, trimCloneSuffix, token);
+            return result.GetValueOrDefault();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<(TComponent, AsyncOperationHandle<GameObject>)>
+#else
+            UnityEngine.Awaitable<(TComponent, AsyncOperationHandle<GameObject>)>
+#endif
+            InstantiateGetHandleAsync<TComponent>(
+              this AddressableKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+            , CancellationToken token = default
+        )
+            where TComponent : Component
+        {
+            var result = await TryInstantiateGetHandleAsync<TComponent>(key, parent, inWorldSpace, trimCloneSuffix, token);
+            return result.GetValueOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,7 +147,8 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token = default
         )
         {
-            return await InstantiateAsyncInternal(key, parent, inWorldSpace, trimCloneSuffix, token);
+            var result = await TryInstantiateGetHandleAsync(key, parent, inWorldSpace, trimCloneSuffix, token);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,23 +167,17 @@ namespace EncosyTower.AddressableKeys
         )
             where TComponent : Component
         {
-            var result = await InstantiateAsyncInternal(key, parent, inWorldSpace, trimCloneSuffix, token);
-
-            if (result.HasValue == false)
-            {
-                return Option.None;
-            }
-
-            return Option.SomeIf(result.GetValueOrThrow().TryGetComponent<TComponent>(out var comp), comp);
+            var result = await TryInstantiateGetHandleAsync<TComponent>(key, parent, inWorldSpace, trimCloneSuffix, token);
+            return Option.SomeIf(result.HasValue, result.GetValueOrDefault().Item1);
         }
 
-        private static async
+        public static async
 #if UNITASK
-            Cysharp.Threading.Tasks.UniTask<Option<GameObject>>
+            Cysharp.Threading.Tasks.UniTask<Option<(GameObject, AsyncOperationHandle<GameObject>)>>
 #else
-            UnityEngine.Awaitable<Option<GameObject>>
+            UnityEngine.Awaitable<Option<(GameObject, AsyncOperationHandle<GameObject>)>>
 #endif
-            InstantiateAsyncInternal(
+            TryInstantiateGetHandleAsync(
               AddressableKey<GameObject> key
             , TransformOrScene parent
             , bool inWorldSpace
@@ -131,12 +185,16 @@ namespace EncosyTower.AddressableKeys
             , CancellationToken token
         )
         {
-            if (key.IsValid == false) return Option.None;
+            if (key.IsValid == false)
+            {
+                return Option.None;
+            }
 
             var handle = Addressables.InstantiateAsync(key.Value.Value, parent.Transform, inWorldSpace);
 
             if (handle.IsValid() == false)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
@@ -157,11 +215,13 @@ namespace EncosyTower.AddressableKeys
 
             if (token.IsCancellationRequested)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
             if (handle.Status != AsyncOperationStatus.Succeeded)
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
@@ -169,6 +229,7 @@ namespace EncosyTower.AddressableKeys
 
             if (go.IsInvalid())
             {
+                handle.TryRelease();
                 return Option.None;
             }
 
@@ -182,8 +243,41 @@ namespace EncosyTower.AddressableKeys
                 go.TrimCloneSuffix();
             }
 
-            return go;
+            return (go, handle);
 
+        }
+
+        public static async
+#if UNITASK
+            Cysharp.Threading.Tasks.UniTask<Option<(TComponent, AsyncOperationHandle<GameObject>)>>
+#else
+            UnityEngine.Awaitable<Option<(TComponent, AsyncOperationHandle<GameObject>)>>
+#endif
+            TryInstantiateGetHandleAsync<TComponent>(
+              this AddressableKey<GameObject> key
+            , TransformOrScene parent = default
+            , bool inWorldSpace = false
+            , bool trimCloneSuffix = false
+            , CancellationToken token = default
+        )
+            where TComponent : Component
+        {
+            var result = await TryInstantiateGetHandleAsync(key, parent, inWorldSpace, trimCloneSuffix, token);
+
+            if (result.HasValue == false || token.IsCancellationRequested)
+            {
+                return Option.None;
+            }
+
+            var (go, handle) = result.GetValueOrDefault();
+
+            if (go.TryGetComponent<TComponent>(out var comp))
+            {
+                return (comp, handle);
+            }
+
+            handle.TryRelease();
+            return Option.None;
         }
     }
 }
