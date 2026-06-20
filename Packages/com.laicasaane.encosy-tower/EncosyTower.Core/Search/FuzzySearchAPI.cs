@@ -29,7 +29,7 @@ namespace EncosyTower.Search
 #else
             if (string.IsNullOrWhiteSpace(searchString))
             {
-                dest.AddRange(source);
+                dest.AddRangeFast(source);
                 return;
             }
 
@@ -77,7 +77,7 @@ namespace EncosyTower.Search
 #else
             if (string.IsNullOrWhiteSpace(searchString))
             {
-                dest.AddRange(source);
+                dest.AddRangeFast(source);
                 return;
             }
 

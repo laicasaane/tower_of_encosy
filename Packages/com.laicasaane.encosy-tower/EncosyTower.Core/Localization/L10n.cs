@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Common;
 using EncosyTower.Ids;
 using EncosyTower.Logging;
@@ -90,7 +91,7 @@ namespace EncosyTower.Localization
             return localeOpt.HasValue;
         }
 
-        public static string SetLocale(string localeCode)
+        public static string SetLocale([NotNull] string localeCode)
         {
             if (IsReady() == false)
             {
@@ -133,16 +134,12 @@ namespace EncosyTower.Localization
             return localeCode;
         }
 
-        public static void GetActiveLocales(ICollection<string> locales)
+        public static void GetActiveLocales([NotNull] ICollection<string> locales)
         {
-            if (locales == null)
-            {
-                return;
-            }
-
             locales.Clear();
 
             var languages = s_getLanguages().Span;
+            locales.TryIncreaseCapacityToFast(languages.Length);
 
             foreach (var locale in languages)
             {
@@ -150,7 +147,7 @@ namespace EncosyTower.Localization
             }
         }
 
-        public static void SaveSelectedLanguage(Action<string> onSave)
+        public static void SaveSelectedLanguage([NotNull] Action<string> onSave)
         {
             if (IsReady() == false)
             {

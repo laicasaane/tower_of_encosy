@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
@@ -19,7 +20,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by a filter.
         /// </summary>
-        public static FasterList<T> FindAllObjects<T>(string filter)
+        public static FasterList<T> FindAllObjects<T>([NotNull] string filter)
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets(filter);
@@ -44,7 +45,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by a filter.
         /// </summary>
-        public static void FindAllObjects<T>(string filter, ICollection<T> result)
+        public static void FindAllObjects<T>([NotNull] string filter, [NotNull] ICollection<T> result)
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets(filter);
@@ -68,14 +69,14 @@ namespace EncosyTower.Editor
         /// Find first object by a filter.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Option<T> FindFirstObject<T>(string filter)
+        public static Option<T> FindFirstObject<T>([NotNull] string filter)
             where T : UnityEngine.Object
             => Option.SomeIf(FindFirstObject<T>(filter, out var obj), obj);
 
         /// <summary>
         /// Find first object by a filter.
         /// </summary>
-        public static bool FindFirstObject<T>(string filter, out T result)
+        public static bool FindFirstObject<T>([NotNull] string filter, out T result)
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets(filter);
@@ -142,7 +143,7 @@ namespace EncosyTower.Editor
         /// Find first object by name and global qualified type name (i.e. with `global::` prefix).
         /// </summary>
         public static bool FindFirstObjectByNameAndGlobalQualifiedTypeName<T>(
-              string name
+              [NotNull] string name
             , out T result
             , out string resultPath
         )
@@ -201,7 +202,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
-        public static void FindAllObjectsByGlobalQualifiedTypeName<T>(ICollection<T> result)
+        public static void FindAllObjectsByGlobalQualifiedTypeName<T>([NotNull] ICollection<T> result)
             where T : UnityEngine.Object
         {
             var candidates = AssetDatabase.FindAssets($"t:global::{typeof(T).FullName}");
@@ -222,10 +223,10 @@ namespace EncosyTower.Editor
         }
 
         public static bool CreateThenSaveScriptableObjectToFile<T>(
-              string fileName
-            , string relativeFolderPath
+              [NotNull] string fileName
+            , [NotNull] string relativeFolderPath
             , out T result
-            , Action<T> onCreate = null
+            , [NotNull] Action<T> onCreate = null
             , bool overwriteIfExist = false
             , bool displayErrorDialog = true
             , bool refreshAssetDatabase = true
@@ -316,8 +317,8 @@ namespace EncosyTower.Editor
 
         public static bool SaveScriptableObjectToFile<T>(
               T asset
-            , string fileName
-            , string relativeFolderPath
+            , [NotNull] string fileName
+            , [NotNull] string relativeFolderPath
             , bool overwriteIfExist = false
             , bool displayErrorDialog = true
             , bool refreshAssetDatabase = true

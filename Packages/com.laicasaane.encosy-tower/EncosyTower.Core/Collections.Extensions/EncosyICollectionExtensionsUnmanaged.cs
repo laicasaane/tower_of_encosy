@@ -8,9 +8,9 @@ namespace EncosyTower.Collections.Extensions
         /// <summary>
         /// Adds a range of items to a collection.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="items"></param>
+        /// <typeparam name="T">The type of elements in the collection and the items to be added.</typeparam>
+        /// <param name="self">The collection to which the items will be added.</param>
+        /// <param name="items">The items to be added to the collection.</param>
         /// <remarks>
         /// If <paramref name="self"/> can be cast to a specific collection type,
         /// it uses the most efficient method available for that type.
@@ -23,7 +23,7 @@ namespace EncosyTower.Collections.Extensions
         /// <br/>
         /// For other types of collection, it iterates through the items and adds them one by one.
         /// </remarks>
-        public static void AddRangeUnmanaged<T>(this ICollection<T> self, ReadOnlySpan<T> items)
+        public static void AddRangeFastUnmanaged<T>(this ICollection<T> self, ReadOnlySpan<T> items)
             where T : unmanaged
         {
             if (items.Length < 1)
@@ -53,10 +53,7 @@ namespace EncosyTower.Collections.Extensions
 
                 case ICollection<T> coll:
                 {
-                    if (coll is IIncreaseCapacity increaseCapacity)
-                    {
-                        increaseCapacity.IncreaseCapacityTo(coll.Count + items.Length);
-                    }
+                    coll.TryIncreaseCapacityToFast(coll.Count + items.Length);
 
                     foreach (var item in items)
                     {
@@ -72,9 +69,9 @@ namespace EncosyTower.Collections.Extensions
         /// <summary>
         /// Adds a range of items to a collection.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="items"></param>
+        /// <typeparam name="T">The type of elements in the collection and the items to be added.</typeparam>
+        /// <param name="self">The collection to which the items will be added.</param>
+        /// <param name="items">The items to be added to the collection.</param>
         /// <remarks>
         /// If <paramref name="self"/> can be cast to a specific collection type,
         /// it uses the most efficient method available for that type.
@@ -88,7 +85,7 @@ namespace EncosyTower.Collections.Extensions
         /// <br/>
         /// For other types of collection, it iterates through the items and adds them one by one.
         /// </remarks>
-        public static void AddRangeUnmanaged<T>(this ICollection<T> self, IEnumerable<T> items)
+        public static void AddRangeFastUnmanaged<T>(this ICollection<T> self, IEnumerable<T> items)
             where T : unmanaged
         {
             if (items is null)
@@ -124,9 +121,15 @@ namespace EncosyTower.Collections.Extensions
 
                 case ICollection<T> coll:
                 {
-                    if (coll is IIncreaseCapacity increaseCapacity && items is ICollection<T> itemsColl)
+                    switch (items)
                     {
-                        increaseCapacity.IncreaseCapacityTo(coll.Count + itemsColl.Count);
+                        case IReadOnlyCollection<T> itemsColl:
+                            coll.TryIncreaseCapacityToFast(coll.Count + itemsColl.Count);
+                            break;
+
+                        case ICollection<T> itemsColl:
+                            coll.TryIncreaseCapacityToFast(coll.Count + itemsColl.Count);
+                            break;
                     }
 
                     foreach (var item in items)

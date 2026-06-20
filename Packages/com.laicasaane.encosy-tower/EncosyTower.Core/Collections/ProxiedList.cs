@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Generic.Exposed;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
 
@@ -243,17 +244,7 @@ namespace EncosyTower.Collections
             }
 
             var items = AsReadOnlySpan();
-            var length = items.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                ref readonly var item = ref items[i];
-
-                if (match(item))
-                {
-                    result.Add(item);
-                }
-            }
+            result.AddRangeFast(items);
         }
 
         public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ICollection<T> result)
@@ -271,17 +262,7 @@ namespace EncosyTower.Collections
             }
 
             var items = AsReadOnlySpan();
-            var length = items.Length;
-
-            for (var i = 0; i < length; i++)
-            {
-                ref readonly var item = ref items[i];
-
-                if (match(in item))
-                {
-                    result.Add(item);
-                }
-            }
+            result.AddRangeFast(items);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
