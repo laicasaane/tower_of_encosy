@@ -181,7 +181,9 @@ namespace EncosyTower.SourceGen.Generators.Types.Caches
                 return default;
             }
 
-            if (semanticModel.GetDeclaredSymbol(containingSyntax, token) is not INamedTypeSymbol containingType)
+            var synmbolInfo = semanticModel.GetSymbolInfo(containingSyntax, token);
+
+            if (synmbolInfo.Symbol is not ITypeSymbol containingType)
             {
                 return default;
             }
