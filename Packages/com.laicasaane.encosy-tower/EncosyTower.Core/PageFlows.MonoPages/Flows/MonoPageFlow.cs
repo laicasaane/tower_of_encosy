@@ -172,7 +172,7 @@ namespace EncosyTower.PageFlows.MonoPages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected PageKey MakePageKey([NotNull] string pageAssetKey)
         {
-            ThrowIfNotInitialized(this);
+            ThrowIfNotInitialized(IsInitialized, this);
 
             var id = Context.MakeStringId(pageAssetKey);
             return new(pageAssetKey, id);
@@ -426,9 +426,9 @@ namespace EncosyTower.PageFlows.MonoPages
             => flow.TrimPool(msg.AssetKey, msg.AmountToKeep);
 
         [HideInCallstack, StackTraceHidden]
-        private static void ThrowIfNotInitialized(MonoPageFlow context)
+        private static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool isInitialized, MonoPageFlow context)
         {
-            if (context.IsInitialized == false)
+            if (isInitialized == false)
             {
                 throw CreateException(context);
             }

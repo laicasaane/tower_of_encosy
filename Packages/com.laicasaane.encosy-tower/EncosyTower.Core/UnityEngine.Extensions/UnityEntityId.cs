@@ -26,7 +26,7 @@ namespace EncosyTower.UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnityEntityId(T obj)
         {
-            ThrowIfInvalid(obj);
+            ThrowIfInvalid(obj.IsValid());
             _value = obj.GetEntityId();
         }
 
@@ -151,24 +151,30 @@ namespace EncosyTower.UnityExtensions
 #endif
 #endif
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfInvalid(T obj)
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
         {
-            if (obj.IsInvalid())
+            if (isValid == false)
             {
-                throw new ArgumentNullException(nameof(obj));
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static ArgumentException CreateException()
+                => new("UnityEngine.Object is null or invalid.", "obj");
         }
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool value)
         {
             if (value == false)
             {
-                throw new InvalidOperationException(
-                    "UnityEntityId must be created using the constructor that takes a UnityEngine.Object."
-                );
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("UnityEntityId must be created using the constructor that takes a UnityEngine.Object.");
         }
     }
 }

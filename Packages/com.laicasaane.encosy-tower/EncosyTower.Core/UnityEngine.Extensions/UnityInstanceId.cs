@@ -179,19 +179,23 @@ namespace EncosyTower.UnityExtensions
         public static bool operator !=(UnityInstanceId<T> left, UnityInstanceId<T> right)
             => left._value != right._value;
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfInvalid(T obj)
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
         {
-            if (obj.IsInvalid())
+            if (isValid == false)
             {
-                throw new ArgumentNullException(nameof(obj));
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static ArgumentException CreateException()
+                => new("UnityEngine.Object is null or invalid.", "obj");
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfNotCreated([DoesNotReturnIf(false)] bool value)
         {
-            if (check == false)
+            if (value == false)
             {
                 throw CreateException();
             }

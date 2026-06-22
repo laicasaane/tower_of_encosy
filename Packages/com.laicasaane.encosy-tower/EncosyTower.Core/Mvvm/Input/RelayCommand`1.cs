@@ -28,7 +28,7 @@ namespace EncosyTower.Mvvm.Input
         /// </summary>
         private readonly Predicate<T> _canExecute;
 
-        private event MvvmEventHandler _canExecuteChanged;
+        private event MvvmEventHandler canExecuteChanged;
 
         private readonly CachedVariantConverter<T> _converter = CachedVariantConverter<T>.Default;
 
@@ -66,14 +66,14 @@ namespace EncosyTower.Mvvm.Input
         {
             if (listener == null) throw new ArgumentNullException(nameof(listener));
 
-            _canExecuteChanged += listener.OnEvent;
-            listener.OnDetachAction = l => _canExecuteChanged -= l.OnEvent;
+            canExecuteChanged += listener.OnEvent;
+            listener.OnDetachAction = l => canExecuteChanged -= l.OnEvent;
         }
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void NotifyCanExecuteChanged()
-            => _canExecuteChanged?.Invoke(new MvvmEventArgs(this, Variant.Undefined));
+            => canExecuteChanged?.Invoke(new MvvmEventArgs(this, Variant.Undefined));
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,10 +83,9 @@ namespace EncosyTower.Mvvm.Input
         /// <inheritdoc/>
         public bool CanExecute(in Variant parameter)
         {
-            if (_converter.TryGetValue(parameter, out T result) == false)
-            {
-                ThrowArgumentException();
-            }
+            var canConvert = _converter.TryGetValue(parameter, out T result);
+
+            ThrowIfCannotConvertParameter(canConvert);
 
             return CanExecute(result);
         }
@@ -98,17 +97,24 @@ namespace EncosyTower.Mvvm.Input
         /// <inheritdoc/>
         public void Execute(in Variant parameter)
         {
-            if (_converter.TryGetValue(parameter, out T result) == false)
-            {
-                ThrowArgumentException();
-            }
+            var canConvert = _converter.TryGetValue(parameter, out T result);
+
+            ThrowIfCannotConvertParameter(canConvert);
 
             Execute(result);
         }
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowArgumentException()
-            => throw new ArgumentException($"The command type requires an argument of type {typeof(T)}.");
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        internal static void ThrowIfCannotConvertParameter([DoesNotReturnIf(false)] bool canConvert)
+        {
+            if (canConvert == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static ArgumentException CreateException()
+                => new($"The command requires an argument of type {typeof(T)}.", "parameter");
+        }
     }
 }

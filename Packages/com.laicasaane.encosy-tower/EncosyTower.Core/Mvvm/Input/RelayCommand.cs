@@ -23,7 +23,7 @@ namespace EncosyTower.Mvvm.Input
         /// </summary>
         private readonly Func<bool> _canExecute;
 
-        private event MvvmEventHandler _canExecuteChanged;
+        private event MvvmEventHandler canExecuteChanged;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelayCommand"/> class that can always execute.
@@ -53,14 +53,14 @@ namespace EncosyTower.Mvvm.Input
         {
             if (listener == null) throw new ArgumentNullException(nameof(listener));
 
-            _canExecuteChanged += listener.OnEvent;
-            listener.OnDetachAction = l => _canExecuteChanged -= l.OnEvent;
+            canExecuteChanged += listener.OnEvent;
+            listener.OnDetachAction = l => canExecuteChanged -= l.OnEvent;
         }
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void NotifyCanExecuteChanged()
-            => _canExecuteChanged?.Invoke(new MvvmEventArgs(this, Variant.Undefined));
+            => canExecuteChanged?.Invoke(new MvvmEventArgs(this, Variant.Undefined));
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

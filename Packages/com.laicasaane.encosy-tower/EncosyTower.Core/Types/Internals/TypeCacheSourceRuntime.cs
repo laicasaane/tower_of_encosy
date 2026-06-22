@@ -74,7 +74,7 @@ namespace EncosyTower.Types.Internals
 
         public ReadOnlyMemory<Type> GetTypesDerivedFrom(Type type, string assemblyName)
         {
-            ThrowIfNull(_cache);
+            ThrowIfNull(_cache != null);
 
             EnsureValidAssemblyName(ref assemblyName);
 
@@ -111,7 +111,7 @@ namespace EncosyTower.Types.Internals
 
         public ReadOnlyMemory<Type> GetTypesWithAttribute(Type attrType, string assemblyName)
         {
-            ThrowIfNull(_cache);
+            ThrowIfNull(_cache != null);
 
             EnsureValidAssemblyName(ref assemblyName);
 
@@ -148,7 +148,7 @@ namespace EncosyTower.Types.Internals
 
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute(Type attrType, string assemblyName)
         {
-            ThrowIfNull(_cache);
+            ThrowIfNull(_cache != null);
 
             EnsureValidAssemblyName(ref assemblyName);
 
@@ -185,7 +185,7 @@ namespace EncosyTower.Types.Internals
 
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute(Type attrType, string assemblyName)
         {
-            ThrowIfNull(_cache);
+            ThrowIfNull(_cache != null);
 
             EnsureValidAssemblyName(ref assemblyName);
 
@@ -209,12 +209,16 @@ namespace EncosyTower.Types.Internals
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfNull(DeserializedTypeCache cache)
+        private static void ThrowIfNull([DoesNotReturnIf(false)] bool isNotNull)
         {
-            if (cache == null)
+            if (isNotNull == false)
             {
-                throw new InvalidOperationException("RuntimeTypeCache is not initialized correctly.");
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("RuntimeTypeCache is not initialized correctly.");
         }
     }
 }

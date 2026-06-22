@@ -9,29 +9,26 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using EncosyTower.Logging;
 using EncosyTower.Types;
+using UnityEngine;
 
 namespace EncosyTower.Vaults
 {
     public class SingletonVault<TBase> : IDisposable
+        where TBase : class
     {
         private readonly ConcurrentDictionary<TypeHash, TBase> _singletons = new();
 
-        static SingletonVault()
-        {
-            ThrowIfNotReferenceType();
-        }
-
         public bool Contains<T>()
-            where T : TBase
+            where T : class, TBase
             => _singletons.ContainsKey(Type<T>.Hash);
 
         public bool Contains<T>(T instance)
-            where T : TBase
+            where T : class, TBase
             => _singletons.TryGetValue(Type<T>.Hash, out var obj)
                && ReferenceEquals(obj, instance);
 
         public bool TryAdd<T>()
-            where T : TBase, new()
+            where T : class, TBase, new()
         {
             if (_singletons.ContainsKey(Type<T>.Hash))
             {
@@ -43,7 +40,7 @@ namespace EncosyTower.Vaults
         }
 
         public bool TryAdd<T>(T instance)
-            where T : TBase
+            where T : class, TBase
         {
             if (instance == null)
             {
@@ -64,7 +61,7 @@ namespace EncosyTower.Vaults
         }
 
         public bool TryGetOrAdd<T>(out T instance)
-            where T : TBase, new()
+            where T : class, TBase, new()
         {
             if (_singletons.TryGetValue(Type<T>.Hash, out var obj))
             {
@@ -84,7 +81,7 @@ namespace EncosyTower.Vaults
         }
 
         public bool TryGet<T>(out T instance)
-            where T : TBase
+            where T : class, TBase
         {
             if (_singletons.TryGetValue(Type<T>.Hash, out var obj))
             {
@@ -125,19 +122,7 @@ namespace EncosyTower.Vaults
         private static void LogError_InstanceAlreadyExists<T>()
             => StaticDevLogger.LogError($"An instance of {typeof(T)} has already been existing");
 
-        [Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfNotReferenceType()
-        {
-            if (typeof(TBase).IsValueType)
-            {
-                throw new InvalidOperationException(
-                    $"{nameof(SingletonVault<TBase>)} does not accept type '{typeof(TBase)}' " +
-                    $"because it is not a reference type."
-                );
-            }
-        }
-
-        [Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowCannotCastEvenRegistered<T>(TBase obj)
         {
             throw new InvalidCastException(
@@ -146,7 +131,7 @@ namespace EncosyTower.Vaults
             );
         }
 
-        [Conditional("__ENCOSY_VALIDATION__")]
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
         private static void ThrowCannotCast<T>(TBase obj)
         {
             throw new InvalidCastException(

@@ -112,14 +112,9 @@ using UnityEngine;
                         p.PrintBeginLine("public ").Print(type).PrintEndLine(" GetValue(in Variant variant)");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("if (variant.TryGetValue(out ").Print(type).PrintEndLine(" result) == false)");
-                            p.OpenScope();
-                            {
-                                p.PrintLine("ThrowIfInvalidCast();");
-                            }
-                            p.CloseScope();
-                            p.PrintEndLine();
-
+                            p.PrintBeginLine("var validCast = variant.TryGetValue(out ")
+                                .Print(type).PrintEndLine(" result);");
+                            p.PrintLine("ThrowIfInvalidCast(validCast);");
                             p.PrintLine("return result;");
                         }
                         p.CloseScope();
@@ -142,12 +137,21 @@ using UnityEngine;
 
                         p.PrintBeginLine("[HideInCallstack, StackTraceHidden, ")
                             .PrintEndLine("Conditional(\"UNITY_EDITOR\"), Conditional(\"DEVELOPMENT_BUILD\")]");
-                        p.PrintLine("private static void ThrowIfInvalidCast()");
+                        p.PrintLine("private static void ThrowIfInvalidCast([DoesNotReturnIf(false)] bool isValid)");
                         p.OpenScope();
                         {
-                            p.PrintBeginLine("throw new InvalidCastException($\"Cannot get value of {typeof(")
-                                .Print(type)
-                                .PrintEndLine(")} from the input variant.\");");
+                            p.PrintLine("if (isValid == false)");
+                            p.OpenScope();
+                            {
+                                p.PrintLine("throw CreateException();");
+                            }
+                            p.CloseScope();
+                            p.PrintEndLine();
+
+                            p.PrintLine("[MethodImpl(MethodImplOptions.NoInlining)]");
+                            p.PrintLine("static InvalidCastException CreateException()");
+                            p.WithIncreasedIndent()
+                                .PrintLine("=> new(\"Cannot get value of object from the input variant.\");");
                         }
                         p.CloseScope();
                         p.PrintEndLine();

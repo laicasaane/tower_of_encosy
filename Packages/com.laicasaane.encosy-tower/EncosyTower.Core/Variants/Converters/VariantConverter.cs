@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Types;
 using Unity.Collections.LowLevel.Unsafe;
@@ -31,7 +32,7 @@ namespace EncosyTower.Variants.Converters
 
         static partial void TryRegisterGeneratedConverters();
 
-        public static bool TryRegister<T>(IVariantConverter<T> converter)
+        public static bool TryRegister<T>([NotNull] IVariantConverter<T> converter)
         {
             ThrowIfNullOrSizeOfTIsBiggerThanVariantDataSize(converter);
 
@@ -103,11 +104,6 @@ namespace EncosyTower.Variants.Converters
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ThrowIfNullOrSizeOfTIsBiggerThanVariantDataSize<T>(IVariantConverter<T> converter)
         {
-            if (converter == null)
-            {
-                throw new ArgumentNullException(nameof(converter));
-            }
-
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 return;
@@ -118,13 +114,19 @@ namespace EncosyTower.Variants.Converters
 
             if (sizeOfT > VariantData.BYTE_COUNT)
             {
-                throw new NotSupportedException(
+                throw CreateException(typeOfT, sizeOfT);
+            }
+
+            return;
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static NotSupportedException CreateException(Type typeOfT, int sizeOfT)
+                => new(
                     $"The size of {typeOfT} is {sizeOfT} bytes, " +
                     $"while a Variant can only store {VariantData.BYTE_COUNT} bytes of custom data. " +
                     $"To enable the automatic conversion between {typeOfT} and {typeof(Variant)}, " +
                     $"please {GetDefineSymbolMessage(sizeOfT)}"
                 );
-            }
 
             static string GetDefineSymbolMessage(int size)
             {

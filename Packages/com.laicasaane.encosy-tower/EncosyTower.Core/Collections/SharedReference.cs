@@ -53,13 +53,13 @@ namespace EncosyTower.Collections
 
         protected SharedReference()
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
             Initialize(default);
         }
 
         public SharedReference(T value)
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
             Initialize(value);
         }
 
@@ -251,25 +251,26 @@ namespace EncosyTower.Collections
             return _native.Slice();
         }
 
-        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static unsafe void ThrowIfTypesNotEqualSize()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected static bool AreTypesEqualSize()
         {
-            if (sizeof(T) != sizeof(TNative))
-            {
-                throw new InvalidOperationException(
-                    $"size of native alias type '{typeof(TNative).FullName}' ({sizeof(TNative)} bytes) " +
-                    $"must be equal to size of source type '{typeof(T).FullName}' ({sizeof(T)} bytes)"
-                );
-            }
+            return UnsafeUtility.SizeOf<T> == UnsafeUtility.SizeOf<TNative>;
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static void ThrowIfSizeNegative(int size)
+        protected static void ThrowIfTypesNotEqualSize([DoesNotReturnIf(false)] bool areEqual)
         {
-            if (size < 0)
+            if (areEqual == false)
             {
-                throw new InvalidOperationException("size must be equal or greater than 0");
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new InvalidOperationException(
+                    $"size of native alias type '{typeof(TNative).FullName}' ({UnsafeUtility.SizeOf<TNative>()} bytes) " +
+                    $"must be equal to size of source type '{typeof(T).FullName}' ({UnsafeUtility.SizeOf<T>()} bytes)"
+                );
         }
 
         private void Initialize(T value)

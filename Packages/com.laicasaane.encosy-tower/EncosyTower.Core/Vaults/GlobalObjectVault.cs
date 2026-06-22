@@ -33,18 +33,22 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains<T>(Id<T> id)
+            where T : class
             => s_vaultIdT.Contains(ToId2(id));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryAdd<T>(Id<T> id, [NotNull] T obj)
+            where T : class
             => s_vaultIdT.TryAdd(ToId2(id), obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryRemove<T>(Id<T> id, out Option<T> obj)
+            where T : class
             => s_vaultIdT.TryRemove(ToId2(id), out obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGet<T>(Id<T> id, out Option<T> obj)
+            where T : class
             => s_vaultIdT.TryGet<T>(ToId2(id), out obj);
 
         #region    ID2
@@ -56,14 +60,17 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryAdd<T>(Id2 id, [NotNull] T obj)
+            where T : class
             => s_vaultId2.TryAdd(id, obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryRemove<T>(Id2 id, out Option<T> obj)
+            where T : class
             => s_vaultId2.TryRemove(id, out obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGet<T>(Id2 id, out Option<T> obj)
+            where T : class
             => s_vaultId2.TryGet<T>(id, out obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,14 +86,17 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryAdd<T>(StringId<T> id, [NotNull] T obj)
+            where T : class
             => s_vaultStringId.TryAdd(ToMetaStringId(id), obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryRemove<T>(StringId<T> id, out Option<T> obj)
+            where T : class
             => s_vaultStringId.TryRemove(ToMetaStringId(id), out obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGet<T>(StringId<T> id, out Option<T> obj)
+            where T : class
             => s_vaultStringId.TryGet(ToMetaStringId(id), out obj);
 
         #region    HELPERS

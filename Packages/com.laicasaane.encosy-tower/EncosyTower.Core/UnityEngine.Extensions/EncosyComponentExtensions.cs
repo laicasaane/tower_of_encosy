@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace EncosyTower.UnityExtensions
@@ -9,7 +10,7 @@ namespace EncosyTower.UnityExtensions
     {
         public static T GetOrAddComponent<T>([NotNull] this Component self) where T : Component
         {
-            ThrowIfComponentInvalid(self);
+            ThrowIfComponentInvalid(self.IsValid(), 0);
 
             if (self.TryGetComponent(out T component) == false)
             {
@@ -21,14 +22,14 @@ namespace EncosyTower.UnityExtensions
 
         public static void DetachParent([NotNull] this Transform self, bool worldPositionStays = true)
         {
-            ThrowIfComponentInvalid(self);
+            ThrowIfComponentInvalid(self.IsValid(), 0);
             self.SetParent(null, worldPositionStays);
         }
 
         public static void FillParent([NotNull] this RectTransform self, [NotNull] RectTransform parent)
         {
-            ThrowIfComponentInvalid(self);
-            ThrowIfComponentInvalid(parent);
+            ThrowIfComponentInvalid(self.IsValid(), 0);
+            ThrowIfComponentInvalid(parent.IsValid(), 1);
 
             self.SetParent(parent, false);
             self.localPosition = Vector3.zero;
@@ -43,8 +44,8 @@ namespace EncosyTower.UnityExtensions
 
         public static void SetParentRect([NotNull] this RectTransform self, [NotNull] RectTransform parent)
         {
-            ThrowIfComponentInvalid(self);
-            ThrowIfComponentInvalid(parent);
+            ThrowIfComponentInvalid(self.IsValid(), 0);
+            ThrowIfComponentInvalid(parent.IsValid(), 1);
 
             self.SetParent(parent, false);
             self.localPosition = Vector3.zero;
@@ -53,12 +54,22 @@ namespace EncosyTower.UnityExtensions
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfComponentInvalid(Component self)
+        private static void ThrowIfComponentInvalid([DoesNotReturnIf(false)] bool isValid, int paramIndex)
         {
-            if (self.IsInvalid())
+            if (isValid == false)
             {
-                throw new ArgumentNullException(nameof(self));
+                throw CreateException(paramIndex);
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static ArgumentException CreateException(int paramIndex)
+                => new("Component is null or invalid.", GetParamName(paramIndex));
+
+            static string GetParamName(int index)
+                => index switch {
+                    1 => "parent",
+                    _ => "self",
+                };
         }
     }
 }

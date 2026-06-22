@@ -53,8 +53,6 @@ namespace EncosyTower.Vaults
             , CancellationToken token
         )
         {
-            ThrowIfNotReferenceType<T>();
-
             await WaitUntilContains(id, token);
 
             if (token.IsCancellationRequested)

@@ -1,9 +1,3 @@
-#if UNITY_BURST
-
-// <copyright file="FixedArray.cs" company="BovineLabs">
-//     Copyright (c) BovineLabs. All rights reserved.
-// </copyright>
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,7 +31,7 @@ namespace EncosyTower.Collections
 
         static FixedArray()
         {
-            ThrowIfInvalidSize(IsValidSize());
+            ThrowIfInvalidSize(AreTypesEqualSize());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -223,7 +217,7 @@ namespace EncosyTower.Collections
             => GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsValidSize()
+        private static bool AreTypesEqualSize()
             => UnsafeUtility.SizeOf<TBuffer>() >= UnsafeUtility.SizeOf<T>();
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -306,7 +300,7 @@ namespace EncosyTower.Collections
 
             static ReadOnly()
             {
-                ThrowIfInvalidSize(IsValidSize());
+                ThrowIfInvalidSize(AreTypesEqualSize());
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -413,5 +407,3 @@ namespace EncosyTower.Collections
         }
     }
 }
-
-#endif

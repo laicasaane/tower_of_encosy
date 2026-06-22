@@ -20,7 +20,7 @@ namespace EncosyTower.UnityExtensions
         /// </summary>
         public static async UnityTask EnableAsync([NotNull] this Behaviour self, CancellationToken token = default)
         {
-            ThrowIfComponentInvalid(self);
+            ThrowIfComponentInvalid(self.IsValid(), 0);
 
             self.enabled = false;
 
@@ -34,7 +34,7 @@ namespace EncosyTower.UnityExtensions
         /// </summary>
         public static async UnityTask EnableAsync([NotNull] this Behaviour self, int delayFrames, CancellationToken token = default)
         {
-            ThrowIfComponentInvalid(self);
+            ThrowIfComponentInvalid(self.IsValid(), 0);
 
             self.enabled = false;
 

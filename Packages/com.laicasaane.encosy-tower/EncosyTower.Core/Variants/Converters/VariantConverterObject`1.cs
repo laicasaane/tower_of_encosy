@@ -23,15 +23,10 @@ namespace EncosyTower.Variants.Converters
 
         public T GetValue(in Variant variant)
         {
-            if (variant.TryGetValue(out object candidate)
-                && candidate is T value
-            )
-            {
-                return value;
-            }
+            var validCast = variant.TryGetValue(out object candidate);
+            ThrowIfInvalidCast(validCast & candidate is T);
 
-            ThrowIfInvalidCast();
-            return default;
+            return candidate is T value ? value : default;
         }
 
         public bool TryGetValue(in Variant variant, out T result)
@@ -67,10 +62,17 @@ namespace EncosyTower.Variants.Converters
             return variant.TypeId.ToType().ToString() ?? string.Empty;
         }
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfInvalidCast()
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfInvalidCast([DoesNotReturnIf(false)] bool isValid)
         {
-            throw new InvalidCastException($"Cannot get value of {typeof(T)} from the input variant.");
+            if (isValid == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidCastException CreateException()
+                => new("Cannot get value of object from the input variant.");
         }
     }
 }

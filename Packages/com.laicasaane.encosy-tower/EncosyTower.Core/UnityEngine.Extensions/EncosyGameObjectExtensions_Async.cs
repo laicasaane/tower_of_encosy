@@ -20,7 +20,7 @@ namespace EncosyTower.UnityExtensions
         /// </summary>
         public static async UnityTask ActivateAsync([NotNull] this GameObject self, CancellationToken token = default)
         {
-            ThrowIfGameObjectInvalid(self);
+            ThrowIfGameObjectInvalid(self.IsValid());
 
             self.SetActive(false);
 
@@ -34,7 +34,7 @@ namespace EncosyTower.UnityExtensions
         /// </summary>
         public static async UnityTask ActivateAsync([NotNull] this GameObject self, int delayFrames, CancellationToken token = default)
         {
-            ThrowIfGameObjectInvalid(self);
+            ThrowIfGameObjectInvalid(self.IsValid());
 
             self.SetActive(false);
 

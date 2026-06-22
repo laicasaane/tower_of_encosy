@@ -29,9 +29,9 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryAdd<T>(TId id, [NotNull] T obj)
+            where T : class
         {
-            ThrowIfNotReferenceType<T>();
-            ThrowIfUnityObjectIsDestroyed(obj);
+            ThrowIfUnityObjectIsInvalid(IsUnityObjectValid<T>(obj), typeof(T));
 
             var map = _map;
 
@@ -46,6 +46,7 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryRemove<T>(TId id, out Option<T> obj)
+            where T : class
         {
             if (_map.TryRemove(id, out var weakRef))
             {
@@ -59,9 +60,8 @@ namespace EncosyTower.Vaults
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGet<T>(TId id, out Option<T> obj)
+            where T : class
         {
-            ThrowIfNotReferenceType<T>();
-
             if (_map.TryGetValue(id, out var weakRef))
             {
                 obj = TryCast<T>(id, weakRef);
@@ -140,36 +140,29 @@ namespace EncosyTower.Vaults
             return Option.Some(obj);
         }
 
-        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfNotReferenceType<T>()
-        {
-            var typeOfT = typeof(T);
-            var isValueType = typeOfT.IsValueType;
-            var isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
-
-            if (isUnmanaged || isValueType)
-            {
-                throw new InvalidCastException(
-                    $"\"{typeOfT}\" is not a reference type"
-                );
-            }
-        }
+        private static bool IsUnityObjectValid<T>(T obj)
+            => obj is UnityObject unityObj && unityObj == false;
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfUnityObjectIsDestroyed<T>(T obj)
+        private static void ThrowIfUnityObjectIsInvalid([DoesNotReturnIf(false)] bool isValid, Type type)
         {
-            if (obj is UnityObject unityObj && unityObj == false)
+            if (isValid == false)
             {
-                throw new MissingReferenceException($"Unity Object of type {typeof(T)} is either missing or destroyed.");
+                throw CreateException(type);
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static MissingReferenceException CreateException(Type type)
+                => new($"Unity Object of type {type} is either missing or destroyed.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfTypeMismatch<T>(TId id, object obj, UnityObject context)
         {
             var message = "Id \"{0}\" is mapped to an object of type \"{1}\". " +
-                  "However an object of type \"{2}\" is being requested from it. " +
-                  "It might be a bug at the time of registering.";
+                "However an object of type \"{2}\" is being requested from it. " +
+                "It might be a bug at the time of registering.";
 
             if (context)
             {
@@ -181,6 +174,7 @@ namespace EncosyTower.Vaults
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         private static void ErrorIfRegisteredObjectIsNull(TId id, UnityObject context)
         {

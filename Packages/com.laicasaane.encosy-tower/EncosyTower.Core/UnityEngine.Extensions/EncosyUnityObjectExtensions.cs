@@ -22,17 +22,21 @@ namespace EncosyTower.UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssumeValid<T>(this T self) where T : UnityEngine.Object
         {
-            ThrowIfInvalid(self);
+            ThrowIfObjectInvalid(self.IsValid());
             return self;
         }
 
-        [HideInCallstack, StackTraceHidden, DoesNotReturn, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfInvalid(UnityEngine.Object self)
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfObjectInvalid([DoesNotReturnIf(false)] bool isValid)
         {
-            if (self.IsInvalid())
+            if (isValid == false)
             {
-                throw new ArgumentNullException(nameof(self));
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static ArgumentException CreateException()
+                => new("UnityEngine.Object is null or invalid.", "self");
         }
     }
 }

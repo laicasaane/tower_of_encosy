@@ -36,6 +36,7 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace EncosyTower.Buffers
 {
@@ -47,13 +48,10 @@ namespace EncosyTower.Buffers
     public struct NativeStrategy<T> : IBufferStrategy<T>, IAsNativeSlice<T>, IAsNativeSliceReadOnly<T>
         where T : unmanaged
     {
-#if DEBUG && !PROFILE_SVELTO
         static NativeStrategy()
         {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                throw new InvalidOperationException("Only unmanaged data can be stored natively");
+            ThrowIfNotUnmanagedType(RuntimeHelpers.IsReferenceOrContainsReferences<T>());
         }
-#endif
 
         internal NativeReference<AllocatorStrategy> _nativeAllocator;
         internal NBInternal<T> _realBuffer;
@@ -61,7 +59,8 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeStrategy(int size, AllocatorStrategy allocatorStrategy, bool clear = true) : this()
         {
-            ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
+            ThrowIfInvalidAllocatorStrategy(allocatorStrategy.IsValid);
+
             Alloc(size, allocatorStrategy, clear);
         }
 
@@ -93,10 +92,7 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Alloc(int newCapacity, AllocatorStrategy allocatorStrategy, bool memClear = true)
         {
-#if __ENCOSY_VALIDATION__
-            if (_realBuffer.ToNativeArray().IsCreated)
-                throw new InvalidOperationException("Cannot allocate an already allocated buffer");
-#endif
+            ThrowIfBufferAlreadyAllocated(_realBuffer.ToNativeArray().IsCreated);
 
             if (allocatorStrategy.TryGetAllocatorHandle(out var handle))
             {
@@ -110,7 +106,7 @@ namespace EncosyTower.Buffers
                 return;
             }
 
-            ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
+            ThrowIfInvalidAllocatorStrategy(allocatorStrategy.IsValid);
         }
 
         private void Alloc(int newCapacity, AllocatorManager.AllocatorHandle allocator, bool memClear = true)
@@ -137,10 +133,9 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize(int newSize, bool copyContent, bool memClear)
         {
-#if __ENCOSY_VALIDATION__
-            if (_nativeAllocator.IsCreated == false || _realBuffer.ToNativeArray().IsCreated == false)
-                throw new InvalidOperationException("Cannot resize an uninitialized buffer");
-#endif
+            ThrowIfResizeUninitializedBuffer(
+                _nativeAllocator.IsCreated == false || _realBuffer.ToNativeArray().IsCreated == false
+            );
 
             var capacity = Capacity;
 
@@ -163,7 +158,7 @@ namespace EncosyTower.Buffers
                 return;
             }
 
-            ThrowIfInvalidAllocatorStrategy(allocatorStrategy);
+            ThrowIfInvalidAllocatorStrategy(allocatorStrategy.IsValid);
         }
 
         private void Resize(int newSize, bool copyContent, bool memClear, AllocatorManager.AllocatorHandle allocator)
@@ -227,39 +222,22 @@ namespace EncosyTower.Buffers
         {
             var array = _realBuffer.ToNativeArray();
 
+            ThrowIfAlreadyDisposed(array.IsCreated);
+
             if (array.IsCreated)
+            {
                 array.Dispose();
-#if __ENCOSY_VALIDATION__
-            else
-                throw new InvalidOperationException("Trying to dispose a disposed buffer");
-#endif
+            }
 
             _realBuffer = default;
         }
 
-        [DoesNotReturn, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfInvalidAllocatorStrategy(AllocatorStrategy strategy)
-        {
-            if (strategy.IsValid)
-            {
-                return;
-            }
-
-            throw new InvalidOperationException(
-                "Allocator strategy must be either Unity.Collections.Allocator " +
-                "or Unity.Collections.AllocatorManager.AllocatorHandle"
-            );
-        }
-
         public readonly struct ReadOnly : IReadOnlyBufferStrategy<T>, IAsNativeSliceReadOnly<T>
         {
-#if DEBUG && !PROFILE_SVELTO
             static ReadOnly()
             {
-                if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                    throw new InvalidOperationException("Only unmanaged data can be stored natively");
+                ThrowIfNotUnmanagedType(RuntimeHelpers.IsReferenceOrContainsReferences<T>());
             }
-#endif
 
             internal readonly NativeReference<AllocatorStrategy>.ReadOnly _nativeAllocator;
             internal readonly NBInternal<T>.ReadOnly _realBuffer;
@@ -272,7 +250,10 @@ namespace EncosyTower.Buffers
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private ReadOnly(NativeReference<AllocatorStrategy>.ReadOnly nativeAllocator, NBInternal<T>.ReadOnly realBuffer)
+            private ReadOnly(
+                  NativeReference<AllocatorStrategy>.ReadOnly nativeAllocator
+                , NBInternal<T>.ReadOnly realBuffer
+            )
             {
                 _nativeAllocator = nativeAllocator;
                 _realBuffer = realBuffer;
@@ -320,6 +301,74 @@ namespace EncosyTower.Buffers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ReadOnly(NativeStrategy<T> strategy)
                 => new(strategy);
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfInvalidAllocatorStrategy([DoesNotReturnIf(false)] bool check)
+        {
+            if (check == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new(
+                    "Allocator strategy must be either Unity.Collections.Allocator " +
+                    "or Unity.Collections.AllocatorManager.AllocatorHandle"
+                );
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfNotUnmanagedType([DoesNotReturnIf(false)] bool isUnmanaged)
+        {
+            if (isUnmanaged == false)
+            {
+                throw CreateException(typeof(T));
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException(Type type)
+                => new($"{type} is not an unmanaged type. Only unmanaged data can be stored natively.");
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfBufferAlreadyAllocated([DoesNotReturnIf(true)] bool isCreated)
+        {
+            if (isCreated)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("Cannot allocate an already allocated buffer.");
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfResizeUninitializedBuffer([DoesNotReturnIf(false)] bool isCreated)
+        {
+            if (isCreated == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("Cannot resize an uninitialized buffer.");
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
+        private static void ThrowIfAlreadyDisposed([DoesNotReturnIf(false)] bool isCreated)
+        {
+            if (isCreated == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("Cannot dispose an already disposed buffer.");
         }
     }
 }

@@ -2,6 +2,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using EncosyTower.UnityExtensions;
 using Unity.Mathematics;
 using UnityEngine;
@@ -16,11 +17,7 @@ namespace EncosyTower.Entities
     {
         public static PsyshockCollider ToPsyshockCollider([NotNull] this UnityCollider collider)
         {
-            if (collider.IsValid() == false)
-            {
-                ThrowColliderNullReference();
-                return default;
-            }
+            ThrowIfInvalidCollider(collider.IsValid());
 
             return collider switch {
                 SphereCollider sphere => ToPsyshockCollider(sphere),
@@ -32,11 +29,7 @@ namespace EncosyTower.Entities
 
         public static Psyshock.SphereCollider ToPsyshockCollider([NotNull] this SphereCollider collider)
         {
-            if (collider.IsValid() == false)
-            {
-                ThrowColliderNullReference();
-                return default;
-            }
+            ThrowIfInvalidCollider(collider.IsValid());
 
             return new Psyshock.SphereCollider {
                 center = collider.center,
@@ -47,11 +40,7 @@ namespace EncosyTower.Entities
 
         public static Psyshock.CapsuleCollider ToPsyshockCollider([NotNull] this CapsuleCollider collider)
         {
-            if (collider.IsValid() == false)
-            {
-                ThrowColliderNullReference();
-                return default;
-            }
+            ThrowIfInvalidCollider(collider.IsValid());
 
             float3 dir;
 
@@ -78,11 +67,7 @@ namespace EncosyTower.Entities
 
         public static Psyshock.BoxCollider ToPsyshockCollider([NotNull] this BoxCollider collider)
         {
-            if (collider.IsValid() == false)
-            {
-                ThrowColliderNullReference();
-                return default;
-            }
+            ThrowIfInvalidCollider(collider.IsValid());
 
             return new Psyshock.BoxCollider {
                 center = collider.center,
@@ -91,9 +76,18 @@ namespace EncosyTower.Entities
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowColliderNullReference()
+        private static void ThrowIfInvalidCollider([DoesNotReturnIf(false)] bool isValid)
         {
-            throw new System.ArgumentNullException("collider");
+            if (isValid == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static System.ArgumentException CreateException()
+            {
+                return new System.ArgumentException("Collider is null or invalid.", "collider");
+            }
         }
     }
 }

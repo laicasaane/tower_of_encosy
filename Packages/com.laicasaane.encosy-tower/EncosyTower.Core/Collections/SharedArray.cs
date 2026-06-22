@@ -92,20 +92,20 @@ namespace EncosyTower.Collections
 
         protected SharedArray()
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
             Initialize(Array.Empty<T>());
         }
 
         public SharedArray(int size)
         {
-            ThrowIfTypesNotEqualSize();
-            ThrowIfSizeNegative(size);
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
+            ThrowIfSizeNegative(size >= 0);
             Initialize(size == 0 ? Array.Empty<T>() : new T[size]);
         }
 
         public SharedArray([NotNull] T[] source)
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
             Initialize(source);
         }
 
@@ -119,7 +119,7 @@ namespace EncosyTower.Collections
 
         public SharedArray(in NativeArray<TNative> source)
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
 
             var managed = new T[source.Length];
             Initialize(managed);
@@ -128,7 +128,7 @@ namespace EncosyTower.Collections
 
         public SharedArray(in NativeSlice<TNative> source)
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
 
             var managed = new T[source.Length];
             Initialize(managed);
@@ -137,7 +137,7 @@ namespace EncosyTower.Collections
 
         public SharedArray([NotNull] ICollection<T> source)
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
 
             var managed = new T[source.Count];
             source.CopyTo(managed, 0);
@@ -147,7 +147,7 @@ namespace EncosyTower.Collections
 
         public SharedArray([NotNull] ICollection<T> source, int extraSize)
         {
-            ThrowIfTypesNotEqualSize();
+            ThrowIfTypesNotEqualSize(AreTypesEqualSize());
 
             var managed = new T[source.Count + extraSize];
             source.CopyTo(managed, 0);
@@ -241,7 +241,7 @@ namespace EncosyTower.Collections
         {
             _version++;
 
-            ThrowIfSizeNegative(newSize);
+            ThrowIfSizeNegative(newSize >= 0);
 
             if (newSize == _managed.Length)
             {
@@ -378,25 +378,39 @@ namespace EncosyTower.Collections
             return _native.Slice();
         }
 
-        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static unsafe void ThrowIfTypesNotEqualSize()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected static bool AreTypesEqualSize()
         {
-            if (sizeof(T) != sizeof(TNative))
-            {
-                throw new InvalidOperationException(
-                    $"size of native alias type '{typeof(TNative).FullName}' ({sizeof(TNative)} bytes) " +
-                    $"must be equal to size of source type '{typeof(T).FullName}' ({sizeof(T)} bytes)"
-                );
-            }
+            return UnsafeUtility.SizeOf<T> == UnsafeUtility.SizeOf<TNative>;
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        protected static void ThrowIfSizeNegative(int size)
+        protected static void ThrowIfTypesNotEqualSize([DoesNotReturnIf(false)] bool areEqual)
         {
-            if (size < 0)
+            if (areEqual == false)
             {
-                throw new InvalidOperationException("size must be equal or greater than 0");
+                throw CreateException();
             }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new(
+                    $"size of native alias type '{typeof(TNative).FullName}' ({UnsafeUtility.SizeOf<TNative>()} bytes) " +
+                    $"must be equal to size of source type '{typeof(T).FullName}' ({UnsafeUtility.SizeOf<T>()} bytes)"
+                );
+        }
+
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        protected static void ThrowIfSizeNegative([DoesNotReturnIf(false)] bool isZeroOrPositive)
+        {
+            if (isZeroOrPositive == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("size must be equal or greater than 0");
         }
 
         internal void Initialize(T[] managed)
@@ -485,10 +499,7 @@ namespace EncosyTower.Collections
 
             private bool MoveNextRare()
             {
-                if (_version != _sharedArray._version)
-                {
-                    ThrowEnumFailedVersion();
-                }
+                ThrowIfEnumFailedVersion(_version == _sharedArray._version);
 
                 _index = _length + 1;
                 _current = Option.None;
@@ -497,10 +508,7 @@ namespace EncosyTower.Collections
 
             void IEnumerator.Reset()
             {
-                if (_version != _sharedArray._version)
-                {
-                    ThrowEnumFailedVersion();
-                }
+                ThrowIfEnumFailedVersion(_version == _sharedArray._version);
 
                 _index = 0;
                 _current = Option.None;
@@ -510,10 +518,7 @@ namespace EncosyTower.Collections
             {
                 get
                 {
-                    if (_index == 0 || _index == _length + 1)
-                    {
-                        ThrowEnumOpCantHappen();
-                    }
+                    ThrowIfEnumOpCantHappen((uint)_index < (uint)_length);
 
                     return Current;
                 }
@@ -524,15 +529,29 @@ namespace EncosyTower.Collections
             }
 
             [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-            private static void ThrowEnumFailedVersion()
+            private static void ThrowIfEnumFailedVersion([DoesNotReturnIf(false)] bool validVersion)
             {
-                throw new InvalidOperationException("SharedArray was modified during enumeration.");
+                if (validVersion == false)
+                {
+                    throw CreateException();
+                }
+
+                [MethodImpl(MethodImplOptions.NoInlining)]
+                static InvalidOperationException CreateException()
+                    => new("SharedArray was modified during enumeration.");
             }
 
             [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-            private static void ThrowEnumOpCantHappen()
+            private static void ThrowIfEnumOpCantHappen([DoesNotReturnIf(false)] bool validIndex)
             {
-                throw new InvalidOperationException("Invalid enumerator state: enumeration cannot proceed.");
+                if (validIndex == false)
+                {
+                    throw CreateException();
+                }
+
+                [MethodImpl(MethodImplOptions.NoInlining)]
+                static InvalidOperationException CreateException()
+                    => new("Invalid enumerator state: enumeration cannot proceed.");
             }
         }
     }

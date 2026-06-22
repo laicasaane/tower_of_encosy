@@ -79,6 +79,7 @@ namespace EncosyTower.Debugging
         public static void ThrowSliceIntegerOverflowException()
             => throw new ArgumentException("Slice start + length ({start + length}) causes an integer overflow");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack]
         public static void ThrowIfIndexOutOfRangeException([DoesNotReturnIf(false)] bool check)
         {
@@ -92,6 +93,7 @@ namespace EncosyTower.Debugging
                 => new("Index must be non-negative and less than the size of the buffer.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack]
         public static void ThrowArgumentOutOfRangeException_IfNegative(int value, string paramName)
         {
@@ -105,6 +107,7 @@ namespace EncosyTower.Debugging
                 => new(paramName, "The value must be non-negative.");
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack]
         public static void ThrowArgumentOutOfRangeException_IfNegativeZero(int value, string paramName)
         {
@@ -123,6 +126,7 @@ namespace EncosyTower.Debugging
         public static void ThrowArgumentException_ArrayPlusOffTooSmall()
             => throw CreateArgumentException_ArrayPlusOffTooSmall();
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack]
         public static void ThrowInvalidOperationException_ReadOnlyCollectionNotCreated(
             [DoesNotReturnIf(false)] bool isCreated
@@ -188,33 +192,43 @@ namespace EncosyTower.Debugging
         public static void ThrowKeyNotFoundException_KeyNotFound()
             => throw new KeyNotFoundException("Key not found");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static IndexOutOfRangeException CreateIndexOutOfRangeException_Collection()
             => new("Index was out of range. Must be non-negative and less than the size of the collection.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static InvalidOperationException CreateInvalidOperationException_TypeNotCreatedCorrectly(string name)
             => new($"Type '{name}' was not created correctly.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static InvalidOperationException CreateInvalidOperationException_CollectionNotCreated()
             => new("Collection was not created.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentException CreateArgumentException_CollectionNotCreated(string paramName)
             => new("Collection was not created.", paramName);
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentNullException CreateArgumentNullException(string paramName)
             => new(paramName);
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentOutOfRangeException CreateArgumentOutOfRangeException_LengthNegative()
             => new("length", "The value must be non-negative.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentOutOfRangeException CreateArgumentOutOfRangeException_IndexNegative()
             => new("index", "The value must be non-negative.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentException CreateArgumentException_SourceStartIndex_Length()
             => new("The number of elements from 'sourceStartIndex' to the end of the collection is lesser than 'length'.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentException CreateArgumentException_DestinationTooShort()
             => new("The destination span is too short to copy the requested number of elements.");
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static ArgumentException CreateArgumentException_ArrayPlusOffTooSmall()
             => new("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
     }
