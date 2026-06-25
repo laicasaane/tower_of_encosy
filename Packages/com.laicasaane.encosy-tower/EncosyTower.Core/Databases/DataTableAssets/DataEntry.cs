@@ -98,9 +98,9 @@ namespace EncosyTower.Databases
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfInvalid([DoesNotReturnIf(false)] bool isValid)
         {
-            if (check == false)
+            if (isValid == false)
             {
                 throw CreateException();
             }

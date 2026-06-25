@@ -166,9 +166,9 @@ namespace EncosyTower.Common
             => a.IsFailure == b.IsFailure && EqualityComparer<TFailure>.Default.Equals(a._failure, b._failure);
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfHasNoValue([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfHasNoValue([DoesNotReturnIf(false)] bool hasValue)
         {
-            if (check == false)
+            if (hasValue == false)
             {
                 throw CreateException();
             }

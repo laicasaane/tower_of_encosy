@@ -229,9 +229,9 @@ namespace EncosyTower.PubSub.Internals
         }
 
         [UnityEngine.HideInCallstack, System.Diagnostics.StackTraceHidden]
-        private static void ThrowIfFailedToRegisterBroker<TMessage>([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfFailedToRegisterBroker<TMessage>([DoesNotReturnIf(false)] bool registeringSuccess)
         {
-            if (check == false)
+            if (registeringSuccess == false)
             {
                 throw CreateException();
             }

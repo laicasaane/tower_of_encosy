@@ -95,9 +95,9 @@ namespace EncosyTower.Debugging
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack]
-        public static void ThrowIfIndexOutOfRangeException([DoesNotReturnIf(false)] bool check)
+        public static void ThrowIfIndexOutOfRangeException([DoesNotReturnIf(false)] bool withinRange)
         {
-            if (check == false)
+            if (withinRange == false)
             {
                 throw CreateException();
             }

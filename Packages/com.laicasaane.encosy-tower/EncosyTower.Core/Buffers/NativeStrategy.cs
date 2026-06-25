@@ -137,9 +137,7 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize(int newSize, bool copyContent, bool memClear)
         {
-            ThrowIfResizeUninitializedBuffer(
-                _nativeAllocator.IsCreated == false || _realBuffer.ToNativeArray().IsCreated == false
-            );
+            ThrowIfResizeUninitializedBuffer(_nativeAllocator.IsCreated && _realBuffer.ToNativeArray().IsCreated);
 
             var capacity = Capacity;
 
@@ -310,9 +308,9 @@ namespace EncosyTower.Buffers
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfInvalidAllocatorStrategy([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfInvalidAllocatorStrategy([DoesNotReturnIf(false)] bool validStrategy)
         {
-            if (check == false)
+            if (validStrategy == false)
             {
                 throw CreateException();
             }

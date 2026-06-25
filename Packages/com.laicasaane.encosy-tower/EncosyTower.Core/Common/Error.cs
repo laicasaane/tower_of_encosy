@@ -174,9 +174,9 @@ namespace EncosyTower.Common
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfHasNoValue([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfHasNoValue([DoesNotReturnIf(false)] bool hasValue)
         {
-            if (check == false)
+            if (hasValue == false)
             {
                 throw CreateException();
             }

@@ -64,7 +64,7 @@ namespace EncosyTower.Common
 
         static Result()
         {
-            ThrowIfSameType(IsSameType());
+            ThrowIfSameType(IsDifferentType());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -243,13 +243,13 @@ namespace EncosyTower.Common
             => Option<TValue>.DefaultEquals(a.Value, b.Value) || a.Error.Equals(b.Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSameType()
-            => typeof(TValue) == typeof(Error<StringOrException>);
+        private static bool IsDifferentType()
+            => typeof(TValue) != typeof(Error<StringOrException>);
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfSameType([DoesNotReturnIf(true)] bool check)
+        private static void ThrowIfSameType([DoesNotReturnIf(false)] bool isDifferentType)
         {
-            if (check)
+            if (isDifferentType == false)
             {
                 throw CreateException();
             }
@@ -269,7 +269,7 @@ namespace EncosyTower.Common
 
         static Result()
         {
-            ThrowIfSameType(IsSameType());
+            ThrowIfSameType(IsDifferentType());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -409,13 +409,13 @@ namespace EncosyTower.Common
             => Option<TValue>.DefaultEquals(a.Value, b.Value) || Option<TError>.DefaultEquals(a.Error, b.Error);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSameType()
-            => typeof(TValue) == typeof(TError);
+        private static bool IsDifferentType()
+            => typeof(TValue) != typeof(TError);
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfSameType([DoesNotReturnIf(true)] bool check)
+        private static void ThrowIfSameType([DoesNotReturnIf(false)] bool isDifferentType)
         {
-            if (check)
+            if (isDifferentType == false)
             {
                 throw CreateException();
             }

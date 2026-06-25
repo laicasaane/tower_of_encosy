@@ -31,7 +31,7 @@ namespace EncosyTower.Collections
 
         static FixedArray()
         {
-            ThrowIfInvalidSize(AreTypesEqualSize());
+            ThrowIfBufferLesserThanT(IsBufferSizeGreaterThanOrEqualToT());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -217,13 +217,13 @@ namespace EncosyTower.Collections
             => GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool AreTypesEqualSize()
+        private static bool IsBufferSizeGreaterThanOrEqualToT()
             => UnsafeUtility.SizeOf<TBuffer>() >= UnsafeUtility.SizeOf<T>();
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfInvalidSize([DoesNotReturnIf(false)] bool check)
+        private static void ThrowIfBufferLesserThanT([DoesNotReturnIf(false)] bool isGreaterOrEqual)
         {
-            if (check == false)
+            if (isGreaterOrEqual == false)
             {
                 throw CreateException();
             }
@@ -300,7 +300,7 @@ namespace EncosyTower.Collections
 
             static ReadOnly()
             {
-                ThrowIfInvalidSize(AreTypesEqualSize());
+                ThrowIfBufferLesserThanT(IsBufferSizeGreaterThanOrEqualToT());
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

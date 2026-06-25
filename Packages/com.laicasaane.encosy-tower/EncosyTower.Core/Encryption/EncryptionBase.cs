@@ -104,9 +104,9 @@ namespace EncosyTower.Encryption
         }
 
         [UnityEngine.HideInCallstack, System.Diagnostics.StackTraceHidden]
-        protected static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool check)
+        protected static void ThrowIfNotInitialized([DoesNotReturnIf(false)] bool isInitialized)
         {
-            if (check == false)
+            if (isInitialized == false)
             {
                 throw CreateException();
             }
