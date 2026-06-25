@@ -74,7 +74,7 @@ namespace EncosyTower.AddressableKeys
                     return Error.FailedStatus((AddressableKey)this, handle.Status);
                 }
 
-                if (asset is UnityEngine.Object obj && obj || asset != null)
+                if ((asset is UnityEngine.Object obj && obj) || asset != null)
                 {
                     return new ValueHandlePair<T>(asset, handle);
                 }

@@ -31,7 +31,7 @@ namespace EncosyTower.Vaults
         public bool TryAdd<T>(TId id, [NotNull] T obj)
             where T : class
         {
-            ThrowIfUnityObjectIsInvalid(IsUnityObjectValid<T>(obj), typeof(T));
+            ThrowIfObjectNull(IsNotNull(obj), typeof(T));
 
             var map = _map;
 
@@ -140,20 +140,23 @@ namespace EncosyTower.Vaults
             return Option.Some(obj);
         }
 
-        private static bool IsUnityObjectValid<T>(T obj)
-            => obj is UnityObject unityObj && unityObj == false;
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static bool IsNotNull(object obj)
+            => obj is UnityObject unityObj ? unityObj.IsValid() : obj != null;
 
         [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfUnityObjectIsInvalid([DoesNotReturnIf(false)] bool isValid, Type type)
+        private static void ThrowIfObjectNull([DoesNotReturnIf(false)] bool isNotNull, Type type)
         {
-            if (isValid == false)
+            if (isNotNull == false)
             {
                 throw CreateException(type);
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
-            static MissingReferenceException CreateException(Type type)
-                => new($"Unity Object of type {type} is either missing or destroyed.");
+            static ArgumentNullException CreateException(Type type)
+                => typeof(UnityObject).IsAssignableFrom(type)
+                    ? new("obj", new MissingReferenceException($"Unity object of type {type} is missing or destroyed."))
+                    : new("obj", $"Object of type {type} is null.");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
