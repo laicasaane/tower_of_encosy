@@ -325,7 +325,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                         continue;
                     }
 
-                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_TYPE) == false)
+                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_TYPE, token) == false)
                     {
                         continue;
                     }
@@ -429,7 +429,7 @@ namespace EncosyTower.SourceGen.Generators.TypeWraps
                 {
                     token.ThrowIfCancellationRequested();
 
-                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_RECORD) == false)
+                    if (attrib.Name.IsTypeNameCandidate(NAMESPACE, WRAP_RECORD, token) == false)
                     {
                         continue;
                     }
