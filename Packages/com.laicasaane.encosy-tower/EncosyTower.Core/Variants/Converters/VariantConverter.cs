@@ -34,7 +34,7 @@ namespace EncosyTower.Variants.Converters
 
         public static bool TryRegister<T>([NotNull] IVariantConverter<T> converter)
         {
-            ThrowIfNullOrSizeOfTIsBiggerThanVariantDataSize(converter);
+            ThrowIfSizeInvalid<T>(IsSizeValid<T>());
 
             return s_converters.TryAdd((TypeId)Type<T>.Id, converter);
         }
@@ -101,31 +101,34 @@ namespace EncosyTower.Variants.Converters
                 : variant.TypeId.ToType().ToString();
         }
 
-        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-        private static void ThrowIfNullOrSizeOfTIsBiggerThanVariantDataSize<T>(IVariantConverter<T> converter)
+        private static bool IsSizeValid<T>()
         {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
             {
-                return;
+                return true;
             }
 
-            var typeOfT = typeof(T);
-            var sizeOfT = UnsafeUtility.SizeOf(typeOfT);
+            var sizeOfT = UnsafeUtility.SizeOf(typeof(T));
+            return sizeOfT <= VariantData.BYTE_COUNT;
+        }
 
-            if (sizeOfT > VariantData.BYTE_COUNT)
+        [HideInCallstack, StackTraceHidden, Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        private static void ThrowIfSizeInvalid<T>([DoesNotReturnIf(false)] bool isValid)
+        {
+            if (isValid == false)
             {
-                throw CreateException(typeOfT, sizeOfT);
+                throw CreateException();
             }
 
             return;
 
             [MethodImpl(MethodImplOptions.NoInlining)]
-            static NotSupportedException CreateException(Type typeOfT, int sizeOfT)
+            static NotSupportedException CreateException()
                 => new(
-                    $"The size of {typeOfT} is {sizeOfT} bytes, " +
+                    $"The size of {typeof(T)} is {UnsafeUtility.SizeOf(typeof(T))} bytes, " +
                     $"while a Variant can only store {VariantData.BYTE_COUNT} bytes of custom data. " +
-                    $"To enable the automatic conversion between {typeOfT} and {typeof(Variant)}, " +
-                    $"please {GetDefineSymbolMessage(sizeOfT)}"
+                    $"To enable the automatic conversion between {typeof(T)} and {typeof(Variant)}, " +
+                    $"please {GetDefineSymbolMessage(UnsafeUtility.SizeOf(typeof(T)))}"
                 );
 
             static string GetDefineSymbolMessage(int size)

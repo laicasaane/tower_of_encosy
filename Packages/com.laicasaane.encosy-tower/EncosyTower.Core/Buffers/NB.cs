@@ -32,6 +32,7 @@ using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Debugging;
+using EncosyTower.Types;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -285,13 +286,12 @@ namespace EncosyTower.Buffers
     internal readonly struct NBInternal<T> : IBuffer<T>, IAsNativeSlice<T>, IAsNativeSliceReadOnly<T>
         where T : struct
     {
+#if __ENCOSY_VALIDATION__
         static NBInternal()
         {
-#if __ENCOSY_VALIDATION__
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                throw new InvalidOperationException("NativeBuffer (NB) supports only unmanaged types");
-#endif
+            ThrowHelper.ThrowIfNotUnmanagedType<T>(EncosyTypeExtensions.IsUnmanaged<T>());
         }
+#endif
 
 #if UNITY_BURST
         [Unity.Burst.NoAlias]
@@ -440,13 +440,12 @@ namespace EncosyTower.Buffers
 
         internal readonly struct ReadOnly : IReadOnlyBuffer<T>, IAsNativeSliceReadOnly<T>
         {
+#if __ENCOSY_VALIDATION__
             static ReadOnly()
             {
-#if __ENCOSY_VALIDATION__
-                if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-                    throw new InvalidOperationException("NativeBuffer (NB) supports only unmanaged types");
-#endif
+                ThrowHelper.ThrowIfNotUnmanagedType<T>(EncosyTypeExtensions.IsUnmanaged<T>());
             }
+#endif
 
 #if UNITY_BURST
             [Unity.Burst.NoAlias]

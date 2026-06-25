@@ -34,6 +34,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
+using EncosyTower.Debugging;
+using EncosyTower.Types;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -48,10 +50,12 @@ namespace EncosyTower.Buffers
     public struct NativeStrategy<T> : IBufferStrategy<T>, IAsNativeSlice<T>, IAsNativeSliceReadOnly<T>
         where T : unmanaged
     {
+#if __ENCOSY_VALIDATION__
         static NativeStrategy()
         {
-            ThrowIfNotUnmanagedType(RuntimeHelpers.IsReferenceOrContainsReferences<T>());
+            ThrowHelper.ThrowIfNotUnmanagedType<T>(EncosyTypeExtensions.IsUnmanaged<T>());
         }
+#endif
 
         internal NativeReference<AllocatorStrategy> _nativeAllocator;
         internal NBInternal<T> _realBuffer;
@@ -234,10 +238,12 @@ namespace EncosyTower.Buffers
 
         public readonly struct ReadOnly : IReadOnlyBufferStrategy<T>, IAsNativeSliceReadOnly<T>
         {
+#if __ENCOSY_VALIDATION__
             static ReadOnly()
             {
-                ThrowIfNotUnmanagedType(RuntimeHelpers.IsReferenceOrContainsReferences<T>());
+                ThrowHelper.ThrowIfNotUnmanagedType<T>(EncosyTypeExtensions.IsUnmanaged<T>());
             }
+#endif
 
             internal readonly NativeReference<AllocatorStrategy>.ReadOnly _nativeAllocator;
             internal readonly NBInternal<T>.ReadOnly _realBuffer;
@@ -317,19 +323,6 @@ namespace EncosyTower.Buffers
                     "Allocator strategy must be either Unity.Collections.Allocator " +
                     "or Unity.Collections.AllocatorManager.AllocatorHandle"
                 );
-        }
-
-        [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]
-        private static void ThrowIfNotUnmanagedType([DoesNotReturnIf(false)] bool isUnmanaged)
-        {
-            if (isUnmanaged == false)
-            {
-                throw CreateException(typeof(T));
-            }
-
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            static InvalidOperationException CreateException(Type type)
-                => new($"{type} is not an unmanaged type. Only unmanaged data can be stored natively.");
         }
 
         [HideInCallstack, StackTraceHidden, Conditional("__ENCOSY_VALIDATION__")]

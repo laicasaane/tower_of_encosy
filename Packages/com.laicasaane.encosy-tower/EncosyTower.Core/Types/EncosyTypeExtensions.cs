@@ -165,9 +165,12 @@ namespace EncosyTower.Types
             return name;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullableType([NotNull] this Type type)
-        {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-        }
+            => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsUnmanaged<T>()
+            => RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
     }
 }

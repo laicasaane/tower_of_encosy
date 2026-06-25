@@ -39,7 +39,7 @@ namespace EncosyTower.Types
         internal static TypeInfo<T> Register<T>([NotNull] Type type)
         {
             var id = TypeIdVault.Register(type);
-            var isUnmanaged = RuntimeHelpers.IsReferenceOrContainsReferences<T>() == false;
+            var isUnmanaged = EncosyTypeExtensions.IsUnmanaged<T>();
             var isBlittable = isUnmanaged && type.IsAutoLayout == false && type != typeof(bool);
             var info = new TypeInfo<T>((TypeId<T>)id, type, type.IsValueType, isUnmanaged, isBlittable);
             s_vault.TryAdd(type, (TypeInfo)info);

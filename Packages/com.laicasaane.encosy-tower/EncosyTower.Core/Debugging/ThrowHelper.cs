@@ -80,6 +80,20 @@ namespace EncosyTower.Debugging
             => throw new ArgumentException("Slice start + length ({start + length}) causes an integer overflow");
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        [HideInCallstack, StackTraceHidden]
+        public static void ThrowIfNotUnmanagedType<T>([DoesNotReturnIf(false)] bool isUnmanaged)
+        {
+            if (isUnmanaged == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new($"{typeof(T)} is not an unmanaged type. Only unmanaged type is supported.");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack]
         public static void ThrowIfIndexOutOfRangeException([DoesNotReturnIf(false)] bool check)
         {
