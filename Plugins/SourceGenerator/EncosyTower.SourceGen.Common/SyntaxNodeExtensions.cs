@@ -102,9 +102,49 @@ namespace EncosyTower.SourceGen
               this SyntaxNode syntaxNode
             , string typeNameNamesapce
             , string typeName
+            , CancellationToken token = default
         )
         {
-            return IsTypeNameCandidate(syntaxNode, typeNameNamesapce.AsSpan(), typeName.AsSpan(), out _);
+            return IsTypeNameCandidate(syntaxNode, typeNameNamesapce.AsSpan(), typeName.AsSpan(), out _, token);
+        }
+
+        public static bool IsTypeNameCandidate(
+              this SyntaxNode syntaxNode
+            , string fullyQualifedTypeName
+            , CancellationToken token = default
+        )
+        {
+            return IsTypeNameCandidate(syntaxNode, fullyQualifedTypeName, out _, token);
+        }
+
+        public static bool IsTypeNameCandidate(
+              this SyntaxNode syntaxNode
+            , string fullyQualifedTypeName
+            , out TypeArgumentListSyntax typeArgumentListSyntax
+            , CancellationToken token = default
+        )
+        {
+            var span = fullyQualifedTypeName.AsSpan();
+            var iLastDot = span.LastIndexOf('.');
+
+            if (iLastDot < 0)
+            {
+                return IsTypeNameCandidate(
+                      syntaxNode
+                    , ReadOnlySpan<char>.Empty
+                    , span
+                    , out typeArgumentListSyntax
+                    , token
+                );
+            }
+
+            return IsTypeNameCandidate(
+                  syntaxNode
+                , span.Slice(0, iLastDot)
+                , span.Slice(iLastDot + 1)
+                , out typeArgumentListSyntax
+                , token
+            );
         }
 
         /// <summary>
@@ -125,8 +165,11 @@ namespace EncosyTower.SourceGen
             , ReadOnlySpan<char> typeNameNamesapce
             , ReadOnlySpan<char> typeName
             , out TypeArgumentListSyntax typeArgumentListSyntax
+            , CancellationToken token = default
         )
         {
+            token.ThrowIfCancellationRequested();
+
             switch (syntaxNode)
             {
                 case QualifiedNameSyntax qualifiedNameSyntax:
@@ -160,6 +203,7 @@ namespace EncosyTower.SourceGen
                               typeNameNamesapce.Slice(0, iLastDot)
                             , typeNameNamesapce.Slice(iLastDot + 1)
                             , out _
+                            , token
                         );
                     }
                     else
@@ -211,7 +255,7 @@ namespace EncosyTower.SourceGen
                     token.ThrowIfCancellationRequested();
 
                     if (attribCandidate is AttributeSyntax attrib
-                        && attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName)
+                        && attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName, token)
                     )
                     {
                         return true;
@@ -239,7 +283,7 @@ namespace EncosyTower.SourceGen
                 {
                     token.ThrowIfCancellationRequested();
 
-                    if (attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName))
+                    if (attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName, token))
                     {
                         return true;
                     }
@@ -264,7 +308,7 @@ namespace EncosyTower.SourceGen
                 {
                     token.ThrowIfCancellationRequested();
 
-                    if (attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName))
+                    if (attrib.Name.IsTypeNameCandidate(attributeNameSpace, attributeName, token))
                     {
                         return attrib;
                     }
