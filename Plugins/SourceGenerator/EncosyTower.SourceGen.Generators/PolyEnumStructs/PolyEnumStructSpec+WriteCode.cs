@@ -42,8 +42,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
 
             p = p.IncreasedIndent();
             {
-                p.Print("#region ENUM CASE").PrintEndLine();
-                p.Print("#endregion ======").PrintEndLine();
+                p.Print("#region    ENUM CASE").PrintEndLine();
+                p.Print("#endregion =========").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
@@ -55,8 +55,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.Print("#region INTERFACE ENUM CASE").PrintEndLine();
-                p.Print("#endregion ================").PrintEndLine();
+                p.Print("#region    INTERFACE ENUM CASE").PrintEndLine();
+                p.Print("#endregion ===================").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
@@ -67,8 +67,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 }
                 p.CloseScope();
                 p.PrintEndLine();
-                p.Print("#region CASE STRUCTS").PrintEndLine();
-                p.Print("#endregion =========").PrintEndLine();
+                p.Print("#region    CASE STRUCTS").PrintEndLine();
+                p.Print("#endregion ============").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
@@ -90,8 +90,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.Print("#region ENUM STRUCT").PrintEndLine();
-                p.Print("#endregion ========").PrintEndLine();
+                p.Print("#region    ENUM STRUCT").PrintEndLine();
+                p.Print("#endregion ===========").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
@@ -132,8 +132,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.Print("#region ENUM CASE API").PrintEndLine();
-                p.Print("#endregion ==========").PrintEndLine();
+                p.Print("#region    ENUM CASE API").PrintEndLine();
+                p.Print("#endregion =============").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine("partial ").Print("struct ")
@@ -153,8 +153,8 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumStructs
                 p.CloseScope();
                 p.PrintEndLine();
 
-                p.Print("#region INTERNALS").PrintEndLine();
-                p.Print("#endregion ======").PrintEndLine();
+                p.Print("#region    INTERNALS").PrintEndLine();
+                p.Print("#endregion =========").PrintEndLine();
                 p.PrintEndLine();
 
                 p.PrintBeginLine(GENERATED_CODE).PrintEndLine(EXCLUDE_COVERAGE);
