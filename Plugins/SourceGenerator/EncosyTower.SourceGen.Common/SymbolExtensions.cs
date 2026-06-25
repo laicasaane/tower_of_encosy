@@ -2035,6 +2035,198 @@ namespace EncosyTower.SourceGen
                 }
             }
         }
+
+        public static CanAccessMembersResult CanAccessMembersOf(
+              this ITypeSymbol type
+            , ITypeSymbol otherType
+            , CancellationToken token = default
+        )
+        {
+            if (SymbolEqualityComparer.Default.Equals(type, otherType.ContainingType))
+            {
+                return CanAccessMembersResult.EnclosingType;
+            }
+
+            var sameAssembly = SymbolEqualityComparer.Default.Equals(
+                  type.ContainingAssembly
+                , otherType.ContainingAssembly
+            );
+
+            var otherAccessibility = otherType.DeclaredAccessibility;
+
+            if (sameAssembly)
+            {
+                if (otherAccessibility == Accessibility.Public
+                    || otherAccessibility == Accessibility.Internal
+                    || otherAccessibility == Accessibility.ProtectedOrInternal
+                )
+                {
+                    return IsContainingTypeAccessible(otherType.ContainingType, type)
+                        ? CanAccessMembersResult.SameAssembly
+                        : CanAccessMembersResult.NoAccess;
+                }
+
+                if (otherAccessibility == Accessibility.Protected
+                    || otherAccessibility == Accessibility.ProtectedAndInternal
+                )
+                {
+                    return IsAccessibleThroughInheritance(type, otherType, token)
+                        ? CanAccessMembersResult.SameAssemblyInheritance
+                        : CanAccessMembersResult.NoAccess;
+                }
+
+                return CanAccessMembersResult.NoAccess;
+            }
+            else
+            {
+                // Different assemblies: check if otherType is publicly accessible
+                // or protected and accessible through inheritance
+                if (otherAccessibility == Accessibility.Public)
+                {
+                    return IsContainingTypeAccessible(otherType.ContainingType, type)
+                        ? CanAccessMembersResult.CrossAssembly
+                        : CanAccessMembersResult.NoAccess;
+                }
+
+                if (otherAccessibility == Accessibility.Protected
+                    || otherAccessibility == Accessibility.ProtectedOrInternal
+                )
+                {
+                    return IsAccessibleThroughInheritance(type, otherType, token)
+                        ? CanAccessMembersResult.CrossAssemblyInheritance
+                        : CanAccessMembersResult.NoAccess;
+                }
+
+                return CanAccessMembersResult.NoAccess;
+            }
+
+            static bool IsContainingTypeAccessible(ITypeSymbol containingType, ITypeSymbol accessorSymbol)
+            {
+                if (containingType == null)
+                {
+                    return true;
+                }
+
+                var accessibility = containingType.DeclaredAccessibility;
+                var sameAssembly = SymbolEqualityComparer.Default.Equals(
+                      accessorSymbol.ContainingAssembly
+                    , containingType.ContainingAssembly
+                );
+
+                return sameAssembly
+                    ? accessibility >= Accessibility.Internal
+                    : accessibility == Accessibility.Public;
+            }
+
+            static bool IsAccessibleThroughInheritance(
+                  ITypeSymbol type
+                , ITypeSymbol otherType
+                , CancellationToken token
+            )
+            {
+                token.ThrowIfCancellationRequested();
+
+                var otherContainingType = otherType.ContainingType;
+
+                if (otherContainingType == null)
+                {
+                    return false;
+                }
+
+                // Check if type derives from otherType's containing type
+                if (IsDerivedFrom(type, otherContainingType, token))
+                {
+                    return true;
+                }
+
+                // Check if type is nested in a type that derives from otherType's containing type
+                var currentContaining = type.ContainingType;
+
+                while (currentContaining != null)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    if (IsDerivedFrom(currentContaining, otherContainingType, token))
+                    {
+                        return true;
+                    }
+
+                    currentContaining = currentContaining.ContainingType;
+                }
+
+                return false;
+            }
+
+            static bool IsDerivedFrom(
+                  ITypeSymbol derivedSymbol
+                , ITypeSymbol baseSymbol
+                , CancellationToken token
+            )
+            {
+                var current = derivedSymbol.BaseType;
+                var comparer = SymbolEqualityComparer.Default;
+
+                while (current != null)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    if (comparer.Equals(current, baseSymbol))
+                    {
+                        return true;
+                    }
+
+                    current = current.BaseType;
+                }
+
+                return false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Represents the possible results of
+    /// <see cref="SymbolExtensions.CanAccessMembersOf(ITypeSymbol, ITypeSymbol, CancellationToken)"/>.
+    /// </summary>
+    public enum CanAccessMembersResult
+    {
+        /// <summary>
+        /// Access is denied – <c>type</c> cannot access members of <c>otherType</c>.
+        /// </summary>
+        NoAccess,
+
+        /// <summary>
+        /// Access is granted because <c>type</c> is the direct enclosing (containing) type of <c>otherType</c>.
+        /// </summary>
+        EnclosingType,
+
+        /// <summary>
+        /// Access is granted because both types belong to the same assembly and
+        /// <c>otherType</c> has <see langword="public"/>, <see langword="internal"/>,
+        /// or <see langword="protected internal"/> declared accessibility,
+        /// and all containing types of <c>otherType</c> are also accessible.
+        /// </summary>
+        SameAssembly,
+
+        /// <summary>
+        /// Access is granted because both types belong to the same assembly,
+        /// <c>otherType</c> has <see langword="protected"/> or <see langword="private protected"/>
+        /// declared accessibility, and <c>type</c> inherits from the containing type of <c>otherType</c>.
+        /// </summary>
+        SameAssemblyInheritance,
+
+        /// <summary>
+        /// Access is granted because the types belong to different assemblies,
+        /// <c>otherType</c> has <see langword="public"/> declared accessibility,
+        /// and all containing types of <c>otherType</c> are also publicly accessible.
+        /// </summary>
+        CrossAssembly,
+
+        /// <summary>
+        /// Access is granted because the types belong to different assemblies,
+        /// <c>otherType</c> has <see langword="protected"/> or <see langword="protected internal"/>
+        /// declared accessibility, and <c>type</c> inherits from the containing type of <c>otherType</c>.
+        /// </summary>
+        CrossAssemblyInheritance,
     }
 }
 
