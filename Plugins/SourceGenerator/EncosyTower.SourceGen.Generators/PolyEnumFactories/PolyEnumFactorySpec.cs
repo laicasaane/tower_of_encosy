@@ -8,12 +8,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         public LocationInfo location;
         public string wrapperTypeName;
         public string wrapperTypeNamespace;
-        public string wrapperFullyQualifiedName;
         public string wrapperKindKeyword;
         public string wrapperPreModifiers;
         public string wrapperAccessibility;
-        public string enumStructName;
-        public string enumStructFullyQualifiedName;
+        public string enumStructTypeName;
         public string enumStructNamespace;
         public string fieldName;
         public string hintName;
@@ -30,19 +28,17 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         public readonly bool IsValid
             => string.IsNullOrEmpty(wrapperTypeName) == false
             && string.IsNullOrEmpty(wrapperKindKeyword) == false
-            && string.IsNullOrEmpty(enumStructName) == false
-            && string.IsNullOrEmpty(enumStructFullyQualifiedName) == false
+            && string.IsNullOrEmpty(enumStructTypeName) == false
+            && string.IsNullOrEmpty(fieldName) == false
             ;
 
         public readonly bool Equals(PolyEnumFactorySpec other)
             => string.Equals(wrapperTypeName, other.wrapperTypeName, StringComparison.Ordinal)
             && string.Equals(wrapperTypeNamespace, other.wrapperTypeNamespace, StringComparison.Ordinal)
-            && string.Equals(wrapperFullyQualifiedName, other.wrapperFullyQualifiedName, StringComparison.Ordinal)
             && string.Equals(wrapperKindKeyword, other.wrapperKindKeyword, StringComparison.Ordinal)
             && string.Equals(wrapperPreModifiers, other.wrapperPreModifiers, StringComparison.Ordinal)
             && string.Equals(wrapperAccessibility, other.wrapperAccessibility, StringComparison.Ordinal)
-            && string.Equals(enumStructName, other.enumStructName, StringComparison.Ordinal)
-            && string.Equals(enumStructFullyQualifiedName, other.enumStructFullyQualifiedName, StringComparison.Ordinal)
+            && string.Equals(enumStructTypeName, other.enumStructTypeName, StringComparison.Ordinal)
             && string.Equals(enumStructNamespace, other.enumStructNamespace, StringComparison.Ordinal)
             && string.Equals(fieldName, other.fieldName, StringComparison.Ordinal)
             && cases.Equals(other.cases)
@@ -62,12 +58,10 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             var hash = new HashValue();
             hash.Add(wrapperTypeName);
             hash.Add(wrapperTypeNamespace);
-            hash.Add(wrapperFullyQualifiedName);
             hash.Add(wrapperKindKeyword);
             hash.Add(wrapperPreModifiers);
             hash.Add(wrapperAccessibility);
-            hash.Add(enumStructName);
-            hash.Add(enumStructFullyQualifiedName);
+            hash.Add(enumStructTypeName);
             hash.Add(enumStructNamespace);
             hash.Add(fieldName);
             hash.Add(cases);
@@ -91,7 +85,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         {
             public string name;
             public string identifier;
-            public string fullyQualifiedName;
+            public string qualifiedName;
             public EquatableArray<CtorSpec> ctors;
             public EquatableArray<MemberSpec> initMembers;
             public ConstructionStrategy strategy;
@@ -102,13 +96,13 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
             public readonly bool IsValid
                 => string.IsNullOrEmpty(name) == false
-                && string.IsNullOrEmpty(fullyQualifiedName) == false
+                && string.IsNullOrEmpty(qualifiedName) == false
                 ;
 
             public readonly bool Equals(CaseSpec other)
                 => string.Equals(name, other.name, StringComparison.Ordinal)
                 && string.Equals(identifier, other.identifier, StringComparison.Ordinal)
-                && string.Equals(fullyQualifiedName, other.fullyQualifiedName, StringComparison.Ordinal)
+                && string.Equals(qualifiedName, other.qualifiedName, StringComparison.Ordinal)
                 && ctors.Equals(other.ctors)
                 && initMembers.Equals(other.initMembers)
                 && strategy == other.strategy
@@ -126,7 +120,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 var hash = new HashValue();
                 hash.Add(name);
                 hash.Add(identifier);
-                hash.Add(fullyQualifiedName);
+                hash.Add(qualifiedName);
                 hash.Add(ctors);
                 hash.Add(initMembers);
                 hash.Add(strategy);

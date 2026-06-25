@@ -75,7 +75,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         {
             token.ThrowIfCancellationRequested();
 
-            if (context.TargetNode is not TypeDeclarationSyntax typeSyntax
+            if (context.TargetNode is not TypeDeclarationSyntax wrapperSyntax
                 || context.TargetSymbol is not INamedTypeSymbol wrapperSymbol
                 || context.Attributes.Length < 1
             )
@@ -94,28 +94,26 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 || attribute.ConstructorArguments[0].Value is not INamedTypeSymbol enumStructSymbol
                 || enumStructSymbol.IsUnboundGenericType
                 || enumStructSymbol.IsGenericType
+                || enumStructSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE, token) == false
             )
             {
                 return default;
             }
 
-            if (enumStructSymbol.HasAttribute(POLY_ENUM_STRUCT_ATTRIBUTE, token) == false)
-            {
-                return default;
-            }
+            var canAccessMembers = wrapperSymbol.CanAccessMembersOf(enumStructSymbol, token);
 
-            if (IsPartial(typeSyntax, token) == false)
+            if (canAccessMembers == CanAccessMembersResult.NoAccess)
             {
                 return default;
             }
 
             var semanticModel = context.SemanticModel;
             var assemblyName = semanticModel.Compilation.AssemblyName;
-            var syntaxTree = typeSyntax.SyntaxTree;
-            var hintName = syntaxTree.GetHintName(typeSyntax, wrapperSymbol.ToFileName());
+            var syntaxTree = wrapperSyntax.SyntaxTree;
+            var hintName = syntaxTree.GetHintName(wrapperSyntax, wrapperSymbol.ToFileName());
 
             TypeCreationHelpers.GenerateOpeningAndClosingSource(
-                  typeSyntax
+                  wrapperSyntax
                 , token
                 , out var openingSource
                 , out var closingSource
@@ -123,34 +121,33 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             );
 
             var result = new PolyEnumFactorySpec {
-                location = LocationInfo.From(typeSyntax.GetLocation()),
+                location = LocationInfo.From(wrapperSyntax.GetLocation()),
                 wrapperTypeName = wrapperSymbol.Name,
                 wrapperTypeNamespace = wrapperSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
-                wrapperFullyQualifiedName = wrapperSymbol.ToFullName(),
-                wrapperKindKeyword = GetWrapperKindKeyword(typeSyntax),
-                wrapperPreModifiers = GetWrapperPreModifiers(typeSyntax, token),
+                wrapperKindKeyword = GetWrapperKindKeyword(wrapperSyntax),
+                wrapperPreModifiers = GetWrapperPreModifiers(wrapperSyntax, token),
                 wrapperAccessibility = GetAccessibilityKeyword(wrapperSymbol.DeclaredAccessibility),
-                enumStructName = enumStructSymbol.Name,
-                enumStructFullyQualifiedName = enumStructSymbol.ToFullName(),
+                enumStructTypeName = SelectEnumStructTypeName(enumStructSymbol, canAccessMembers),
                 enumStructNamespace = enumStructSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
                 enumStructIsReadOnly = enumStructSymbol.IsReadOnly,
                 enumStructSize = 0,
                 hintName = hintName,
                 openingSource = openingSource,
                 closingSource = closingSource,
-                parentIsNamespace = typeSyntax.Parent is BaseNamespaceDeclarationSyntax,
-                isStruct = IsStruct(typeSyntax),
+                parentIsNamespace = wrapperSyntax.Parent is BaseNamespaceDeclarationSyntax,
+                isStruct = IsStruct(wrapperSyntax),
             };
 
-            ResolveBackingField(wrapperSymbol, enumStructSymbol, ref result, token);
-            AggregateCases(enumStructSymbol, ref result, token);
+            ResolveBackingField(wrapperSyntax, wrapperSymbol, enumStructSymbol, ref result, token);
+            AggregateCases(enumStructSymbol, canAccessMembers, ref result, token);
             ResolveExplicitUndefinedMethod(ref result, token);
 
             return result;
         }
 
         private static void ResolveBackingField(
-              INamedTypeSymbol wrapperSymbol
+              TypeDeclarationSyntax wrapperSyntax
+            , INamedTypeSymbol wrapperSymbol
             , INamedTypeSymbol enumStructSymbol
             , ref PolyEnumFactorySpec result
             , CancellationToken token
@@ -158,21 +155,40 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         {
             token.ThrowIfCancellationRequested();
 
+            if (wrapperSyntax is RecordDeclarationSyntax recordSyntax
+                && recordSyntax.ParameterList is ParameterListSyntax paramListSyntax
+                && paramListSyntax.Parameters.Count > 0
+            )
+            {
+                var param = paramListSyntax.Parameters[0];
+
+                if (param.Type is TypeSyntax type
+                    && type.IsTypeNameCandidate(result.enumStructTypeName, token)
+                )
+                {
+                    result.emitBackingField = false;
+                    result.fieldName = param.Identifier.Text;
+                    return;
+                }
+            }
+
+            var comparer = SymbolEqualityComparer.Default;
+
             foreach (var ctor in wrapperSymbol.InstanceConstructors)
             {
                 token.ThrowIfCancellationRequested();
 
-                if (ctor.Parameters.Length != 1)
+                if (ctor.Parameters.Length < 1)
                 {
                     continue;
                 }
 
                 var paramType = ctor.Parameters[0].Type;
 
-                if (SymbolEqualityComparer.Default.Equals(paramType, enumStructSymbol))
+                if (comparer.Equals(paramType, enumStructSymbol))
                 {
                     result.emitBackingField = false;
-                    result.fieldName = string.Empty;
+                    result.fieldName = GetUserDefinedBackingField(wrapperSymbol, enumStructSymbol, token);
                     return;
                 }
             }
@@ -194,6 +210,31 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             }
 
             result.fieldName = fieldName;
+            return;
+
+            static string GetUserDefinedBackingField(
+                  INamedTypeSymbol wrapperSymbol
+                , INamedTypeSymbol enumStructSymbol
+                , CancellationToken token
+            )
+            {
+                var comparer = SymbolEqualityComparer.Default;
+
+                foreach (var member in wrapperSymbol.GetMembers())
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    if (member is IFieldSymbol field
+                        && field.IsStatic == false
+                        && comparer.Equals(field.Type, enumStructSymbol)
+                    )
+                    {
+                        return field.Name;
+                    }
+                }
+
+                return string.Empty;
+            }
         }
 
         private static bool HasInstanceField(INamedTypeSymbol typeSymbol, string name, CancellationToken token)
@@ -218,6 +259,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
         private static void AggregateCases(
               INamedTypeSymbol enumStructSymbol
+            , CanAccessMembersResult access
             , ref PolyEnumFactorySpec result
             , CancellationToken token
         )
@@ -247,17 +289,12 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                     continue;
                 }
 
-                var accessibility = nested.DeclaredAccessibility;
-
-                if (accessibility != Accessibility.Public
-                    && accessibility != Accessibility.Internal
-                    && accessibility != Accessibility.ProtectedOrInternal
-                )
+                if (IsSupportedAccessibility(nested.DeclaredAccessibility) == false)
                 {
                     continue;
                 }
 
-                var caseSpec = BuildCaseSpec(nested, verboseUndefined, token);
+                var caseSpec = BuildCaseSpec(enumStructSymbol, nested, access, verboseUndefined, token);
 
                 if (caseSpec.IsValid == false)
                 {
@@ -271,7 +308,9 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
         }
 
         private static PolyEnumFactorySpec.CaseSpec BuildCaseSpec(
-              INamedTypeSymbol caseSymbol
+              INamedTypeSymbol enumStructSymbol
+            , INamedTypeSymbol caseSymbol
+            , CanAccessMembersResult access
             , string verboseUndefined
             , CancellationToken token
         )
@@ -284,7 +323,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             var spec = new PolyEnumFactorySpec.CaseSpec {
                 name = caseSymbol.Name,
                 identifier = caseSymbol.Name.ToValidIdentifier(),
-                fullyQualifiedName = caseSymbol.ToFullName(),
+                qualifiedName = SelectCaseStructTypeName(enumStructSymbol, caseSymbol, access),
                 isUndefined = isUndefined,
                 isReadOnly = caseSymbol.IsReadOnly,
                 size = 0,
@@ -347,7 +386,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             {
                 token.ThrowIfCancellationRequested();
 
-                if (ctor.DeclaredAccessibility != Accessibility.Public)
+                if (IsSupportedAccessibility(ctor.DeclaredAccessibility) == false)
                 {
                     continue;
                 }
@@ -446,7 +485,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                     continue;
                 }
 
-                if (member.DeclaredAccessibility != Accessibility.Public)
+                if (IsSupportedAccessibility(member.DeclaredAccessibility) == false)
                 {
                     continue;
                 }
@@ -479,9 +518,7 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
 
                     var setter = property.SetMethod;
 
-                    if (setter is null
-                        || setter.DeclaredAccessibility < Accessibility.Internal
-                    )
+                    if (setter is null || IsSupportedAccessibility(setter.DeclaredAccessibility) == false)
                     {
                         continue;
                     }
@@ -559,23 +596,6 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             result.emitExplicitUndefinedMethod = hasParameterlessUndefined == false;
         }
 
-        private static bool IsPartial(TypeDeclarationSyntax typeSyntax, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            foreach (var modifier in typeSyntax.Modifiers)
-            {
-                token.ThrowIfCancellationRequested();
-
-                if (modifier.IsKind(SyntaxKind.PartialKeyword))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private static bool IsStruct(TypeDeclarationSyntax typeSyntax)
         {
             return typeSyntax is RecordDeclarationSyntax record
@@ -583,16 +603,18 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
                 : typeSyntax is StructDeclarationSyntax;
         }
 
+        private static bool IsSupportedAccessibility(Accessibility accessibility)
+        {
+            return accessibility >= Accessibility.Internal;
+        }
+
         private static string GetWrapperKindKeyword(TypeDeclarationSyntax typeSyntax)
         {
             if (typeSyntax is RecordDeclarationSyntax record)
             {
-                if (record.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword))
-                {
-                    return "record struct";
-                }
-
-                return "record class";
+                return record.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword)
+                    ? "record struct"
+                    : "record class";
             }
 
             if (typeSyntax is StructDeclarationSyntax)
@@ -639,6 +661,38 @@ namespace EncosyTower.SourceGen.Generators.PolyEnumFactories
             var result = sb.ToString();
             StringExtensions.ReturnSb(sb);
             return result;
+        }
+
+        private static string SelectEnumStructTypeName(INamedTypeSymbol type, CanAccessMembersResult access)
+        {
+            switch (access)
+            {
+                case CanAccessMembersResult.EnclosingType:
+                case CanAccessMembersResult.SameAssemblyInheritance:
+                case CanAccessMembersResult.CrossAssemblyInheritance:
+                    return type.Name;
+
+                default:
+                    return type.ToFullName();
+            }
+        }
+
+        private static string SelectCaseStructTypeName(
+              INamedTypeSymbol enumStructType
+            , INamedTypeSymbol caseStructType
+            , CanAccessMembersResult access
+        )
+        {
+            switch (access)
+            {
+                case CanAccessMembersResult.EnclosingType:
+                case CanAccessMembersResult.SameAssemblyInheritance:
+                case CanAccessMembersResult.CrossAssemblyInheritance:
+                    return $"{enumStructType.Name}.{caseStructType.Name}";
+
+                default:
+                    return caseStructType.ToFullName();
+            }
         }
 
         private static bool IsAccessibilityModifier(SyntaxToken token)
