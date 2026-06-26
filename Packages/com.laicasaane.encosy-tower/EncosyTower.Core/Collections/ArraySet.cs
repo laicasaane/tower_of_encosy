@@ -226,6 +226,10 @@ namespace EncosyTower.Collections
             => TryFindIndex(value, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(in T value)
+            => TryFindIndex(value, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(T[] array, int arrayIndex)
             => _values.AsArraySegment().Slice(0, _freeValueCellIndex).CopyTo(array, arrayIndex);
 
@@ -251,6 +255,9 @@ namespace EncosyTower.Collections
             => EnsureCapacity(size);
 
         public bool Remove(T value)
+            => Remove(in value);
+
+        public bool Remove(in T value)
         {
             var hash = value.GetHashCode();
             var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier);
@@ -365,7 +372,7 @@ namespace EncosyTower.Collections
 
         //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
         //constant states) because it will be used in multithreaded parallel code
-        private bool TryFindIndex(T value, out int index)
+        private bool TryFindIndex(in T value, out int index)
         {
             Checks.IsTrue(_buckets.Capacity > 0, "Set arrays are not correctly initialized (0 size)");
 
@@ -393,7 +400,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Intersect([NotNull] ArraySet<T> otherMapKeys)
+        public void Intersect([NotNull] ArraySet<T> otherSet)
         {
             var items = Items.Span;
 
@@ -401,7 +408,7 @@ namespace EncosyTower.Collections
             {
                 var item = items[i];
 
-                if (otherMapKeys.Contains(item) == false)
+                if (otherSet.Contains(item) == false)
                 {
                     Remove(item);
                 }
@@ -409,7 +416,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exclude([NotNull] ArraySet<T> otherMapKeys)
+        public void Exclude([NotNull] ArraySet<T> otherSet)
         {
             var items = Items.Span;
 
@@ -417,7 +424,7 @@ namespace EncosyTower.Collections
             {
                 var item = items[i];
 
-                if (otherMapKeys.Contains(item))
+                if (otherSet.Contains(item))
                 {
                     Remove(item);
                 }
@@ -433,7 +440,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        private bool AddValue(T value, out int indexSet)
+        private bool AddValue(in T value, out int indexSet)
         {
             var hash = value.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
             var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier);
@@ -668,7 +675,7 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Values
+        public T[] Items
         {
             get
             {

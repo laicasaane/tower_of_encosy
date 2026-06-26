@@ -105,6 +105,10 @@ namespace EncosyTower.Collections
                 => _set.Contains(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool Contains(in T value)
+                => _set.Contains(value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
                 => _set.GetEnumerator();
 
