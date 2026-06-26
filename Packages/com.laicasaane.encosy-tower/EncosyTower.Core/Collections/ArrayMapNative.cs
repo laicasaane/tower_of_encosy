@@ -94,9 +94,10 @@ namespace EncosyTower.Collections
         internal NativeStrategy<TValue> _values;
         internal NativeStrategy<int> _buckets;
 
-        internal NativeReference<int> _freeValueCellIndex;
-        internal NativeReference<uint> _collisions;
         internal NativeReference<ulong> _fastModBucketsMultiplier;
+        internal NativeReference<uint> _collisions;
+        internal NativeReference<int> _freeValueCellIndex;
+        internal NativeReference<int> _version;
 
         public ArrayMapNative(int capacity, AllocatorManager.AllocatorHandle allocator)
         {
@@ -109,6 +110,7 @@ namespace EncosyTower.Collections
             _buckets = default;
             _buckets.Alloc(HashHelpers.GetPrime(capacity), allocator);
             _freeValueCellIndex = new(allocator);
+            _version = new(allocator);
             _collisions = new(allocator);
             _fastModBucketsMultiplier = new(allocator);
 
@@ -132,6 +134,7 @@ namespace EncosyTower.Collections
             _buckets = default;
             _buckets.Alloc(HashHelpers.GetPrime(capacity), allocator);
             _freeValueCellIndex = new(allocator);
+            _version = new(allocator);
             _collisions = new(allocator);
             _fastModBucketsMultiplier = new(allocator);
 
@@ -148,17 +151,19 @@ namespace EncosyTower.Collections
               NativeStrategy<ArrayMapNode<TKey>> valuesInfo
             , NativeStrategy<TValue> values
             , NativeStrategy<int> buckets
-            , NativeReference<int> freeValueCellIndex
-            , NativeReference<uint> collisions
             , NativeReference<ulong> fastModBucketsMultiplier
+            , NativeReference<uint> collisions
+            , NativeReference<int> freeValueCellIndex
+            , NativeReference<int> version
         )
         {
             _valuesInfo = valuesInfo;
             _values = values;
             _buckets = buckets;
-            _freeValueCellIndex = freeValueCellIndex;
-            _collisions = collisions;
             _fastModBucketsMultiplier = fastModBucketsMultiplier;
+            _collisions = collisions;
+            _freeValueCellIndex = freeValueCellIndex;
+            _version = version;
         }
 
         public readonly int Capacity
@@ -209,10 +214,16 @@ namespace EncosyTower.Collections
 
         public void Dispose()
         {
+            if (_valuesInfo.IsCreated == false)
+            {
+                return;
+            }
+
             _valuesInfo.Dispose();
             _values.Dispose();
             _buckets.Dispose();
             _freeValueCellIndex.Dispose();
+            _version.Dispose();
             _collisions.Dispose();
             _fastModBucketsMultiplier.Dispose();
         }
@@ -232,9 +243,10 @@ namespace EncosyTower.Collections
                   _valuesInfo
                 , _values.Reinterpret<UValue>()
                 , _buckets
-                , _freeValueCellIndex
-                , _collisions
                 , _fastModBucketsMultiplier
+                , _collisions
+                , _freeValueCellIndex
+                , _version
             );
         }
 
@@ -293,6 +305,7 @@ namespace EncosyTower.Collections
             if (_freeValueCellIndex.Value == 0)
                 return;
 
+            _version.Value++;
             _freeValueCellIndex.Value = 0;
 
             // Buckets cannot be FastCleared because it's important that the values are reset to 0
@@ -305,6 +318,7 @@ namespace EncosyTower.Collections
             if (_freeValueCellIndex.Value == 0)
                 return;
 
+            _version.Value++;
             _freeValueCellIndex.Value = 0;
 
             // Buckets cannot be FastCleared because it's important that the values are reset to 0
@@ -338,6 +352,7 @@ namespace EncosyTower.Collections
         {
             if (TryFindIndex(key, out var index))
             {
+                _version.Value++;
                 return ref _values[index];
             }
 
@@ -368,6 +383,7 @@ namespace EncosyTower.Collections
         {
             if (TryFindIndex(key, out index))
             {
+                _version.Value++;
                 return ref _values[index];
             }
 
@@ -392,7 +408,7 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly ref TValue GetValueByRef(TKey key)
+        public ref TValue GetValueByRef(TKey key)
         {
             var found = TryFindIndex(key, out var index);
 
@@ -404,7 +420,8 @@ namespace EncosyTower.Collections
             }
 #endif
 
-            return ref _values[(int)index];
+            _version.Value++;
+            return ref _values[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -414,6 +431,7 @@ namespace EncosyTower.Collections
             {
                 var expandPrime = HashHelpers.ExpandPrime(size);
 
+                _version.Value++;
                 _values.Resize(expandPrime, true, false);
                 _valuesInfo.Resize(expandPrime);
             }
@@ -484,6 +502,7 @@ namespace EncosyTower.Collections
                 return false; //not found!
             }
 
+            _version.Value++;
             index = indexToValueToRemove; //index is a out variable, for internal use we want to know the index of the element to remove
 
             _freeValueCellIndex.Value--; //one less value to iterate
@@ -539,6 +558,8 @@ namespace EncosyTower.Collections
         public void Trim()
         {
             var size = _freeValueCellIndex.Value;
+
+            _version.Value++;
             _values.Resize(size);
             _valuesInfo.Resize(size);
         }
@@ -593,7 +614,11 @@ namespace EncosyTower.Collections
             for (var i = Count - 1; i >= 0; i--)
             {
                 var tKey = keys[i].key;
-                if (otherMapKeys.ContainsKey(tKey) == false) Remove(tKey);
+
+                if (otherMapKeys.ContainsKey(tKey) == false)
+                {
+                    Remove(tKey);
+                }
             }
         }
 
@@ -606,7 +631,11 @@ namespace EncosyTower.Collections
             for (var i = Count - 1; i >= 0; i--)
             {
                 var tKey = keys[i].key;
-                if (otherMapKeys.ContainsKey(tKey)) Remove(tKey);
+
+                if (otherMapKeys.ContainsKey(tKey))
+                {
+                    Remove(tKey);
+                }
             }
         }
 
@@ -619,7 +648,7 @@ namespace EncosyTower.Collections
             }
         }
 
-        private bool AddValue(TKey key, out int indexSet)
+        internal bool AddValue(TKey key, out int indexSet)
         {
             var hash = key.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
             var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier.Value);
@@ -663,6 +692,8 @@ namespace EncosyTower.Collections
                 //Important: the new node is always the one that will be pointed by the bucket cell
                 //so I can assume that the one pointed by the bucket is always the last value added
             }
+
+            _version.Value++;
 
             //item with this bucketIndex will point to the last value created
             //ToDo: if instead I assume that the original one is the one in the bucket
@@ -790,7 +821,10 @@ namespace EncosyTower.Collections
         public struct KeyEnumerator : IEnumerator<TKey>
         {
             private readonly ReadOnly _map;
-            private readonly int _count;
+
+#if __ENCOSY_VALIDATION__
+            private readonly int _version;
+#endif
 
             private int _index;
 
@@ -799,7 +833,10 @@ namespace EncosyTower.Collections
             {
                 _map = map;
                 _index = -1;
-                _count = map.Count;
+
+#if __ENCOSY_VALIDATION__
+                _version = map._version.Value;
+#endif
             }
 
             public readonly bool IsValid
@@ -818,13 +855,18 @@ namespace EncosyTower.Collections
             public bool MoveNext()
             {
 #if __ENCOSY_VALIDATION__
-                if (_count != _map.Count)
+                if (IsValid == false)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+                }
+
+                if (_version != _map._version.Value)
                 {
                     ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
                 }
 #endif
 
-                if (_index < _count - 1)
+                if (_index < _map.Count - 1)
                 {
                     ++_index;
                     return true;
@@ -853,20 +895,18 @@ namespace EncosyTower.Collections
         private ArrayMapNative<TKey, TValue> _map;
 
 #if __ENCOSY_VALIDATION__
-        internal int _startCount;
+        private readonly int _version;
 #endif
 
-        private int _count;
         private int _index;
 
         public ArrayMapNativeKeyValueEnumerator(in ArrayMapNative<TKey, TValue> map) : this()
         {
             _map = map;
             _index = -1;
-            _count = map.Count;
 
 #if __ENCOSY_VALIDATION__
-            _startCount = map.Count;
+            _version = map._version.Value;
 #endif
         }
 
@@ -885,13 +925,13 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
             }
 
-            if (_count != _startCount)
+            if (_version != _map._version.Value)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
             }
 #endif
 
-            if (_index < _count - 1)
+            if (_index < _map.Count - 1)
             {
                 ++_index;
                 return true;
@@ -912,35 +952,9 @@ namespace EncosyTower.Collections
             get => Current;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetRange(uint startIndex, uint count)
-        {
-            _index = (int)startIndex - 1;
-            _count = (int)count;
-
-#if __ENCOSY_VALIDATION__
-            if (IsValid == false)
-            {
-                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
-            }
-
-            if (_count > _startCount)
-            {
-                ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
-            }
-
-            _startCount = (int)count;
-#endif
-        }
-
         public void Reset()
         {
             _index = -1;
-            _count = _map.Count;
-
-#if __ENCOSY_VALIDATION__
-            _startCount = _map.Count;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

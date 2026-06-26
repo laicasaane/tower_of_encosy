@@ -29,9 +29,10 @@ namespace EncosyTower.Collections
             internal readonly NativeStrategy<TValue>.ReadOnly _values;
             internal readonly NativeStrategy<int>.ReadOnly _buckets;
 
-            internal readonly NativeReference<int>.ReadOnly _freeValueCellIndex;
-            internal readonly NativeReference<uint>.ReadOnly _collisions;
             internal readonly NativeReference<ulong>.ReadOnly _fastModBucketsMultiplier;
+            internal readonly NativeReference<uint>.ReadOnly _collisions;
+            internal readonly NativeReference<int>.ReadOnly _freeValueCellIndex;
+            internal readonly NativeReference<int>.ReadOnly _version;
 
             public ReadOnly(ArrayMapNative<TKey, TValue> map)
             {
@@ -39,6 +40,7 @@ namespace EncosyTower.Collections
                 _values = map._values.AsReadOnly();
                 _buckets = map._buckets.AsReadOnly();
                 _freeValueCellIndex = map._freeValueCellIndex.AsReadOnly();
+                _version = map._version.AsReadOnly();
                 _collisions = map._collisions.AsReadOnly();
                 _fastModBucketsMultiplier = map._fastModBucketsMultiplier.AsReadOnly();
             }
@@ -168,20 +170,18 @@ namespace EncosyTower.Collections
         private readonly ArrayMapNative<TKey, TValue>.ReadOnly _map;
 
 #if __ENCOSY_VALIDATION__
-        internal int _startCount;
+        private readonly int _version;
 #endif
 
-        private int _count;
         private int _index;
 
         public ArrayMapNativeReadOnlyKeyValueEnumerator(in ArrayMapNative<TKey, TValue>.ReadOnly map) : this()
         {
             _map = map;
             _index = -1;
-            _count = map.Count;
 
 #if __ENCOSY_VALIDATION__
-            _startCount = map.Count;
+            _version = map._version.Value;
 #endif
         }
 
@@ -200,13 +200,13 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
             }
 
-            if (_count != _startCount)
+            if (_version != _map._version.Value)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
             }
 #endif
 
-            if (_index < _count - 1)
+            if (_index < _map.Count - 1)
             {
                 ++_index;
                 return true;
@@ -227,30 +227,9 @@ namespace EncosyTower.Collections
             get => Current;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetRange(uint startIndex, uint count)
-        {
-            _index = (int)startIndex - 1;
-            _count = (int)count;
-
-#if __ENCOSY_VALIDATION__
-            if (_count > _startCount)
-            {
-                ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
-            }
-
-            _startCount = (int)count;
-#endif
-        }
-
         public void Reset()
         {
             _index = -1;
-            _count = _map.Count;
-
-#if __ENCOSY_VALIDATION__
-            _startCount = _map.Count;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
