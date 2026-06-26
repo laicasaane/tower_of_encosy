@@ -17,7 +17,7 @@ namespace EncosyTower.Collections.Unsafe
         public static MB<TValue> GetValuesUnsafe<TKey, TValue>(this ArrayMap<TKey, TValue> self, out int count)
         {
             count = self._freeValueCellIndex;
-            return self._values.ToRealBuffer();
+            return self._values.AsRealBuffer();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -39,7 +39,7 @@ namespace EncosyTower.Collections.Unsafe
         public static MB<TValue>.ReadOnly GetValuesUnsafe<TKey, TValue>(this in ArrayMap<TKey, TValue>.ReadOnly self, out int count)
         {
             count = self._map._freeValueCellIndex;
-            return self._map._values.ToRealBuffer().AsReadOnly();
+            return self._map._values.AsRealBuffer().AsReadOnly();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

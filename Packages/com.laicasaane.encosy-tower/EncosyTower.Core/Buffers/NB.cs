@@ -163,8 +163,8 @@ namespace EncosyTower.Buffers
             => AsReadOnlySpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal NativeArray<T> ToNativeArray()
-            => _buffer.ToNativeArray();
+        internal NativeArray<T> AsNativeArray()
+            => _buffer.AsNativeArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public NativeSlice<T> AsNativeSlice()
@@ -265,8 +265,8 @@ namespace EncosyTower.Buffers
                 => AsReadOnlySpan().Slice(sourceStartIndex, length).TryCopyTo(destination[..length]);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal NativeArray<T>.ReadOnly ToNativeArray()
-                => _buffer.ToNativeArray();
+            internal NativeArray<T>.ReadOnly AsNativeArray()
+                => _buffer.AsNativeArray();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public NativeSliceReadOnly<T> AsNativeSliceReadOnly()
@@ -406,7 +406,7 @@ namespace EncosyTower.Buffers
             => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal NativeArray<T> ToNativeArray()
+        internal NativeArray<T> AsNativeArray()
             => _buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -436,7 +436,7 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator NBInternal<T>(NB<T> proxy)
-            => new(proxy.ToNativeArray());
+            => new(proxy.AsNativeArray());
 
         internal readonly struct ReadOnly : IReadOnlyBuffer<T>, IAsNativeSliceReadOnly<T>
         {
@@ -525,7 +525,7 @@ namespace EncosyTower.Buffers
                 => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal NativeArray<T>.ReadOnly ToNativeArray()
+            internal NativeArray<T>.ReadOnly AsNativeArray()
                 => _buffer;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

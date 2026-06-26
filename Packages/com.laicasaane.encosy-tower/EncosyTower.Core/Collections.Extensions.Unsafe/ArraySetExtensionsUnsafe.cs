@@ -17,7 +17,7 @@ namespace EncosyTower.Collections.Unsafe
         public static MB<T> GetItemsUnsafe<T>(this ArraySet<T> self, out int count)
         {
             count = self._freeValueCellIndex;
-            return self._values.ToRealBuffer();
+            return self._values.AsRealBuffer();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -39,7 +39,7 @@ namespace EncosyTower.Collections.Unsafe
         public static MB<T>.ReadOnly GetItemsUnsafe<T>(this in ArraySet<T>.ReadOnly self, out int count)
         {
             count = self._set._freeValueCellIndex;
-            return self._set._values.ToRealBuffer().AsReadOnly();
+            return self._set._values.AsRealBuffer().AsReadOnly();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

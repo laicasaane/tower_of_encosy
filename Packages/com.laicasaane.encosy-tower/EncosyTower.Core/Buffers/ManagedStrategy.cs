@@ -94,7 +94,7 @@ namespace EncosyTower.Buffers
                 return;
             }
 
-            var realBuffer = _realBuffer.ToManagedArray();
+            var realBuffer = _realBuffer.AsManagedArray();
 
             if (copyContent)
                 Array.Resize(ref realBuffer, newSize);
@@ -118,7 +118,7 @@ namespace EncosyTower.Buffers
             => _realBuffer.Clear();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly MB<T> ToRealBuffer()
+        public readonly MB<T> AsRealBuffer()
             => _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -177,7 +177,7 @@ namespace EncosyTower.Buffers
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly MB<T>.ReadOnly ToRealBuffer()
+            public readonly MB<T>.ReadOnly AsRealBuffer()
                 => _realBuffer;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

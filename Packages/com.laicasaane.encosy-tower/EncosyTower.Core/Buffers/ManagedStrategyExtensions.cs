@@ -16,7 +16,7 @@ namespace EncosyTower.Buffers
 
             Checks.IsTrue(count > index, "Count is lesser than index");
 
-            var managedArray = self._realBuffer.ToManagedArray();
+            var managedArray = self._realBuffer.AsManagedArray();
             Array.Copy(managedArray, index + 1, managedArray, index, count - index);
         }
 
@@ -30,7 +30,7 @@ namespace EncosyTower.Buffers
 
             Checks.IsTrue(count > index, "Count is lesser than index");
 
-            var managedArray = self._realBuffer.ToManagedArray();
+            var managedArray = self._realBuffer.AsManagedArray();
             Array.Copy(managedArray, index, managedArray, index + 1, count - index);
         }
     }

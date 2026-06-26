@@ -164,8 +164,8 @@ namespace EncosyTower.Buffers
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal readonly T[] ToManagedArray()
-            => _buffer.ToManagedArray();
+        internal readonly T[] AsManagedArray()
+            => _buffer.AsManagedArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly ArraySegment<T> AsArraySegment()
@@ -270,8 +270,8 @@ namespace EncosyTower.Buffers
             /// </summary>
             /// <returns></returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal readonly T[] ToManagedArray()
-                => _buffer.ToManagedArray();
+            internal readonly T[] AsManagedArray()
+                => _buffer.AsManagedArray();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public readonly ReadOnlyMemory<T> AsReadOnlyMemory()
@@ -391,7 +391,7 @@ namespace EncosyTower.Buffers
             => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal readonly T[] ToManagedArray()
+        internal readonly T[] AsManagedArray()
             => _buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -424,7 +424,7 @@ namespace EncosyTower.Buffers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator MBInternal<T>(MB<T> mb)
-            => new(mb.ToManagedArray());
+            => new(mb.AsManagedArray());
 
         public readonly struct ReadOnly : IReadOnlyBuffer<T>, IAsReadOnlyMemory<T>
         {
@@ -500,7 +500,7 @@ namespace EncosyTower.Buffers
                 => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal readonly T[] ToManagedArray()
+            internal readonly T[] AsManagedArray()
                 => _buffer;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -218,7 +218,7 @@ namespace EncosyTower.Collections
         public readonly ArrayMapNativeReadOnlyKeyValuePair<TKey, TValue> Current
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new(_map._valuesInfo[_index].key, _map._values.ToNativeArray(), _index);
+            get => new(_map._valuesInfo[_index].key, _map._values.AsNativeArray(), _index);
         }
 
         readonly object IEnumerator.Current

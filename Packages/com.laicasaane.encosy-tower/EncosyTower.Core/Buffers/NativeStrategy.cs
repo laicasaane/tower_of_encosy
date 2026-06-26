@@ -96,7 +96,7 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Alloc(int newCapacity, AllocatorStrategy allocatorStrategy, bool memClear = true)
         {
-            ThrowIfBufferAlreadyAllocated(_realBuffer.ToNativeArray().IsCreated);
+            ThrowIfBufferAlreadyAllocated(_realBuffer.AsNativeArray().IsCreated);
 
             if (allocatorStrategy.TryGetAllocatorHandle(out var handle))
             {
@@ -137,7 +137,7 @@ namespace EncosyTower.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Resize(int newSize, bool copyContent, bool memClear)
         {
-            ThrowIfResizeUninitializedBuffer(_nativeAllocator.IsCreated && _realBuffer.ToNativeArray().IsCreated);
+            ThrowIfResizeUninitializedBuffer(_nativeAllocator.IsCreated && _realBuffer.AsNativeArray().IsCreated);
 
             var capacity = Capacity;
 
@@ -165,7 +165,8 @@ namespace EncosyTower.Buffers
 
         private void Resize(int newSize, bool copyContent, bool memClear, AllocatorManager.AllocatorHandle allocator)
         {
-            var realBuffer = _realBuffer.ToNativeArray();
+            var realBuffer = _realBuffer.AsNativeArray();
+
             var newBuffer = memClear
                 ? NativeArray.Create<T>(newSize, allocator)
                 : NativeArray.CreateFast<T>(newSize, allocator);
@@ -188,11 +189,11 @@ namespace EncosyTower.Buffers
             => _realBuffer.Clear();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal readonly NativeArray<T> ToNativeArray()
-            => _realBuffer.ToNativeArray();
+        internal readonly NativeArray<T> AsNativeArray()
+            => _realBuffer.AsNativeArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly NB<T> ToRealBuffer()
+        public readonly NB<T> AsRealBuffer()
             => _realBuffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -222,7 +223,7 @@ namespace EncosyTower.Buffers
 
         public void Dispose()
         {
-            var array = _realBuffer.ToNativeArray();
+            var array = _realBuffer.AsNativeArray();
 
             ThrowIfAlreadyDisposed(array.IsCreated);
 
@@ -282,11 +283,11 @@ namespace EncosyTower.Buffers
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal readonly NativeArray<T>.ReadOnly ToNativeArray()
-                => _realBuffer.ToNativeArray();
+            internal readonly NativeArray<T>.ReadOnly AsNativeArray()
+                => _realBuffer.AsNativeArray();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly NB<T>.ReadOnly ToRealBuffer()
+            public readonly NB<T>.ReadOnly AsRealBuffer()
                 => _realBuffer;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

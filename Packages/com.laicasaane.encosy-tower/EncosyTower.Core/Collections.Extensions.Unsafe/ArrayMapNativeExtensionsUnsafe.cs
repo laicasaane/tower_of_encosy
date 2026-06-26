@@ -27,7 +27,7 @@ namespace EncosyTower.Collections.Extensions.Unsafe
             where TValue : unmanaged
         {
             count = self._freeValueCellIndex.Value;
-            return self._values.ToRealBuffer();
+            return self._values.AsRealBuffer();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,7 +58,7 @@ namespace EncosyTower.Collections.Extensions.Unsafe
             where TValue : unmanaged
         {
             count = self._freeValueCellIndex.Value;
-            return self._values.ToRealBuffer();
+            return self._values.AsRealBuffer();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
