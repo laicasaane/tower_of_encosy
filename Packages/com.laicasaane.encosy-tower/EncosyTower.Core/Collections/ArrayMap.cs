@@ -971,6 +971,7 @@ namespace EncosyTower.Collections
             get => Current;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
             _index = -1;
@@ -1062,7 +1063,7 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public ArrayMapKeyValuePair<TKey, TValue>[] Items
+        public ArrayMapKeyValuePair<TKey, TValue>[] KeyValues
         {
             get
             {

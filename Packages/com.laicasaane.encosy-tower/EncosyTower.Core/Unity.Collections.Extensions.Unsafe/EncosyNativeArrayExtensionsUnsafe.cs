@@ -12,7 +12,9 @@ namespace EncosyTower.Collections.Unsafe
         /// </summary>
         public static NativeArray<T> ConvertFrom<T>(Span<T> source, Allocator allocator)
             where T : unmanaged
-            => NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(source, allocator);
+        {
+            return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(source, allocator);
+        }
     }
 
     public static class EncosyNativeArrayExtensionsUnsafe

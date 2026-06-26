@@ -198,11 +198,6 @@ namespace EncosyTower.Debugging
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [StackTraceHidden, HideInCallstack, DoesNotReturn]
-        public static void ThrowInvalidOperationException_TrySetValueOnNotExistingKey()
-            => throw new InvalidOperationException("Trying to set a value on a not existing key");
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [StackTraceHidden, HideInCallstack, DoesNotReturn]
         public static void ThrowKeyNotFoundException_KeyNotFound()
             => throw new KeyNotFoundException("Key not found");
 

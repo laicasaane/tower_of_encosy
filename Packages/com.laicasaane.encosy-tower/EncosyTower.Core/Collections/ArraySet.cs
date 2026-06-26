@@ -649,6 +649,7 @@ namespace EncosyTower.Collections
             get => Current;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
             _index = -1;

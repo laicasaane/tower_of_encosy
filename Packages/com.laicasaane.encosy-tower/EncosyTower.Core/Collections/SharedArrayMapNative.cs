@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EncosyTower.Collections.Unsafe;
 using EncosyTower.Common;
 using EncosyTower.Debugging;
 using Unity.Collections;
@@ -24,9 +25,10 @@ namespace EncosyTower.Collections
                   _valuesInfo.AsNativeArray()
                 , _values.AsNativeArray()
                 , _buckets.AsNativeArray()
-                , _freeValueCellIndex.AsNativeArray()
-                , _collisions.AsNativeArray()
                 , _fastModBucketsMultiplier.AsNativeArray()
+                , _collisions.AsNativeArray()
+                , _freeValueCellIndex.AsNativeArray()
+                , _version.AsNativeArray()
             );
     }
 
@@ -52,28 +54,31 @@ namespace EncosyTower.Collections
         internal readonly NativeArray<TValue> _values;
         internal readonly NativeArray<int> _buckets;
 
-        internal readonly NativeArray<int> _freeValueCellIndex;
-        internal readonly NativeArray<uint> _collisions;
         internal readonly NativeArray<ulong> _fastModBucketsMultiplier;
+        internal readonly NativeArray<uint> _collisions;
+        internal readonly NativeArray<int> _freeValueCellIndex;
+        internal readonly NativeArray<int> _version;
 
         internal SharedArrayMapNative(
               NativeArray<ArrayMapNode<TKey>> valuesInfo
             , NativeArray<TValue> values
             , NativeArray<int> buckets
-            , NativeArray<int> freeValueCellIndex
-            , NativeArray<uint> collisions
             , NativeArray<ulong> fastModBucketsMultiplier
+            , NativeArray<uint> collisions
+            , NativeArray<int> freeValueCellIndex
+            , NativeArray<int> version
         )
         {
             _valuesInfo = valuesInfo;
             _values = values;
             _buckets = buckets;
-            _freeValueCellIndex = freeValueCellIndex;
-            _collisions = collisions;
             _fastModBucketsMultiplier = fastModBucketsMultiplier;
+            _collisions = collisions;
+            _freeValueCellIndex = freeValueCellIndex;
+            _version = version;
         }
 
-        public readonly bool IsCreated
+        public bool IsCreated
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _buckets.IsCreated;
@@ -85,10 +90,10 @@ namespace EncosyTower.Collections
             get => _values.Length;
         }
 
-        public readonly int Count
+        public int Count
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _freeValueCellIndex.AsReadOnlySpan()[0];
+            get => _freeValueCellIndex[0];
         }
 
         public KeyEnumerable Keys
@@ -100,7 +105,19 @@ namespace EncosyTower.Collections
         public NativeSliceReadOnly<TValue> Values
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _values.Slice(0, _freeValueCellIndex.AsSpan()[0]);
+            get => _values.Slice(0, _freeValueCellIndex[0]);
+        }
+
+        internal ref int VersionRW
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref _version.ElementAsUnsafeRefRW(0);
+        }
+
+        internal int Version
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _version[0];
         }
 
         public TValue this[TKey key]
@@ -195,6 +212,7 @@ namespace EncosyTower.Collections
             if (freeValueCellIndex == 0)
                 return;
 
+            VersionRW++;
             freeValueCellIndex = 0;
 
             // Buckets cannot be FastCleared because it's important that the values are reset to 0
@@ -227,6 +245,7 @@ namespace EncosyTower.Collections
 
             if (TryFindIndex(key, out var findIndex))
             {
+                VersionRW++;
                 return ref values[findIndex];
             }
 
@@ -244,6 +263,7 @@ namespace EncosyTower.Collections
 
             if (TryFindIndex(key, out index))
             {
+                VersionRW++;
                 return ref values[index];
             }
 
@@ -265,6 +285,7 @@ namespace EncosyTower.Collections
             }
 #endif
 
+            VersionRW++;
             return ref _values.AsSpan()[findIndex];
         }
 
@@ -332,6 +353,7 @@ namespace EncosyTower.Collections
                 return false; //not found!
             }
 
+            VersionRW++;
             index = indexToValueToRemove; //index is a out variable, for internal use we want to know the index of the element to remove
 
             freeValueCellIndex--; //one less value to iterate
@@ -531,6 +553,8 @@ namespace EncosyTower.Collections
                 //so I can assume that the one pointed by the bucket is always the last value added
             }
 
+            VersionRW++;
+
             //item with this bucketIndex will point to the last value created
             //ToDo: if instead I assume that the original one is the one in the bucket
             //I wouldn't need to update the bucket here. Small optimization but important
@@ -641,7 +665,10 @@ namespace EncosyTower.Collections
         public struct KeyEnumerator
         {
             private readonly SharedArrayMapNative< TKey, TValue > _map;
-            private readonly int _count;
+
+#if __ENCOSY_VALIDATION__
+            private readonly int _version;
+#endif
 
             private int _index;
 
@@ -650,20 +677,34 @@ namespace EncosyTower.Collections
             {
                 _map = map;
                 _index = -1;
-                _count = map.Count;
+
+#if __ENCOSY_VALIDATION__
+                _version = map.Version;
+#endif
+            }
+
+            public readonly bool IsValid
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => _map.IsCreated;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext()
             {
 #if __ENCOSY_VALIDATION__
-                if (_count != _map.Count)
+                if (IsValid == false)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+                }
+
+                if (_version != _map.Version)
                 {
                     ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
                 }
 #endif
 
-                if (_index < _count - 1)
+                if (_index < _map.Count - 1)
                 {
                     ++_index;
                     return true;
@@ -688,34 +729,43 @@ namespace EncosyTower.Collections
         private readonly SharedArrayMapNative<TKey, TValue> _map;
 
 #if __ENCOSY_VALIDATION__
-        internal int _startCount;
+        private readonly int _version;
 #endif
 
-        private int _count;
         private int _index;
 
         public SharedArrayMapNativeKeyValueEnumerator(SharedArrayMapNative<TKey, TValue> map) : this()
         {
             _map = map;
             _index = -1;
-            _count = map.Count;
 
 #if __ENCOSY_VALIDATION__
-            _startCount = map.Count;
+            _version = map.Version;
 #endif
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _map.IsCreated;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
 #if __ENCOSY_VALIDATION__
-            if (_count != _startCount)
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
+            if (_version != _map.Version)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
             }
 #endif
 
-            if (_index >= _count - 1)
+            if (_index >= _map.Count - 1)
             {
                 return false;
             }
@@ -737,29 +787,9 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetRange(uint startIndex, uint count)
-        {
-            _index = (int)startIndex - 1;
-            _count = (int)count;
-
-#if __ENCOSY_VALIDATION__
-            if (_count > _startCount)
-            {
-                ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
-            }
-
-            _startCount = (int)count;
-#endif
-        }
-
         public void Reset()
         {
             _index = -1;
-            _count = _map.Count;
-
-#if __ENCOSY_VALIDATION__
-            _startCount = _map.Count;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
