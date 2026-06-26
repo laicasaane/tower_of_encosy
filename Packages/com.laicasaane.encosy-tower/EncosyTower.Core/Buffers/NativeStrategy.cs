@@ -165,19 +165,19 @@ namespace EncosyTower.Buffers
 
         private void Resize(int newSize, bool copyContent, bool memClear, AllocatorManager.AllocatorHandle allocator)
         {
-            var realBuffer = _realBuffer.AsNativeArray();
-
+            var oldBuffer = _realBuffer.AsNativeArray();
+            var oldLength = oldBuffer.Length;
             var newBuffer = memClear
                 ? NativeArray.Create<T>(newSize, allocator)
                 : NativeArray.CreateFast<T>(newSize, allocator);
 
             if (copyContent)
             {
-                var copyLength = math.min(Capacity, newSize);
-                realBuffer.AsReadOnlySpan().CopyTo(newBuffer.AsSpan()[..copyLength]);
+                var copyLength = math.min(oldLength, newSize);
+                oldBuffer.AsReadOnlySpan()[..copyLength].CopyTo(newBuffer.AsSpan()[..copyLength]);
             }
 
-            realBuffer.Dispose();
+            oldBuffer.Dispose();
             _realBuffer = new NBInternal<T>(newBuffer);
         }
 
