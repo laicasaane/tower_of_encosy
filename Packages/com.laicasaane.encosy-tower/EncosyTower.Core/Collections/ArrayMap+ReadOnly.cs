@@ -92,7 +92,18 @@ namespace EncosyTower.Collections
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ref readonly TValue GetValueByRef(TKey key)
-                => ref _map.GetValueByRef(key);
+            {
+                var found = TryFindIndex(key, out var index);
+
+#if __ENCOSY_VALIDATION__
+                if (found == false)
+                {
+                    ThrowHelper.ThrowKeyNotFoundException_KeyNotFound();
+                }
+#endif
+
+                return ref _map._values[index];
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool TryFindIndex(TKey key, out int index)

@@ -63,9 +63,10 @@ namespace EncosyTower.Collections
         internal ManagedStrategy<TValue> _values;
         internal ManagedStrategy<int> _buckets;
 
-        internal int _freeValueCellIndex;
-        internal uint _collisions;
         internal ulong _fastModBucketsMultiplier;
+        internal uint _collisions;
+        internal int _freeValueCellIndex;
+        internal int _version;
 
         public ArrayMap() : this(0) { }
 
@@ -73,6 +74,7 @@ namespace EncosyTower.Collections
         {
             // AllocationStrategy must be passed external for TValue because ArrayMap doesn't have struct
             // constraint needed for the NativeVersion
+            _version = default;
             _valuesInfo = default;
             _valuesInfo.Alloc(capacity);
             _values = default;
@@ -88,6 +90,7 @@ namespace EncosyTower.Collections
         {
             var capacity = source.Capacity;
 
+            _version = default;
             _valuesInfo = default;
             _valuesInfo.Alloc(capacity);
             _values = default;
@@ -153,6 +156,12 @@ namespace EncosyTower.Collections
 
         public void Dispose()
         {
+            if (_valuesInfo.IsCreated == false)
+            {
+                return;
+            }
+
+            _version++;
             _valuesInfo.Dispose();
             _values.Dispose();
             _buckets.Dispose();
@@ -231,6 +240,7 @@ namespace EncosyTower.Collections
             if (_freeValueCellIndex == 0)
                 return;
 
+            _version++;
             _freeValueCellIndex = 0;
 
             // Buckets cannot be FastCleared because it's important that the values are reset to 0
@@ -264,6 +274,7 @@ namespace EncosyTower.Collections
         {
             if (TryFindIndex(key, out var index))
             {
+                _version++;
                 return ref _values[index];
             }
 
@@ -279,6 +290,7 @@ namespace EncosyTower.Collections
         {
             if (TryFindIndex(key, out var index))
             {
+                _version++;
                 return ref _values[index];
             }
 
@@ -294,6 +306,7 @@ namespace EncosyTower.Collections
         {
             if (TryFindIndex(key, out index))
             {
+                _version++;
                 return ref _values[index];
             }
 
@@ -303,10 +316,11 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
+        public ref TValue GetOrAdd<TParam>(TKey key, FuncRef<TParam, TValue> builder, ref TParam parameter)
         {
             if (TryFindIndex(key, out var index))
             {
+                _version++;
                 return ref _values[index];
             }
 
@@ -337,6 +351,7 @@ namespace EncosyTower.Collections
         {
             if (TryFindIndex(key, out var index))
             {
+                _version++;
                 return ref _values[index];
             }
 
@@ -363,15 +378,17 @@ namespace EncosyTower.Collections
         /// <typeparam name="W"></typeparam>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue RecycleOrAdd<TValueProxy, W>(
+        public ref TValue RecycleOrAdd<TValueProxy, TParam>(
               TKey key
-            , FuncRef<W, TValue> builder
-            , ActionRef<TValueProxy, W> recycler, ref W parameter
+            , FuncRef<TParam, TValue> builder
+            , ActionRef<TValueProxy, TParam> recycler
+            , ref TParam parameter
         )
             where TValueProxy : class, TValue
         {
             if (TryFindIndex(key, out var index))
             {
+                _version++;
                 return ref _values[index];
             }
 
@@ -397,7 +414,8 @@ namespace EncosyTower.Collections
             }
 #endif
 
-            return ref _values[(int)index];
+            _version++;
+            return ref _values[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -407,6 +425,7 @@ namespace EncosyTower.Collections
             {
                 var expandPrime = HashHelpers.ExpandPrime(size);
 
+                _version++;
                 _values.Resize(expandPrime, true, false);
                 _valuesInfo.Resize(expandPrime);
             }
@@ -478,6 +497,7 @@ namespace EncosyTower.Collections
                 return false; //not found!
             }
 
+            _version++;
             index = indexToValueToRemove; //index is a out variable, for internal use we want to know the index of the element to remove
 
             _freeValueCellIndex--; //one less value to iterate
@@ -532,8 +552,11 @@ namespace EncosyTower.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Trim()
         {
-            _values.Resize(_freeValueCellIndex);
-            _valuesInfo.Resize(_freeValueCellIndex);
+            var size = _freeValueCellIndex;
+
+            _version++;
+            _values.Resize(size);
+            _valuesInfo.Resize(size);
         }
 
         //I store all the index with an offset + 1, so that in the bucket list 0 means actually not existing.
@@ -584,7 +607,11 @@ namespace EncosyTower.Collections
             for (var i = Count - 1; i >= 0; i--)
             {
                 var tKey = keys[i].key;
-                if (otherMapKeys.ContainsKey(tKey) == false) Remove(tKey);
+
+                if (otherMapKeys.ContainsKey(tKey) == false)
+                {
+                    Remove(tKey);
+                }
             }
         }
 
@@ -596,7 +623,11 @@ namespace EncosyTower.Collections
             for (var i = Count - 1; i >= 0; i--)
             {
                 var tKey = keys[i].key;
-                if (otherMapKeys.ContainsKey(tKey)) Remove(tKey);
+
+                if (otherMapKeys.ContainsKey(tKey))
+                {
+                    Remove(tKey);
+                }
             }
         }
 
@@ -652,6 +683,8 @@ namespace EncosyTower.Collections
                 //Important: the new node is always the one that will be pointed by the bucket cell
                 //so I can assume that the one pointed by the bucket is always the last value added
             }
+
+            _version++;
 
             //item with this bucketIndex will point to the last value created
             //ToDo: if instead I assume that the original one is the one in the bucket
@@ -805,7 +838,10 @@ namespace EncosyTower.Collections
         public struct KeyEnumerator : IEnumerator<TKey>
         {
             private readonly ArrayMap<TKey, TValue> _map;
-            private readonly int _count;
+
+#if __ENCOSY_VALIDATION__
+            private readonly int _version;
+#endif
 
             private int _index;
 
@@ -814,7 +850,10 @@ namespace EncosyTower.Collections
             {
                 _map = map;
                 _index = -1;
-                _count = map.Count;
+
+#if __ENCOSY_VALIDATION__
+                _version = map._version;
+#endif
             }
 
             public readonly bool IsValid
@@ -838,13 +877,13 @@ namespace EncosyTower.Collections
                     ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
                 }
 
-                if (_count != _map.Count)
+                if (_version != _map._version)
                 {
                     ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
                 }
 #endif
 
-                if (_index < _count - 1)
+                if (_index < _map.Count - 1)
                 {
                     ++_index;
                     return true;
@@ -860,10 +899,13 @@ namespace EncosyTower.Collections
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public readonly void Dispose()
-            { }
+            public readonly void Dispose() { }
 
-            readonly object IEnumerator.Current => Current;
+            readonly object IEnumerator.Current
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => Current;
+            }
         }
     }
 
@@ -872,20 +914,18 @@ namespace EncosyTower.Collections
         private readonly ArrayMap<TKey, TValue> _map;
 
 #if __ENCOSY_VALIDATION__
-        internal int _startCount;
+        private readonly int _version;
 #endif
 
-        private int _count;
         private int _index;
 
         public ArrayMapKeyValueEnumerator([NotNull] ArrayMap<TKey, TValue> map) : this()
         {
             _map = map;
             _index = -1;
-            _count = map.Count;
 
 #if __ENCOSY_VALIDATION__
-            _startCount = map.Count;
+            _version = map._version;
 #endif
         }
 
@@ -904,13 +944,13 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
             }
 
-            if (_count != _startCount)
+            if (_version != _map._version)
             {
                 ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Map();
             }
 #endif
 
-            if (_index >= _count - 1)
+            if (_index >= _map.Count - 1)
             {
                 return false;
             }
@@ -931,35 +971,9 @@ namespace EncosyTower.Collections
             get => Current;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetRange(uint startIndex, uint count)
-        {
-            _index = (int)startIndex - 1;
-            _count = (int)count;
-
-#if __ENCOSY_VALIDATION__
-            if (IsValid == false)
-            {
-                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
-            }
-
-            if (_count > _startCount)
-            {
-                ThrowHelper.ThrowInvalidOperationException_SetCountGreaterThanStartingOne();
-            }
-
-            _startCount = (int)count;
-#endif
-        }
-
         public void Reset()
         {
             _index = -1;
-            _count = _map.Count;
-
-#if __ENCOSY_VALIDATION__
-            _startCount = _map.Count;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
