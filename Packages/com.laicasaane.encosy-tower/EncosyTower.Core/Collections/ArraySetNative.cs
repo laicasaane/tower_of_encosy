@@ -1,0 +1,729 @@
+// https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/Dictionaries/SveltoDictionary.cs
+
+// MIT License
+//
+// Copyright (c) 2015-2020 Sebastiano Mandalà
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#if UNITY_COLLECTIONS
+#if !(UNITY_EDITOR || DEBUG || ENABLE_UNITY_COLLECTIONS_CHECKS || UNITY_DOTS_DEBUG) || DISABLE_ENCOSY_CHECKS
+#define __ENCOSY_NO_VALIDATION__
+#else
+#define __ENCOSY_VALIDATION__
+#endif
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using EncosyTower.Buffers;
+using EncosyTower.Common;
+using EncosyTower.Debugging;
+using EncosyTower.Logging;
+using Unity.Collections;
+
+namespace EncosyTower.Collections
+{
+    /// <summary>
+    /// Adapts the functionality of <see cref="ArrayMapNative{T, T}"/> for a set of <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the set.</typeparam>
+    /// <seealso cref="ArrayMapNative{T, T}"/>
+    [DebuggerTypeProxy(typeof(ArraySetNativeDebugProxy<>))]
+    public partial struct ArraySetNative<T> : IDisposable, IClearable, IIsCreated
+        , IIncreaseCapacity, IHasCount
+        where T : unmanaged, IEquatable<T>
+    {
+        static ArraySetNative()
+        {
+            NoBurstCheck();
+        }
+
+#if UNITY_BURST
+        [Unity.Burst.BurstDiscard]
+#endif
+        static void NoBurstCheck()
+        {
+#if __ENCOSY_VALIDATION__
+            try
+            {
+                var type = typeof(T);
+                var method = type.GetMethod("GetHashCode", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                if (method == null)
+                {
+                    StaticDevLogger.LogWarning(
+                          type.Name
+                        + " does not implement GetHashCode and will potentially cause unwanted allocations (boxing)"
+                    );
+                }
+            }
+            catch (AmbiguousMatchException) { }
+#endif
+        }
+
+        internal NativeStrategy<ArrayMapNode<T>> _valuesInfo;
+        internal NativeStrategy<T> _values;
+        internal NativeStrategy<int> _buckets;
+
+        internal NativeReference<ulong> _fastModBucketsMultiplier;
+        internal NativeReference<uint> _collisions;
+        internal NativeReference<int> _freeValueCellIndex;
+        internal NativeReference<int> _version;
+
+        public ArraySetNative(int capacity, AllocatorManager.AllocatorHandle allocator)
+        {
+            // AllocationStrategy must be passed external for T because ArraySetNative doesn't have struct
+            // constraint needed for the NativeVersion
+            _valuesInfo = default;
+            _valuesInfo.Alloc(capacity, allocator);
+            _values = default;
+            _values.Alloc(capacity, allocator);
+            _buckets = default;
+            _buckets.Alloc(HashHelpers.GetPrime(capacity), allocator);
+            _freeValueCellIndex = new(allocator);
+            _version = new(allocator);
+            _collisions = new(allocator);
+            _fastModBucketsMultiplier = new(allocator);
+
+            if (capacity > 0)
+                _fastModBucketsMultiplier.Value = HashHelpers.GetFastModMultiplier((uint)capacity);
+        }
+
+        public ArraySetNative(ArraySetNative<T> source, AllocatorManager.AllocatorHandle allocator)
+        {
+            if (source.IsCreated == false)
+            {
+                throw new InvalidOperationException("Source set is not valid");
+            }
+
+            var capacity = source.Capacity;
+
+            _valuesInfo = default;
+            _valuesInfo.Alloc(capacity, allocator);
+            _values = default;
+            _values.Alloc(capacity, allocator);
+            _buckets = default;
+            _buckets.Alloc(HashHelpers.GetPrime(capacity), allocator);
+            _freeValueCellIndex = new(allocator);
+            _version = new(allocator);
+            _collisions = new(allocator);
+            _fastModBucketsMultiplier = new(allocator);
+
+            source._valuesInfo.AsSpan().CopyTo(_valuesInfo.AsSpan());
+            source._values.AsSpan().CopyTo(_values.AsSpan());
+            source._buckets.AsSpan().CopyTo(_buckets.AsSpan());
+
+            _collisions.Value = source._collisions.Value;
+            _fastModBucketsMultiplier.Value = source._fastModBucketsMultiplier.Value;
+            _freeValueCellIndex.Value = source._freeValueCellIndex.Value;
+        }
+
+        private ArraySetNative(
+              NativeStrategy<ArrayMapNode<T>> valuesInfo
+            , NativeStrategy<T> values
+            , NativeStrategy<int> buckets
+            , NativeReference<ulong> fastModBucketsMultiplier
+            , NativeReference<uint> collisions
+            , NativeReference<int> freeValueCellIndex
+            , NativeReference<int> version
+        )
+        {
+            _valuesInfo = valuesInfo;
+            _values = values;
+            _buckets = buckets;
+            _fastModBucketsMultiplier = fastModBucketsMultiplier;
+            _collisions = collisions;
+            _freeValueCellIndex = freeValueCellIndex;
+            _version = version;
+        }
+
+        public readonly int Capacity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.Capacity;
+        }
+
+        public readonly int Count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _freeValueCellIndex.Value;
+        }
+
+        public readonly bool IsCreated
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _valuesInfo.IsCreated && _values.IsCreated && _buckets.IsCreated
+                && _freeValueCellIndex.IsCreated && _collisions.IsCreated
+                && _fastModBucketsMultiplier.IsCreated;
+        }
+
+        public readonly NativeSliceReadOnly<T> Items
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _values.AsNativeSlice().Slice(0, _freeValueCellIndex.Value);
+        }
+
+        public void Dispose()
+        {
+            if (_valuesInfo.IsCreated == false)
+            {
+                return;
+            }
+
+            _valuesInfo.Dispose();
+            _values.Dispose();
+            _buckets.Dispose();
+            _freeValueCellIndex.Dispose();
+            _version.Dispose();
+            _collisions.Dispose();
+            _fastModBucketsMultiplier.Dispose();
+        }
+
+        /// <remarks>
+        /// This returns readonly because the enumerator cannot be, but at the same time, it cannot be modified
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ArraySetNativeEnumerator<T> GetEnumerator()
+            => new(this);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ArraySetNative<U> Reinterpret<U>()
+            where U : unmanaged, IEquatable<U>
+        {
+            return new ArraySetNative<U>(
+                  _valuesInfo.Reinterpret<ArrayMapNode<U>>()
+                , _values.Reinterpret<U>()
+                , _buckets
+                , _fastModBucketsMultiplier
+                , _collisions
+                , _freeValueCellIndex
+                , _version
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Add(T value)
+        {
+            var itemAdded = AddValue(value, out var index);
+
+            if (itemAdded)
+                _values[index] = value;
+
+            return itemAdded;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Add(in T value)
+        {
+            var itemAdded = AddValue(value, out var index);
+
+            if (itemAdded)
+                _values[index] = value;
+
+            return itemAdded;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Clear()
+        {
+            if (_freeValueCellIndex.Value == 0)
+                return;
+
+            _version.Value++;
+            _freeValueCellIndex.Value = 0;
+
+            // Buckets cannot be FastCleared because it's important that the values are reset to 0
+            _buckets.Clear();
+
+            _values.FastClear();
+            _valuesInfo.FastClear();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Contains(T value)
+            => TryFindIndex(value, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Contains(in T value)
+            => TryFindIndex(value, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnsureCapacity(int size)
+        {
+            if (_values.Capacity < size)
+            {
+                var expandPrime = HashHelpers.ExpandPrime(size);
+
+                _version.Value++;
+                _values.Resize(expandPrime, true, false);
+                _valuesInfo.Resize(expandPrime);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void IncreaseCapacityBy(int amount)
+            => EnsureCapacity(_values.Capacity + amount);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void IncreaseCapacityTo(int size)
+            => EnsureCapacity(size);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Remove(T value)
+            => Remove(in value);
+
+        public bool Remove(in T value)
+        {
+            var hash = value.GetHashCode();
+            var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier.Value);
+
+            //find the bucket
+            var indexToValueToRemove = _buckets[bucketIndex] - 1;
+            var itemAfterCurrentOne = -1;
+
+            //Part one: look for the actual key in the bucket list if found I update the bucket list so that it doesn't
+            //point anymore to the cell to remove
+            while (indexToValueToRemove != -1)
+            {
+                ref var node = ref _valuesInfo[indexToValueToRemove];
+                if (node._hashcode == hash && node.key.Equals(value))
+                {
+                    //if the key is found and the bucket points directly to the node to remove
+                    if (_buckets[bucketIndex] - 1 == indexToValueToRemove)
+                    {
+                        //the bucket will point to the previous cell. if a previous cell exists
+                        //its next pointer must be updated!
+                        //<--- iteration order
+                        //                      Bucket points always to the last one
+                        //   ------- ------- -------
+                        //   |  1  | |  2  | |  3  | //bucket cannot have next, only previous
+                        //   ------- ------- -------
+                        //--> insert order
+                        _buckets[bucketIndex] = node._previous + 1;
+                    }
+                    else //we need to update the previous pointer if it's not the last element that is removed
+                    {
+                        Checks.IsTrue(itemAfterCurrentOne != -1, "This should never happen");
+                        //update the previous pointer of the item after the one to remove with the previous pointer of the item to remove
+                        _valuesInfo[itemAfterCurrentOne]._previous = node._previous;
+                    }
+
+                    break; //don't miss this, at this point it must break and not update indexToValueToRemove
+                }
+
+                //a bucket always points to the last element of the list, so if the item is not found we need to iterate backward
+                itemAfterCurrentOne = indexToValueToRemove;
+                indexToValueToRemove = node._previous;
+            }
+
+            if (indexToValueToRemove == -1)
+            {
+                return false; //not found!
+            }
+
+            _version.Value++;
+            _freeValueCellIndex.Value--; //one less value to iterate
+
+            //Part two:
+            //At this point nodes pointers and buckets are updated, but the _values array
+            //still has got the value to delete. Remember the goal of this map is to be able
+            //to iterate over the values like an array, so the values array must always be up to date
+
+            //if the cell to remove is the last one in the list, we can perform less operations (no swapping needed)
+            //otherwise we want to move the last value cell over the value to remove
+
+            var lasTCellIndex = _freeValueCellIndex.Value;
+            if (indexToValueToRemove != lasTCellIndex)
+            {
+                //we can transfer the last value of both arrays to the index of the value to remove.
+                //in order to do so, we need to be sure that the bucket pointer is updated.
+                //first we find the index in the bucket list of the pointer that points to the cell
+                //to move
+                ref var nodeToMove = ref _valuesInfo[lasTCellIndex];
+
+                var movingBucketIndex = (int)Reduce(
+                      (uint)nodeToMove._hashcode
+                    , (uint)_buckets.Capacity
+                    , _fastModBucketsMultiplier.Value
+                );
+
+                var linkedListIterationIndex = _buckets[movingBucketIndex] - 1;
+
+                //if the key is found and the bucket points directly to the node to remove
+                //it must now point to the cell where it's going to be moved (update bucket list first linked list node to iterate from)
+                if (linkedListIterationIndex == lasTCellIndex)
+                    _buckets[movingBucketIndex] = indexToValueToRemove + 1;
+
+                //find the prev element of the last element in the valuesInfo array
+                while (_valuesInfo[linkedListIterationIndex]._previous != -1 && _valuesInfo[linkedListIterationIndex]._previous != lasTCellIndex)
+                    linkedListIterationIndex = _valuesInfo[linkedListIterationIndex]._previous;
+
+                //if we find any value that has the last value cell as previous, we need to update it to point to the new value index that is going to be replaced
+                if (_valuesInfo[linkedListIterationIndex]._previous != -1)
+                    _valuesInfo[linkedListIterationIndex]._previous = indexToValueToRemove;
+
+                //finally, actually move the values
+                _valuesInfo[indexToValueToRemove] = nodeToMove;
+                _values[indexToValueToRemove] = _values[lasTCellIndex];
+            }
+
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Trim()
+        {
+            var size = _freeValueCellIndex.Value;
+
+            _version.Value++;
+            _values.Resize(size);
+            _valuesInfo.Resize(size);
+        }
+
+        //I store all the index with an offset + 1, so that in the bucket list 0 means actually not existing.
+        //When read the offset must be offset by -1 again to be the real one. In this way
+        //I avoid to initialize the array to -1
+
+        //WARNING this method must stay stateless (not relying on states that can change, it's ok to read
+        //constant states) because it will be used in multithreaded parallel code
+        private readonly bool TryFindIndex(in T value, out int index)
+        {
+            Checks.IsTrue(_buckets.Capacity > 0, "Set arrays are not correctly initialized (0 size)");
+
+            var hash = value.GetHashCode();
+            var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier.Value);
+            var valueIndex = _buckets[bucketIndex] - 1;
+
+            //even if we found an existing value we need to be sure it's the one we requested
+            while (valueIndex != -1)
+            {
+                //Comparer<T>.default needs to create a new comparer, so it is much slower
+                //than assuming that Equals is implemented through IEquatable
+                ref var node = ref _valuesInfo[valueIndex];
+                if (node._hashcode == hash && node.key.Equals(value))
+                {
+                    //this is the one
+                    index = valueIndex;
+                    return true;
+                }
+
+                valueIndex = node._previous;
+            }
+
+            index = 0;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Intersect(in ArraySetNative<T> otherSet)
+        {
+            var items = _valuesInfo.AsSpan();
+
+            for (var i = Count - 1; i >= 0; i--)
+            {
+                var item = items[i].key;
+
+                if (otherSet.Contains(item) == false)
+                {
+                    Remove(item);
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Exclude(in ArraySetNative<T> otherSet)
+        {
+            var items = Items.AsSpan();
+
+            for (var i = Count - 1; i >= 0; i--)
+            {
+                var item = items[i];
+
+                if (otherSet.Contains(item) == false)
+                {
+                    Remove(item);
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Union(in ArraySetNative<T> otherSet)
+        {
+            foreach (var other in otherSet)
+            {
+                Add(other);
+            }
+        }
+
+        internal bool AddValue(in T value, out int indexSet)
+        {
+            var hash = value.GetHashCode(); //IEquatable doesn't enforce the override of GetHashCode
+            var bucketIndex = (int)Reduce((uint)hash, (uint)_buckets.Capacity, _fastModBucketsMultiplier.Value);
+
+            //buckets value -1 means it's empty
+            var valueIndex = _buckets[bucketIndex] - 1;
+            var freeValueCellIndex = _freeValueCellIndex.Value;
+
+            if (valueIndex == -1)
+            {
+                ResizeIfNeeded();
+                //create the info node at the last position and fill it with the relevant information
+                _valuesInfo[freeValueCellIndex] = new ArrayMapNode<T>(value, hash);
+            }
+            else //collision or already exists
+            {
+                var currenTIndex = valueIndex;
+                do
+                {
+                    //must check if the key already exists in the map
+                    //Comparer<T>.default needs to create a new comparer, so it is much slower
+                    //than assuming that Equals is implemented through IEquatable (but what if the comparer is statically cached?)
+                    ref var mode = ref _valuesInfo[currenTIndex];
+                    if (mode._hashcode == hash && mode.key.Equals(value))
+                    {
+                        //the key already exists, simply replace the value!
+                        indexSet = currenTIndex;
+                        return false;
+                    }
+
+                    currenTIndex = mode._previous;
+                } while (currenTIndex != -1); //-1 means no more values with key with the same hash
+
+                ResizeIfNeeded();
+
+                //oops collision!
+                _collisions.Value++;
+                //create a new node which previous index points to node currently pointed in the bucket (valueIndex)
+                //_freeValueCellIndex = valueIndex + 1
+                _valuesInfo[freeValueCellIndex] = new ArrayMapNode<T>(value, hash, valueIndex);
+                //Important: the new node is always the one that will be pointed by the bucket cell
+                //so I can assume that the one pointed by the bucket is always the last value added
+            }
+
+            _version.Value++;
+
+            //item with this bucketIndex will point to the last value created
+            //ToDo: if instead I assume that the original one is the one in the bucket
+            //I wouldn't need to update the bucket here. Small optimization but important
+            _buckets[bucketIndex] = freeValueCellIndex + 1;
+
+            indexSet = freeValueCellIndex;
+            _freeValueCellIndex.Value++;
+
+            //too many collisions
+            var collisions = _collisions.Value;
+            if (collisions > _buckets.Capacity)
+            {
+                if (_buckets.Capacity < 100)
+                    RecomputeBuckets((int)collisions << 1);
+                else
+                    RecomputeBuckets(HashHelpers.ExpandPrime((int)collisions));
+            }
+
+            return true;
+        }
+
+        private void RecomputeBuckets(int newSize)
+        {
+            //we need more space and less collisions
+            _buckets.Resize(newSize, false);
+            _collisions.Value = 0;
+            _fastModBucketsMultiplier.Value = HashHelpers.GetFastModMultiplier((uint)_buckets.Capacity);
+            var bucketsCapacity = (uint)_buckets.Capacity;
+
+            //we need to get all the hash code of all the values stored so far and spread them over the new bucket
+            //length
+            var freeValueCellIndex = _freeValueCellIndex.Value;
+            var fastModBucketsMultiplier = _fastModBucketsMultiplier.Value;
+            var collisions = _collisions.Value;
+
+            for (var newValueIndex = 0; newValueIndex < freeValueCellIndex; ++newValueIndex)
+            {
+                //get the original hash code and find the new bucketIndex due to the new length
+                ref var valueInfoNode = ref _valuesInfo[newValueIndex];
+                var bucketIndex = (int)Reduce((uint)valueInfoNode._hashcode, bucketsCapacity, fastModBucketsMultiplier);
+                //bucketsIndex can be -1 or a next value. If it's -1 means no collisions. If there is collision,
+                //we create a new node which prev points to the old one. Old one next points to the new one.
+                //the bucket will now points to the new one
+                //In this way we can rebuild the linkedlist.
+                //get the current valueIndex, it's -1 if no collision happens
+                var existingValueIndex = _buckets[bucketIndex] - 1;
+                //update the bucket index to the index of the current item that share the bucketIndex
+                //(last found is always the one in the bucket)
+                _buckets[bucketIndex] = newValueIndex + 1;
+                if (existingValueIndex == -1)
+                {
+                    //ok nothing was indexed, the bucket was empty. We need to update the previous
+                    //values of next and previous
+                    valueInfoNode._previous = -1;
+                }
+                else
+                {
+                    //oops a value was already being pointed by this cell in the new bucket list,
+                    //it means there is a collision, problem
+                    collisions++;
+                    //the bucket will point to this value, so
+                    //the previous index will be used as previous for the new value.
+                    valueInfoNode._previous = existingValueIndex;
+                }
+            }
+
+            _collisions.Value = collisions;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ResizeIfNeeded()
+        {
+            if (_freeValueCellIndex.Value != _values.Capacity)
+            {
+                return;
+            }
+
+            var expandPrime = HashHelpers.ExpandPrime(_freeValueCellIndex.Value);
+
+            _values.Resize(expandPrime, true, false);
+            _valuesInfo.Resize(expandPrime);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint Reduce(uint hashcode, uint N, ulong fastModBucketsMultiplier)
+        {
+            if (hashcode >= N) //is the condition return actually an optimization?
+                return Environment.Is64BitProcess
+                    ? HashHelpers.FastMod(hashcode, N, fastModBucketsMultiplier)
+                    : hashcode % N;
+
+            return hashcode;
+        }
+    }
+
+    public struct ArraySetNativeEnumerator<T> : IEnumerator<T>
+        where T : unmanaged, IEquatable<T>
+    {
+        private ArraySetNative<T> _set;
+
+#if __ENCOSY_VALIDATION__
+        private readonly int _version;
+#endif
+
+        private int _index;
+
+        public ArraySetNativeEnumerator(in ArraySetNative<T> set) : this()
+        {
+            _set = set;
+            _index = -1;
+
+#if __ENCOSY_VALIDATION__
+            _version = set._version.Value;
+#endif
+        }
+
+        public readonly bool IsValid
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _set.IsCreated;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool MoveNext()
+        {
+#if __ENCOSY_VALIDATION__
+            if (IsValid == false)
+            {
+                ThrowHelper.ThrowInvalidOperationException_EnumeratorNotValid();
+            }
+
+            if (_version != _set._version.Value)
+            {
+                ThrowHelper.ThrowInvalidOperationException_ModifyWhileBeingIterated_Set();
+            }
+#endif
+
+            if (_index < _set.Count - 1)
+            {
+                ++_index;
+                return true;
+            }
+
+            return false;
+        }
+
+        public readonly T Current
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _set._values[_index];
+        }
+
+        readonly object IEnumerator.Current
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Current;
+        }
+
+        public void Reset()
+        {
+            _index = -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly void Dispose() { }
+    }
+
+    internal sealed class ArraySetNativeDebugProxy<T>
+        where T : unmanaged, IEquatable<T>
+    {
+
+        private readonly ArraySetNative<T> _set;
+
+        public ArraySetNativeDebugProxy(in ArraySetNative<T> set)
+        {
+            _set = set;
+        }
+
+        public uint Count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (uint)_set.Count;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public T[] Items
+        {
+            get
+            {
+                var set = _set;
+                var array = new T[set.Count];
+                var i = 0;
+
+                foreach (var value in set)
+                {
+                    array[i++] = value;
+                }
+
+                return array;
+            }
+        }
+    }
+}
+
+#endif
