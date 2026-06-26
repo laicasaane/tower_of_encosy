@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using EncosyTower.Collections;
+using EncosyTower.Collections.Extensions;
 using EncosyTower.TypeWraps;
 using NUnit.Framework;
 using Unity.Collections;
@@ -178,13 +179,15 @@ namespace EncosyTower.Tests.EncosyTower.Collections
         [Test]
         public void GetOrAdd_WithBuilder_UsesBuilderOnlyWhenMissing()
         {
-            using var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
+            var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
 
             var value = map.GetOrAdd(1, () => 7);
             Assert.AreEqual(7, value);
 
             var existing = map.GetOrAdd(1, () => 999);
             Assert.AreEqual(7, existing);
+
+            map.Dispose();
         }
 
         [Test]
@@ -205,12 +208,14 @@ namespace EncosyTower.Tests.EncosyTower.Collections
         [Test]
         public void GetOrAdd_WithFuncRef_PassesParameter()
         {
-            using var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
+            var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
 
             var param = 3;
             var value = map.GetOrAdd(1, (ref int p) => p * 10, ref param);
 
             Assert.AreEqual(30, value);
+
+            map.Dispose();
         }
 
         [Test]
