@@ -365,6 +365,7 @@ namespace EncosyTower.Collections
                 ThrowHelper.ThrowArrayLengthMismatchException(array.Length, Length);
                 return;
             }
+
             var sizeOf = UnsafeUtility.SizeOf<T>();
             UnsafeUtility.MemCpyStride(array.GetUnsafePtr(), sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, _length);
         }
@@ -385,12 +386,17 @@ namespace EncosyTower.Collections
             handle.Free();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly T[] ToArray()
         {
             T[] array = new T[Length];
             CopyTo(array);
             return array;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly ReadOnlySpan<T> AsSpan()
+            => new(this.GetUnsafeReadOnlyPtr(), Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator()
