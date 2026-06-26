@@ -1019,7 +1019,7 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public ArrayMapNativeKeyValuePair<TKey, TValue>[] KeyValues
+        public ArrayMapNativeKeyValuePair<TKey, TValue>[] Items
         {
             get
             {

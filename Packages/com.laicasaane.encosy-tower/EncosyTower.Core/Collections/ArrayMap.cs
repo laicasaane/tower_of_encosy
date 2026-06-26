@@ -1062,7 +1062,7 @@ namespace EncosyTower.Collections
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public ArrayMapKeyValuePair<TKey, TValue>[] KeyValues
+        public ArrayMapKeyValuePair<TKey, TValue>[] Items
         {
             get
             {
