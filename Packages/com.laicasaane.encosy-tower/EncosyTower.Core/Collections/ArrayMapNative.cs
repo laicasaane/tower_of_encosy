@@ -364,21 +364,6 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd(TKey key, Func<TValue> builder)
-        {
-            if (TryFindIndex(key, out var index))
-            {
-                return ref _values[index];
-            }
-
-            AddValue(key, out index);
-
-            _values[index] = builder();
-
-            return ref _values[index];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrAdd(TKey key, out int index)
         {
             if (TryFindIndex(key, out index))
@@ -388,21 +373,6 @@ namespace EncosyTower.Collections
             }
 
             AddValue(key, out index);
-
-            return ref _values[index];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TValue GetOrAdd<W>(TKey key, FuncRef<W, TValue> builder, ref W parameter)
-        {
-            if (TryFindIndex(key, out var index))
-            {
-                return ref _values[index];
-            }
-
-            AddValue(key, out index);
-
-            _values[index] = builder(ref parameter);
 
             return ref _values[index];
         }
