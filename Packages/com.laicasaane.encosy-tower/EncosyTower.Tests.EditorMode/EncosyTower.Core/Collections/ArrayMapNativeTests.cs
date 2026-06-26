@@ -94,25 +94,6 @@ namespace EncosyTower.Tests.EncosyTower.Collections
         }
 
         [Test]
-        public void Set_ExistingKey_Overwrites()
-        {
-            using var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
-            map.Add(1, 10);
-
-            map.Set(1, 50);
-
-            Assert.AreEqual(50, map[1]);
-        }
-
-        [Test]
-        public void Set_MissingKey_Throws()
-        {
-            using var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
-
-            Assert.Throws<InvalidOperationException>(() => map.Set(99, 1));
-        }
-
-        [Test]
         public void ContainsKey_ReflectsContent()
         {
             using var map = new ArrayMapNative<int, int>(4, Allocator.Temp);
@@ -614,16 +595,19 @@ namespace EncosyTower.Tests.EncosyTower.Collections
             map.Add(1, 10);
             map.Add(2, 20);
 
-            var readOnly = map.AsReadOnly();
+            Asserts(map.AsReadOnly());
 
-            Assert.IsTrue(readOnly.TryGetValue(1, out var value1));
-            Assert.AreEqual(10, value1);
+            static void Asserts(ArrayMapNative<UintId, uint>.ReadOnly readOnly)
+            {
+                Assert.IsTrue(readOnly.TryGetValue(1, out var value1));
+                Assert.AreEqual(10, value1);
 
-            Assert.IsTrue(readOnly.TryGetValue(2, out var value2));
-            Assert.AreEqual(20, value2);
+                Assert.IsTrue(readOnly.TryGetValue(2, out var value2));
+                Assert.AreEqual(20, value2);
 
-            Assert.IsFalse(readOnly.TryGetValue(3, out var missing));
-            Assert.AreEqual(0, missing);
+                Assert.IsFalse(readOnly.TryGetValue(3, out var missing));
+                Assert.AreEqual(0, missing);
+            }
         }
 
         [Test]

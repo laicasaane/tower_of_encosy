@@ -216,25 +216,6 @@ namespace EncosyTower.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(TKey key, in TValue value)
-        {
-            var itemAdded = AddValue(key, out var index);
-
-#if __ENCOSY_VALIDATION__
-            if (itemAdded)
-            {
-                ThrowHelper.ThrowInvalidOperationException_TrySetValueOnNotExistingKey();
-            }
-            else
-#else
-            if (itemAdded == false)
-#endif
-            {
-                _values[index] = value;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             if (_freeValueCellIndex == 0)
