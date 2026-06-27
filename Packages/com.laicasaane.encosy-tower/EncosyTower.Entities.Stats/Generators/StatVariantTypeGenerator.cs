@@ -2,11 +2,13 @@
 
 using System;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Entities.Stats.Generators
 {
     [Generator]
+    [ApiForEditor]
     internal sealed class StatVariantTypeGenerator : ICodeGenerator
     {
         public void Execute(GeneratorContext context)

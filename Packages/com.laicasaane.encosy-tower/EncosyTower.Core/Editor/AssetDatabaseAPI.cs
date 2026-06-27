@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using EncosyTower.Collections;
 using EncosyTower.Collections.Extensions;
 using EncosyTower.Common;
+using EncosyTower.Core;
 using EncosyTower.IO;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
@@ -15,11 +16,13 @@ using UnityEngine;
 
 namespace EncosyTower.Editor
 {
+    [ApiForEditor]
     public static class AssetDatabaseAPI
     {
         /// <summary>
         /// Find all objects by a filter.
         /// </summary>
+        [ApiForEditor]
         public static FasterList<T> FindAllObjects<T>([NotNull] string filter)
             where T : UnityEngine.Object
         {
@@ -45,6 +48,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by a filter.
         /// </summary>
+        [ApiForEditor]
         public static void FindAllObjects<T>([NotNull] string filter, [NotNull] ICollection<T> result)
             where T : UnityEngine.Object
         {
@@ -68,6 +72,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by a filter.
         /// </summary>
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> FindFirstObject<T>([NotNull] string filter)
             where T : UnityEngine.Object
@@ -76,6 +81,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by a filter.
         /// </summary>
+        [ApiForEditor]
         public static bool FindFirstObject<T>([NotNull] string filter, out T result)
             where T : UnityEngine.Object
         {
@@ -105,6 +111,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<T> FindFirstObjectByGlobalQualifiedTypeName<T>()
             where T : UnityEngine.Object
@@ -113,6 +120,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
+        [ApiForEditor]
         public static bool FindFirstObjectByGlobalQualifiedTypeName<T>(out T result)
             where T : UnityEngine.Object
         {
@@ -142,6 +150,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find first object by name and global qualified type name (i.e. with `global::` prefix).
         /// </summary>
+        [ApiForEditor]
         public static bool FindFirstObjectByNameAndGlobalQualifiedTypeName<T>(
               [NotNull] string name
             , out T result
@@ -177,6 +186,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
+        [ApiForEditor]
         public static FasterList<T> FindAllObjectsByGlobalQualifiedTypeName<T>()
             where T : UnityEngine.Object
         {
@@ -202,6 +212,7 @@ namespace EncosyTower.Editor
         /// <summary>
         /// Find all objects by global qualified type name (i.e. with `global::` prefix).
         /// </summary>
+        [ApiForEditor]
         public static void FindAllObjectsByGlobalQualifiedTypeName<T>([NotNull] ICollection<T> result)
             where T : UnityEngine.Object
         {
@@ -222,6 +233,7 @@ namespace EncosyTower.Editor
             }
         }
 
+        [ApiForEditor]
         public static bool CreateThenSaveScriptableObjectToFile<T>(
               [NotNull] string fileName
             , [NotNull] string relativeFolderPath
@@ -315,6 +327,7 @@ namespace EncosyTower.Editor
             }
         }
 
+        [ApiForEditor]
         public static bool SaveScriptableObjectToFile<T>(
               T asset
             , [NotNull] string fileName

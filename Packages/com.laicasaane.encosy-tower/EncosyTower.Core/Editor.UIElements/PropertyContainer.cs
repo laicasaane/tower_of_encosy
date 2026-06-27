@@ -26,6 +26,7 @@
 
 using System;
 using EncosyTower.Annotations;
+using EncosyTower.Core;
 using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -60,19 +61,24 @@ namespace EncosyTower.Editor.UIElements
     /// }
     /// ]]></code>
     /// </example>
+    [ApiForEditor]
     [UxmlElement(libraryPath = "Encosy Tower")]
     public partial class PropertyContainer : VisualElement, IHasBindingPath
     {
         /// <summary> USS class name of elements of this type. </summary>
+        [ApiForEditor]
         public static readonly string UssClassName = "editor-aid-property-container";
 
         /// <summary> USS class name of elements of this type when their property is a prefab override. </summary>
+        [ApiForEditor]
         public static readonly string PrefabOverrideUssClassName = $"{UssClassName}--prefab-override";
 
         /// <summary> USS class name for the content element. </summary>
+        [ApiForEditor]
         public static readonly string ContentUssClassName = $"{UssClassName}__content";
 
         /// <summary> USS class name for an invisible element that makes Unity apply the relevant SerializedProperty features. </summary>
+        [ApiForEditor]
         public static readonly string PropertyProxyUssClassName = $"{UssClassName}__property-proxy";
 
         private const long CHECK_PREFAB_OVERRIDE_INTERVAL = 500;
@@ -91,6 +97,7 @@ namespace EncosyTower.Editor.UIElements
         private bool _hasPropertyOverride = false;
 
         /// <summary> Constructor. </summary>
+        [ApiForEditor]
         public PropertyContainer()
             : this(string.Empty)
         { }
@@ -99,6 +106,7 @@ namespace EncosyTower.Editor.UIElements
         /// Constructor. The Property parameter just sets the <see cref="bindingPath"/>; it still needs to be bound.
         /// </summary>
         /// <param name="property"> The property represented by this element. </param>
+        [ApiForEditor]
         public PropertyContainer(SerializedProperty property)
             : this(property?.propertyPath)
         { }
@@ -111,6 +119,7 @@ namespace EncosyTower.Editor.UIElements
         /// Whether to trigger <see cref="OnPrefabOverrideChanged"/> and apply a custom USS class
         /// when a prefab override is detected.
         /// </param>
+        [ApiForEditor]
         public PropertyContainer(SerializedProperty property, bool checkForPrefabOverride)
             : this(property?.propertyPath, checkForPrefabOverride)
         { }
@@ -119,6 +128,7 @@ namespace EncosyTower.Editor.UIElements
         /// Constructor. Receives a string that is assigned to <see cref="bindingPath"/>.
         /// </summary>
         /// <param name="propertyPath"> The path of the property represented by this element. </param>
+        [ApiForEditor]
         public PropertyContainer(string propertyPath)
             : this(propertyPath, true)
         { }
@@ -131,6 +141,7 @@ namespace EncosyTower.Editor.UIElements
         /// Whether to trigger <see cref="OnPrefabOverrideChanged"/> and apply a custom USS class
         /// when a prefab override is detected.
         /// </param>
+        [ApiForEditor]
         public PropertyContainer(string propertyPath, bool checkForPrefabOverride)
         {
             AddToClassList(UssClassName);

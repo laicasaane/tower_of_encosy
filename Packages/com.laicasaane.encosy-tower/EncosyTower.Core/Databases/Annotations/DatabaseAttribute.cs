@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using EncosyTower.Core;
 using EncosyTower.Naming;
 
@@ -21,6 +22,7 @@ namespace EncosyTower.Databases
     /// </remarks>
     [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+    [Conditional("UNITY_EDITOR"), Conditional("ENCOSY_INCLUDE_AUTHORING")]
     public sealed class DatabaseAttribute : Attribute
     {
         public NameCasing NameCasing { get; }

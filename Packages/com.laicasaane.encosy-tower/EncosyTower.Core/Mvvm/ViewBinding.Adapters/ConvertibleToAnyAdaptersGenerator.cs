@@ -3,10 +3,12 @@
 using System;
 using EncosyTower.CodeGen;
 using EncosyTower.Common;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.Variants.Converters
 {
+    [ApiForEditor]
     internal abstract class ConvertibleToAnyAdaptersGenerator : ICodeGenerator
     {
         private static readonly string[] s_variantTypes = new string[] {
@@ -140,6 +142,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class BoolToAnyAdaptersGenerator : ConvertibleToAnyAdaptersGenerator
     {
         protected override string FromType => "bool";
@@ -155,6 +158,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class StringToAnyAdaptersGenerator : ConvertibleToAnyAdaptersGenerator
     {
         protected override string FromType => "string";
@@ -170,6 +174,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class ObjectToAnyAdaptersGenerator : ConvertibleToAnyAdaptersGenerator
     {
         protected override string FromType => "object";

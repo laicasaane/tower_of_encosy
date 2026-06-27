@@ -1,12 +1,15 @@
 #if UNITY_EDITOR
 
+using EncosyTower.Core;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 
 namespace EncosyTower.Editor.Common
 {
+    [ApiForEditor]
     public static class SerializableSortingLayerEditorExtensions
     {
+        [ApiForEditor]
         public static bool TryCopyFrom(ref this SerializableSortingLayer self, SerializedProperty property)
         {
             if (TryGetValueProperty(ref property) == false)
@@ -19,6 +22,7 @@ namespace EncosyTower.Editor.Common
             return true;
         }
 
+        [ApiForEditor]
         public static bool TryCopyTo(in this SerializableSortingLayer self, SerializedProperty property)
         {
             if (TryGetValueProperty(ref property) == false)

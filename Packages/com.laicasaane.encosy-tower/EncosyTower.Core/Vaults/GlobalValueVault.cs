@@ -89,6 +89,7 @@ namespace EncosyTower.Vaults
     using System;
     using System.Collections.Concurrent;
     using EncosyTower.Collections;
+    using EncosyTower.Core;
     using EncosyTower.Ids;
     using EncosyTower.Types;
     using UnityEditor;
@@ -104,6 +105,7 @@ namespace EncosyTower.Vaults
         }
     }
 
+    [ApiForEditor]
     internal static partial class GlobalValueVaultEditor
     {
         private readonly static ConcurrentDictionary<Id2, IClearable> s_vaults = new();
@@ -119,6 +121,7 @@ namespace EncosyTower.Vaults
             }
         }
 
+        [ApiForEditor]
         public static void Register<TId, TValue>(ValueVault<TId, TValue> vault)
             where TId : unmanaged, IEquatable<TId>
             where TValue : struct

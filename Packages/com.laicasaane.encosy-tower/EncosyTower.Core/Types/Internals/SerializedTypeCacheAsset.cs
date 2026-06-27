@@ -22,14 +22,14 @@
 //
 // https://github.com/thebeardphantom/Runtime-TypeCache
 
-using System;
-using EncosyTower.Logging;
-using EncosyTower.UnityExtensions;
-using UnityEngine;
-
 namespace EncosyTower.Types.Internals
 {
-    internal class SerializedTypeCacheAsset : ScriptableObject
+    using System;
+    using EncosyTower.Logging;
+    using EncosyTower.UnityExtensions;
+    using UnityEngine;
+
+    internal partial class SerializedTypeCacheAsset : ScriptableObject
     {
         private static SerializedTypeCacheAsset s_instance;
 
@@ -58,12 +58,24 @@ namespace EncosyTower.Types.Internals
 
             return s_instance;
         }
+    }
+}
+
 
 #if UNITY_EDITOR
+
+namespace EncosyTower.Types.Internals
+{
+    using EncosyTower.Core;
+
+    partial class SerializedTypeCacheAsset
+    {
+        [ApiForEditor]
         internal static void InitWhenDomainReloadDisabled()
         {
             s_instance = null;
         }
-#endif
     }
 }
+
+#endif

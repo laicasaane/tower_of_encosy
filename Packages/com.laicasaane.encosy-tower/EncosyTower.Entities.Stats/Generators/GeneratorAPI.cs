@@ -1,18 +1,21 @@
 #if UNITY_EDITOR && ANNULUS_CODEGEN && ENCOSY_STAT_VALUE_TYPES_GENERATOR
 
+using EncosyTower.Core;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 namespace EncosyTower.Entities.Stats.Generators
 {
+    [ApiForEditor]
     internal static class GeneratorAPI
     {
-        public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
-        public const string STRUCT_LAYOUT_EXPLICIT = "[StructLayout(LayoutKind.Explicit)]";
-        public const string FIELD_OFFSET_0 = "[FieldOffset(0)]";
-        public const string FIELD_OFFSET_1 = "[FieldOffset(1)]";
-        public const string COMMON_FOLDER = "../Common";
+        [ApiForEditor] public const string AGGRESSIVE_INLINING = "[MethodImpl(MethodImplOptions.AggressiveInlining)]";
+        [ApiForEditor] public const string STRUCT_LAYOUT_EXPLICIT = "[StructLayout(LayoutKind.Explicit)]";
+        [ApiForEditor] public const string FIELD_OFFSET_0 = "[FieldOffset(0)]";
+        [ApiForEditor] public const string FIELD_OFFSET_1 = "[FieldOffset(1)]";
+        [ApiForEditor] public const string COMMON_FOLDER = "../Common";
 
+        [ApiForEditor]
         public static readonly string[] Types = new string[] {
             nameof(None),
             "bool",
@@ -92,6 +95,7 @@ namespace EncosyTower.Entities.Stats.Generators
             "ushort",
         };
 
+        [ApiForEditor]
         public static readonly bool[] EqualOperators = new bool[] {
             false, /// <see cref="None"/>
             true,  /// <see cref="bool"/>
@@ -171,6 +175,7 @@ namespace EncosyTower.Entities.Stats.Generators
             true,  /// <see cref="ushort"/>
         };
 
+        [ApiForEditor]
         public static readonly string[] TypeNames = new string[] {
             "None",
             "Bool",
@@ -250,6 +255,7 @@ namespace EncosyTower.Entities.Stats.Generators
             "UShort",
         };
 
+        [ApiForEditor]
         public static readonly string[] OneConstructors = new string[] {
             "new None()",
             "true",
@@ -329,6 +335,7 @@ namespace EncosyTower.Entities.Stats.Generators
             "(ushort)1",
         };
 
+        [ApiForEditor]
         public static readonly int[] Sizes = new int[] {
             UnsafeUtility.SizeOf<None>(),
             UnsafeUtility.SizeOf<bool>(),

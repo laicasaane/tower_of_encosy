@@ -3,13 +3,16 @@
 using System;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
+using EncosyTower.Core;
 using EncosyTower.SystemExtensions;
 using UnityEditor;
 
 namespace EncosyTower.Editor.Common
 {
+    [ApiForEditor]
     public static class SerializableGuidEditorExtensions
     {
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryCopyFrom(ref this Guid self, SerializedProperty property)
         {
@@ -24,6 +27,7 @@ namespace EncosyTower.Editor.Common
             return true;
         }
 
+        [ApiForEditor]
         public static bool TryCopyFrom(ref this SerializableGuid self, SerializedProperty property)
         {
             if (TryGetBytesProperty(ref property) == false)
@@ -43,10 +47,12 @@ namespace EncosyTower.Editor.Common
             return true;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryCopyTo(in this Guid self, SerializedProperty property)
             => TryCopyTo(self.AsSerializable(), property);
 
+        [ApiForEditor]
         public static bool TryCopyTo(in this SerializableGuid self, SerializedProperty property)
         {
             if (TryGetBytesProperty(ref property) == false)

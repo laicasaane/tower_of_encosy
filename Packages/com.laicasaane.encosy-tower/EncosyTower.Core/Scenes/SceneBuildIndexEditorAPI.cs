@@ -3,11 +3,13 @@
 using System;
 using System.IO;
 using EncosyTower.Collections;
+using EncosyTower.Core;
 using EncosyTower.Scenes;
 using UnityEditor;
 
 namespace EncosyTower.Editor.Scenes
 {
+    [ApiForEditor]
     public static class SceneBuildIndexEditorAPI
     {
         /// <summary>
@@ -21,6 +23,7 @@ namespace EncosyTower.Editor.Scenes
         /// A <see cref="SceneBuildIndex"/> is considered valid if its index and name match an entry in the
         /// current <see cref="EditorBuildSettings.scenes"/>.
         /// </remarks>
+        [ApiForEditor]
         public static bool Validate(SceneBuildIndex index)
         {
             var indices = GetSceneBuidIndices();

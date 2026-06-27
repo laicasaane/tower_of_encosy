@@ -1,11 +1,14 @@
 #if UNITY_EDITOR
 
 using System;
+using EncosyTower.Core;
 
 namespace EncosyTower.Editor.Mvvm
 {
+    [ApiForEditor]
     internal static class MvvmCodeGenAPI
     {
+        [ApiForEditor]
         public readonly static TypeGroup[] UnityTypes = new TypeGroup[] {
 #if UNITY_ANIMATION
             new("UNITY_ANIMATION", new[] {
@@ -47,6 +50,7 @@ namespace EncosyTower.Editor.Mvvm
 #endif
         };
 
+        [ApiForEditor]
         public readonly record struct TypeGroup(string Condition, Type[] Types);
     }
 }

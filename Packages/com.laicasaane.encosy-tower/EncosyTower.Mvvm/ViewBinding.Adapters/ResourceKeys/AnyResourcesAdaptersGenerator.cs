@@ -4,11 +4,13 @@ using System;
 using System.Globalization;
 using EncosyTower.CodeGen;
 using EncosyTower.Common;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.ResourceKeys
 {
     [Generator]
+    [ApiForEditor]
     internal class AnyResourcesAdaptersGenerator : ICodeGenerator
     {
         public void Execute(GeneratorContext context)

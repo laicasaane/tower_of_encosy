@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using EncosyTower.Core;
 using EncosyTower.Data;
 
@@ -15,6 +16,7 @@ namespace EncosyTower.Databases.Authoring
     /// </remarks>
     [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
+    [Conditional("UNITY_EDITOR"), Conditional("ENCOSY_INCLUDE_AUTHORING")]
     public sealed class HorizontalAttribute : Attribute
     {
         /// <summary>

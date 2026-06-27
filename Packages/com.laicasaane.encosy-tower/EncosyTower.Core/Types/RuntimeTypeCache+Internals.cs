@@ -8,7 +8,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using EncosyTower.AssetKeys;
 using EncosyTower.AtlasedSprites;
 using EncosyTower.Ids;

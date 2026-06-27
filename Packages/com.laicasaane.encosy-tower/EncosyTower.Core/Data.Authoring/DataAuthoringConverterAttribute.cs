@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using EncosyTower.Core;
 
 namespace EncosyTower.Data.Authoring
@@ -43,6 +44,7 @@ namespace EncosyTower.Data.Authoring
     /// </example>
     [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    [Conditional("UNITY_EDITOR"), Conditional("ENCOSY_INCLUDE_AUTHORING")]
     public sealed class DataAuthoringConverterAttribute : Attribute
     {
         /// <inheritdoc cref="DataAuthoringConverterAttribute" />

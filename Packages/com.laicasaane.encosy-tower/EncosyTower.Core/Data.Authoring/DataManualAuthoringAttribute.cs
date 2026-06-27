@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using EncosyTower.Core;
 
 namespace EncosyTower.Data.Authoring
@@ -26,6 +27,7 @@ namespace EncosyTower.Data.Authoring
     /// </remarks>
     [ApiForAuthoring]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    [Conditional("UNITY_EDITOR"), Conditional("ENCOSY_INCLUDE_AUTHORING")]
     public sealed class DataManualAuthoringAttribute : Attribute
     {
         public DataManualAuthoringAttribute(Type authoringType = null)

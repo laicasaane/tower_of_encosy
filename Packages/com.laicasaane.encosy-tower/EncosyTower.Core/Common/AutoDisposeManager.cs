@@ -1,3 +1,5 @@
+using EncosyTower.Core;
+
 namespace EncosyTower.Common
 {
     using System;
@@ -31,6 +33,7 @@ namespace EncosyTower.Common
 {
     partial class AutoDisposeManager
     {
+        [ApiForEditor]
         internal static void Reset()
         {
             var references = s_references.AsSpan();

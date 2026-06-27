@@ -32,11 +32,14 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using EncosyTower.Core;
 
 namespace EncosyTower.Types.Internals
 {
+    [ApiForEditor]
     internal readonly struct TypeCacheSourceEditor
     {
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesDerivedFrom<T>()
         {
@@ -44,6 +47,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesDerivedFrom<T>(string assemblyName)
         {
@@ -51,6 +55,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesDerivedFrom(Type type)
         {
@@ -58,6 +63,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesDerivedFrom(Type type, string assemblyName)
         {
@@ -65,6 +71,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesWithAttribute<T>() where T : Attribute
         {
@@ -72,6 +79,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesWithAttribute<T>(string assemblyName) where T : Attribute
         {
@@ -79,6 +87,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesWithAttribute(Type attrType)
         {
@@ -86,6 +95,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<Type> GetTypesWithAttribute(Type attrType, string assemblyName)
         {
@@ -93,6 +103,7 @@ namespace EncosyTower.Types.Internals
             return TypeCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute<T>() where T : Attribute
         {
@@ -100,6 +111,7 @@ namespace EncosyTower.Types.Internals
             return FieldCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute<T>(string assemblyName) where T : Attribute
         {
@@ -107,6 +119,7 @@ namespace EncosyTower.Types.Internals
             return FieldCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute(Type attrType)
         {
@@ -114,6 +127,7 @@ namespace EncosyTower.Types.Internals
             return FieldCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<FieldInfo> GetFieldsWithAttribute(Type attrType, string assemblyName)
         {
@@ -121,6 +135,7 @@ namespace EncosyTower.Types.Internals
             return FieldCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute<T>() where T : Attribute
         {
@@ -128,6 +143,7 @@ namespace EncosyTower.Types.Internals
             return MethodCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute<T>(string assemblyName) where T : Attribute
         {
@@ -135,6 +151,7 @@ namespace EncosyTower.Types.Internals
             return MethodCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute(Type attrType)
         {
@@ -142,6 +159,7 @@ namespace EncosyTower.Types.Internals
             return MethodCollection.AsMemory(items);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<MethodInfo> GetMethodsWithAttribute(Type attrType, string assemblyName)
         {

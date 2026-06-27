@@ -30,6 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using EncosyTower.Collections;
+using EncosyTower.Core;
 using EncosyTower.Logging;
 using EncosyTower.Types.Caches;
 using EncosyTower.Types.Internals;
@@ -41,10 +42,11 @@ namespace EncosyTower.Types.Editor
 {
     using SystemAssembly = System.Reflection.Assembly;
 
+    [ApiForEditor]
     internal static class SerializedTypeCacheEditor
     {
         [MenuItem("Encosy Tower/Runtime Type Cache/Print Player Assemblies", priority = 82_80_00_00)]
-        public static void PrintAssemblies()
+        private static void PrintAssemblies()
         {
             var names = GetPlayerAssemblyNames();
 
@@ -54,6 +56,7 @@ namespace EncosyTower.Types.Editor
             }
         }
 
+        [ApiForEditor]
         public static void Regenerate(this SerializedTypeCache cache, out LinkXmlTypeStore linkXmlTypeStore)
         {
             var typesDerivedFromTypeList = cache._typesDerivedFromTypeList = new();

@@ -3,12 +3,15 @@
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
 using EncosyTower.ConfigKeys;
+using EncosyTower.Core;
 using UnityEditor;
 
 namespace EncosyTower.Editor.ConfigKeys
 {
+    [ApiForEditor]
     public static class ConfigKeyEditorUserSettingExtensions
     {
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<string> GetEditorUserSetting(this ConfigKey<string> self)
         {
@@ -16,6 +19,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return Option.SomeIf(string.IsNullOrEmpty(str) == false, str);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<bool> GetEditorUserSetting(this ConfigKey<bool> self)
         {
@@ -23,6 +27,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return Option.SomeIf(bool.TryParse(str, out var result), result);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<int> GetEditorUserSetting(this ConfigKey<int> self)
         {
@@ -30,6 +35,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return Option.SomeIf(int.TryParse(str, out var result), result);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Option<float> GetEditorUserSetting(this ConfigKey<float> self)
         {
@@ -37,6 +43,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return Option.SomeIf(float.TryParse(str, out var result), result);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetEditorUserSetting(this ConfigKey<string> self, string defaultValue)
         {
@@ -44,6 +51,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return str.NotEmptyOr(defaultValue);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool GetEditorUserSetting(this ConfigKey<bool> self, bool defaultValue)
         {
@@ -51,6 +59,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return bool.TryParse(str, out var result) ? result : defaultValue;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetEditorUserSetting(this ConfigKey<int> self, int defaultValue)
         {
@@ -58,6 +67,7 @@ namespace EncosyTower.Editor.ConfigKeys
             return int.TryParse(str, out var result) ? result : defaultValue;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetEditorUserSetting(this ConfigKey<float> self, float defaultValue)
         {
@@ -65,24 +75,28 @@ namespace EncosyTower.Editor.ConfigKeys
             return float.TryParse(str, out var result) ? result : defaultValue;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetEditorUserSetting(this ConfigKey<string> self, string value)
         {
             EditorUserSettings.SetConfigValue(self.Value, value);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetEditorUserSetting(this ConfigKey<bool> self, bool value)
         {
             EditorUserSettings.SetConfigValue(self.Value, value ? bool.TrueString : bool.FalseString);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetEditorUserSetting(this ConfigKey<int> self, int value)
         {
             EditorUserSettings.SetConfigValue(self.Value, $"{value}");
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetEditorUserSetting(this ConfigKey<float> self, float value)
         {

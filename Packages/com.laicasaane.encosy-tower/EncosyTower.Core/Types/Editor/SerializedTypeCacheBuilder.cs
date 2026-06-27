@@ -30,6 +30,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using EncosyTower.Logging;
 using EncosyTower.Types.Internals;
 using UnityEditor;
@@ -45,6 +46,7 @@ namespace EncosyTower.Types.Editor
     /// <summary>
     /// Responsible for creating the <see cref="SerializedTypeCacheAsset"/> at build time.
     /// </summary>
+    [ApiForEditor]
     internal sealed class SerializedTypeCacheBuilder : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
         /// <summary>

@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using EncosyTower.Core;
 using EncosyTower.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -9,8 +10,10 @@ using UnityEngine.UIElements;
 
 namespace EncosyTower.Editor.UIElements
 {
+    [ApiForEditor]
     public static class EncosyEditorUIElementExtensions
     {
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T WithBind<T>([NotNull] this T self, [NotNull] SerializedProperty property)
             where T : VisualElement, IHasBindingPath
@@ -20,6 +23,7 @@ namespace EncosyTower.Editor.UIElements
             return self;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T WithBind<T>([NotNull] this T self, SerializedObject obj)
             where T : VisualElement
@@ -28,16 +32,18 @@ namespace EncosyTower.Editor.UIElements
             return self;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T WithBindProperty<T>([NotNull] this T self, [NotNull] SerializedProperty property)
-            where T : IBindable
+                where T : IBindable
         {
             BindingExtensions.BindProperty(self, property);
             return self;
         }
 
+        [ApiForEditor]
         public static T WithEditorBuiltInStyleSheet<T>([NotNull] this T self, [NotNull] string styleSheet)
-            where T : VisualElement
+                where T : VisualElement
         {
             if (string.IsNullOrWhiteSpace(styleSheet) == false
                 && EditorGUIUtility.Load(styleSheet) is StyleSheet uss
@@ -49,8 +55,9 @@ namespace EncosyTower.Editor.UIElements
             return self;
         }
 
+        [ApiForEditor]
         public static T WithEditorStyleSheet<T>([NotNull] this T self, [NotNull] string styleSheet)
-            where T : VisualElement
+                where T : VisualElement
         {
             if (string.IsNullOrWhiteSpace(styleSheet) == false
                 && AssetDatabase.LoadAssetAtPath<StyleSheet>(styleSheet) is StyleSheet uss
@@ -62,25 +69,27 @@ namespace EncosyTower.Editor.UIElements
             return self;
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T WithEditorStyleSheet<T>(
-              [NotNull] this T self
-            , [NotNull] string darkStyleSheet
-            , [NotNull] string lightStyleSheet
-        )
-            where T : VisualElement
+                  [NotNull] this T self
+                , [NotNull] string darkStyleSheet
+                , [NotNull] string lightStyleSheet
+            )
+                where T : VisualElement
         {
             var styleSheet = EditorAPI.IsDark ? darkStyleSheet : lightStyleSheet;
             return self.WithEditorStyleSheet(styleSheet);
         }
 
+        [ApiForEditor]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T WithEditorStyleSheet<T>(
-              [NotNull] this T self
-            , StyleSheet darkStyleSheet
-            , StyleSheet lightStyleSheet
-        )
-            where T : VisualElement
+                  [NotNull] this T self
+                , StyleSheet darkStyleSheet
+                , StyleSheet lightStyleSheet
+            )
+                where T : VisualElement
         {
             var styleSheet = EditorAPI.IsDark ? darkStyleSheet : lightStyleSheet;
             return self.WithStyleSheet(styleSheet);

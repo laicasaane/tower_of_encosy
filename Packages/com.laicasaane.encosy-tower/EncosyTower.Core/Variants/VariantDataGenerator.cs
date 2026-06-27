@@ -2,11 +2,13 @@
 
 using System.Diagnostics.CodeAnalysis;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Variants
 {
     [Generator]
+    [ApiForEditor]
     internal class VariantDataGenerator : ICodeGenerator
     {
         private const uint SIZE_OF_LONG = 8;

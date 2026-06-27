@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cathei.BakingSheet;
+using EncosyTower.Core;
 using EncosyTower.Data.Authoring;
 using EncosyTower.Databases.Authoring.SourceGen;
 using EncosyTower.UnityExtensions;
@@ -14,13 +17,16 @@ using UnityEngine;
 
 namespace EncosyTower.Databases.Authoring
 {
+    [ApiForEditor]
     public class DatabaseAssetExporter : DatabaseAssetExporter<DatabaseAsset>
     {
+        [ApiForEditor]
         public DatabaseAssetExporter(string savePath, string databaseName = nameof(DatabaseAsset))
             : base(savePath, databaseName)
         { }
     }
 
+    [ApiForEditor]
     public class DatabaseAssetExporter<TDatabaseAsset> : ISheetExporter, ISheetFormatter
         where TDatabaseAsset : DatabaseAsset
     {
@@ -29,6 +35,7 @@ namespace EncosyTower.Databases.Authoring
 
         /// <param name="savePath">The location to store the exported data table assets</param>
         /// <param name="databaseName">The name of the exported database asset</param>
+        [ApiForEditor]
         public DatabaseAssetExporter(string savePath, string databaseName)
         {
             _savePath = savePath;
@@ -263,3 +270,5 @@ namespace EncosyTower.Databases.Authoring
         }
     }
 }
+
+#endif

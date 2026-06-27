@@ -4,11 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Entities.Stats.Generators
 {
     [Generator]
+    [ApiForEditor]
     internal sealed class StatDataSizeGenerator : ICodeGenerator
     {
         public void Execute(GeneratorContext context)

@@ -1,10 +1,12 @@
 #if UNITY_EDITOR
 
 using System.Diagnostics.CodeAnalysis;
+using EncosyTower.Core;
 using EncosyTower.UIElements;
 
 namespace EncosyTower.Editor.UIElements
 {
+    [ApiForEditor]
     public static class SimpleTableViewEditorExtensions
     {
         private const string MODULE_ROOT = $"{EditorStyleSheetPaths.ROOT}/EncosyTower.Core/UIElements/SimpleTableView";
@@ -20,6 +22,7 @@ namespace EncosyTower.Editor.UIElements
         /// <summary>
         /// Applies built-in editor style sheets to <see cref="SimpleTableView{TItem}"/>.
         /// </summary>
+        [ApiForEditor]
         public static SimpleTableView<TItem> WithEditorStyleSheets<TItem>(
             [NotNull] this SimpleTableView<TItem> self
         )

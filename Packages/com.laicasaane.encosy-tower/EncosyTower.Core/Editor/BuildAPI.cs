@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EncosyTower.Collections.Extensions;
+using EncosyTower.Core;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.Build;
@@ -11,8 +12,10 @@ using UnityEditor.Build.Profile;
 
 namespace EncosyTower.Editor
 {
+    [ApiForEditor]
     public static class BuildAPI
     {
+        [ApiForEditor]
         public static NamedBuildTarget ActiveNamedBuildTarget
         {
             get
@@ -25,6 +28,7 @@ namespace EncosyTower.Editor
             }
         }
 
+        [ApiForEditor]
         public static BuildProfile ActiveBuildProfile
         {
             get
@@ -33,6 +37,7 @@ namespace EncosyTower.Editor
             }
         }
 
+        [ApiForEditor]
         public static BuildProfileOrTarget ActiveProfileOrTarget
         {
             get
@@ -42,6 +47,7 @@ namespace EncosyTower.Editor
             }
         }
 
+        [ApiForEditor]
         public static HashSet<NamedBuildTarget> GetSupportedNamedBuildTargets()
         {
             var buildTargets = BuildTargetExtensions.Values.AsSpan();
@@ -72,6 +78,7 @@ namespace EncosyTower.Editor
             return result;
         }
 
+        [ApiForEditor]
         public static NamedBuildTarget GetNamedBuildTarget(BuildTarget buildTarget)
         {
             var targetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget);
@@ -79,12 +86,14 @@ namespace EncosyTower.Editor
             return namedBuildTarget;
         }
 
+        [ApiForEditor]
         public static NamedBuildTarget GetNamedBuildTarget(BuildTargetGroup targetGroup)
         {
             var namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(targetGroup);
             return namedBuildTarget;
         }
 
+        [ApiForEditor]
         public static HashSet<string> GetScriptingDefineSymbols(BuildProfile profile)
         {
             var result = new HashSet<string>();
@@ -97,6 +106,7 @@ namespace EncosyTower.Editor
             return result;
         }
 
+        [ApiForEditor]
         public static void SetScriptingDefineSymbols(BuildProfile profile, params string[] symbols)
         {
             if (profile.IsValid() == false)
@@ -108,6 +118,7 @@ namespace EncosyTower.Editor
             EditorUtility.SetDirty(profile);
         }
 
+        [ApiForEditor]
         public static void SetScriptingDefineSymbols(BuildProfile profile, IEnumerable<string> symbols)
         {
             if (profile.IsValid() == false)
@@ -119,6 +130,7 @@ namespace EncosyTower.Editor
             EditorUtility.SetDirty(profile);
         }
 
+        [ApiForEditor]
         public static HashSet<string> GetScriptingDefineSymbols(NamedBuildTarget buildTarget)
         {
             var symbolStr = PlayerSettings.GetScriptingDefineSymbols(buildTarget) ?? string.Empty;
@@ -126,18 +138,21 @@ namespace EncosyTower.Editor
             return new HashSet<string>(symbols);
         }
 
+        [ApiForEditor]
         public static void SetScriptingDefineSymbols(NamedBuildTarget buildTarget, params string[] symbols)
         {
             var symbolStr = string.Join(';', symbols);
             PlayerSettings.SetScriptingDefineSymbols(buildTarget, symbolStr);
         }
 
+        [ApiForEditor]
         public static void SetScriptingDefineSymbols(NamedBuildTarget buildTarget, IEnumerable<string> symbols)
         {
             var symbolStr = string.Join(';', symbols);
             PlayerSettings.SetScriptingDefineSymbols(buildTarget, symbolStr);
         }
 
+        [ApiForEditor]
         public static void AddScriptingDefineSymbols(NamedBuildTarget buildTarget, params string[] symbols)
         {
             var result = GetScriptingDefineSymbols(buildTarget);
@@ -146,6 +161,7 @@ namespace EncosyTower.Editor
             SetScriptingDefineSymbols(buildTarget, result);
         }
 
+        [ApiForEditor]
         public static void AddScriptingDefineSymbols(NamedBuildTarget buildTarget, IEnumerable<string> symbols)
         {
             var result = GetScriptingDefineSymbols(buildTarget);
@@ -154,6 +170,7 @@ namespace EncosyTower.Editor
             SetScriptingDefineSymbols(buildTarget, result);
         }
 
+        [ApiForEditor]
         public static void RemoveScriptingDefineSymbols(NamedBuildTarget buildTarget, params string[] symbols)
         {
             var result = GetScriptingDefineSymbols(buildTarget);
@@ -162,6 +179,7 @@ namespace EncosyTower.Editor
             SetScriptingDefineSymbols(buildTarget, result);
         }
 
+        [ApiForEditor]
         public static void RemoveScriptingDefineSymbols(NamedBuildTarget buildTarget, IEnumerable<string> symbols)
         {
             var result = GetScriptingDefineSymbols(buildTarget);

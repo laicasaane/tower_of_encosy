@@ -2,11 +2,13 @@
 
 using System;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.ViewBinding.Adapters.Localization
 {
     [Generator]
+    [ApiForEditor]
     internal class L10nKeyToStringAdaptersGenerator : ICodeGenerator
     {
         private readonly static TypeData[] s_types = new TypeData[] {

@@ -1,6 +1,6 @@
-#if UNITY_EDITOR
-
 using System;
+using System.Diagnostics;
+using EncosyTower.Core;
 
 namespace EncosyTower.Editor
 {
@@ -41,10 +41,10 @@ namespace EncosyTower.Editor
     /// }
     /// </code>
     /// </example>
+    [ApiForEditor]
     [AttributeUsage(AttributeTargets.Method)]
+    [Conditional("UNITY_EDITOR")]
     public sealed class MenuItemProviderAttribute : Attribute
     {
     }
 }
-
-#endif

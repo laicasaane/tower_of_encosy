@@ -2,10 +2,12 @@
 
 using System;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.Variants.Converters
 {
+    [ApiForEditor]
     internal abstract class AnyToAnyAdaptersGenerator : ICodeGenerator
     {
         private static readonly string[] s_variantTypes = new string[] {
@@ -121,6 +123,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToBoolAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "bool";
@@ -133,6 +136,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToNotBoolAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "bool";
@@ -149,6 +153,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToDoubleAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "double";
@@ -161,6 +166,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToFloatAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "float";
@@ -173,6 +179,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToIntAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "int";
@@ -185,6 +192,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToUIntAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "uint";
@@ -197,6 +205,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToLongAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "long";
@@ -209,6 +218,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToULongAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "ulong";
@@ -221,6 +231,7 @@ using EncosyTower.Variants;
     }
 
     [Generator]
+    [ApiForEditor]
     internal sealed class AnyToStringAdaptersGenerator : AnyToAnyAdaptersGenerator
     {
         protected override string ToType => "string";

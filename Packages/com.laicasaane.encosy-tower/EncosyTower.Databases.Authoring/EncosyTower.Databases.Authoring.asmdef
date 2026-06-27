@@ -19,7 +19,7 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "UNITY_EDITOR",
+        "UNITY_EDITOR || ENCOSY_INCLUDE_AUTHORING",
         "BAKING_SHEET",
         "UNITY_NEWTONSOFT_JSON"
     ],

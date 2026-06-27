@@ -3,15 +3,18 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using EncosyTower.Core;
 
 namespace EncosyTower.Types.Editor
 {
+    [ApiForEditor]
     internal class IndexedType : IEquatable<IndexedType>
     {
         public int index;
 
         public Type Type { get; init; }
 
+        [ApiForEditor]
         public IndexedType(Type type)
         {
             Type = type;
@@ -27,9 +30,13 @@ namespace EncosyTower.Types.Editor
             => ReferenceEquals(Type, other?.Type);
     }
 
+    [ApiForEditor]
     internal class LinkXmlTypeStore
     {
         public readonly Dictionary<Assembly, Dictionary<IndexedType, HashSet<MemberInfo>>> Store = new();
+
+        [ApiForEditor]
+        public LinkXmlTypeStore() { }
 
         public void Add(IndexedType type)
         {

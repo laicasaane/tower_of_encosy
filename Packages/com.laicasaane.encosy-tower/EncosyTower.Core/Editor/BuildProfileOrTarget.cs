@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using EncosyTower.Common;
+using EncosyTower.Core;
 using EncosyTower.UnityExtensions;
 using UnityEditor;
 using UnityEditor.Build;
@@ -14,6 +15,7 @@ using UnityEngine;
 
 namespace EncosyTower.Editor
 {
+    [ApiForEditor]
     public readonly struct BuildProfileOrTarget
     {
         private readonly BuildProfile _profile;
@@ -74,9 +76,11 @@ namespace EncosyTower.Editor
             }
         }
 
+        [ApiForEditor]
         public static implicit operator BuildProfileOrTarget(BuildProfile profile)
             => new(profile, default);
 
+        [ApiForEditor]
         public static implicit operator BuildProfileOrTarget(NamedBuildTarget target)
             => new(default, target);
 

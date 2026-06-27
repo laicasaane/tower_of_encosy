@@ -2,11 +2,13 @@
 
 using System;
 using EncosyTower.CodeGen;
+using EncosyTower.Core;
 using UnityCodeGen;
 
 namespace EncosyTower.Editor.Mvvm.Variants.Converters
 {
     [Generator]
+    [ApiForEditor]
     internal class VariantConvertersGenerator : ICodeGenerator
     {
         private static readonly string[] s_variantTypes = new string[] {
