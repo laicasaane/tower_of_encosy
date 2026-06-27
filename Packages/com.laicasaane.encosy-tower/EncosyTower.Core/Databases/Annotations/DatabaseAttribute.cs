@@ -30,10 +30,12 @@ namespace EncosyTower.Databases
         /// <remarks>
         /// Converter precedences (smaller index means higher precedence):
         /// <list type="number">
-        /// <item><see cref="EncosyTower.Data.Authoring.DataAuthoringConverterAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.Authoring.ConverterForDataPropertyAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.Authoring.ConverterForTableAttribute"/></item>
         /// <item><see cref="EncosyTower.Databases.Authoring.AuthorDatabaseAttribute"/></item>
-        /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
+        /// <item><see cref="EncosyTower.Data.Authoring.DataAuthoringConverterAttribute"/></item>
         /// <item><see cref="EncosyTower.Databases.TableAttribute"/></item>
+        /// <item><see cref="EncosyTower.Databases.DatabaseAttribute"/></item>
         /// <item>Local <c>Convert</c> method within IData type</item>
         /// </list>
         /// </remarks>
