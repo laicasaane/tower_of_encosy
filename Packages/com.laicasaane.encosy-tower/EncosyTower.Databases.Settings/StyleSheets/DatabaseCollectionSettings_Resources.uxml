@@ -36,7 +36,7 @@ However, it will be created upon download." />
                   text="A SpreadSheet should conform to one of the following formats:&#10;
     1. A SpreadSheet contains a list of files. See &lt;a href=&quot;https://docs.google.com/spreadsheets/d/1MCEi9N9EVYHvbIPr8Vlf9g39aGOmAayaxDH99-wnyi8/edit?usp=sharing &quot; &gt;this template&lt;/a&gt;.&#10;
     2. A SpreadSheet contains all data. See &lt;a href=&quot;https://docs.google.com/spreadsheets/d/1HJOkFiVH4snsQ0h23m66ZOazYLmU8o5STx0Y1PD47uY/edit?usp=sharing &quot; &gt;this template&lt;/a&gt;.&#10;&#10;
-The SpreadSheet ID can be retrieved following &lt;a href=&quot;https://github.com/cathei/BakingSheet/blob/master/docs/google-sheet-import.md#get-your-sheet-identifier &quot; &gt;this tutorial&lt;/a&gt;.
+The SpreadSheet ID can be retrieved following &lt;a href=&quot;https://github.com/laicasaane/BakingSheet/blob/master/docs/google-sheet-import.md#get-your-sheet-identifier &quot; &gt;this tutorial&lt;/a&gt;.
 " />
 
     <engine:Label name="google-sheet__spreadsheet-invalid" text="SpreadSheet ID MUST be a valid string." />

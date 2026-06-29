@@ -1,5 +1,6 @@
 // BakingSheet, Maxwell Keonwoo Kang <code.athei@gmail.com>, 2022
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -40,9 +41,9 @@ namespace EncosyTower.Databases.Authoring
             SpreadsheetId = spreadsheetId;
 
             _applicationName = applicationName;
-            _credential = GoogleCredential
-                .FromJson(credential)
-                .CreateScoped(Scopes);
+            _credential = CredentialFactory.
+                FromJson(credential, JsonCredentialParameters.ServiceAccountCredentialType).
+                CreateScoped(new[] { DriveService.Scope.DriveReadonly });
 
             _pages = new Dictionary<string, List<Page>>();
         }
@@ -72,7 +73,7 @@ namespace EncosyTower.Databases.Authoring
             fileReq.Fields = "name,modifiedTime";
 
             var file = await fileReq.ExecuteAsync();
-            return new(file.Name, file.ModifiedTime ?? default);
+            return new(file.Name, file.ModifiedTimeDateTimeOffset ?? DateTimeOffset.MinValue);
         }
 
         public override void Reset()

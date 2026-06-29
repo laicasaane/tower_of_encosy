@@ -29,7 +29,7 @@
             "define": "ANNULUS_CODEGEN"
         },
         {
-            "name": "com.cathei.bakingsheet",
+            "name": "com.laicasaane.bakingsheet",
             "expression": "",
             "define": "BAKING_SHEET"
         },

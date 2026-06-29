@@ -30,14 +30,14 @@
             "define": "ANNULUS_CODEGEN"
         },
         {
-            "name": "com.cathei.bakingsheet",
-            "expression": "",
-            "define": "BAKING_SHEET"
-        },
-        {
             "name": "com.cysharp.unitask",
             "expression": "",
             "define": "UNITASK"
+        },
+        {
+            "name": "com.laicasaane.bakingsheet",
+            "expression": "",
+            "define": "BAKING_SHEET"
         },
         {
             "name": "com.latios.latiosframework",

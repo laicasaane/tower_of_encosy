@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -42,9 +43,9 @@ namespace EncosyTower.Databases.Authoring
             SpreadsheetId = spreadsheetId;
 
             _applicationName = applicationName;
-            _credential = GoogleCredential
-                .FromJson(credential)
-                .CreateScoped(Scopes);
+            _credential = CredentialFactory.
+                FromJson(credential, JsonCredentialParameters.ServiceAccountCredentialType).
+                CreateScoped(new[] { DriveService.Scope.DriveReadonly });
 
             _fileSystem = fileSystem ?? new DatabaseFileSystem();
             _spreadsheetNameTransformer = spreadsheetNameTransformer;
@@ -79,7 +80,7 @@ namespace EncosyTower.Databases.Authoring
             fileReq.Fields = "name,modifiedTime";
 
             var file = await fileReq.ExecuteAsync();
-            return new(file.Name, file.ModifiedTime ?? default);
+            return new(file.Name, file.ModifiedTimeDateTimeOffset ?? DateTimeOffset.MinValue);
         }
 
         public async Task Export(

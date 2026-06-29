@@ -6,7 +6,7 @@ namespace EncosyTower.Databases.Authoring
 {
     [Feature("5. EncosyTower: Databases Authoring")]
     [RequiresPackage(PackageRegistry.Unity, "com.unity.editorcoroutines")]
-    [RequiresPackage(PackageRegistry.OpenUpm, "com.cathei.bakingsheet", "4.1.3")]
+    [RequiresPackage(PackageRegistry.OpenUpm, "com.laicasaane.bakingsheet")]
 
 #if !UNITY_6000_0_OR_NEWER
     [RequiresPackage(PackageRegistry.OpenUpm, "com.cysharp.unitask")]
