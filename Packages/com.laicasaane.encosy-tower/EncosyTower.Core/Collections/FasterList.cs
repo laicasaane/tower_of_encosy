@@ -34,7 +34,7 @@ using EncosyTower.Debugging;
 namespace EncosyTower.Collections
 {
     public partial class FasterList<T> : IList<T>, IReadOnlyList<T>
-        , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IToArray<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
         , IAddRangeSpan<T>, IContains<T>

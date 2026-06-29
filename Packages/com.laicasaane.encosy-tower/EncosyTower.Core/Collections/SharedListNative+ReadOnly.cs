@@ -28,7 +28,8 @@ namespace EncosyTower.Collections
                 , _version.AsReadOnly()
             );
 
-        public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>, ICopyToSpan<T>, ITryCopyToSpan<T>
+        public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>, IToArray<T>
+            , ICopyToSpan<T>, ITryCopyToSpan<T>
             , IHasCapacity, IHasCount, IIsCreated
         {
             internal readonly NativeArray<T>.ReadOnly _buffer;

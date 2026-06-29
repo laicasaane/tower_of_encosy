@@ -17,7 +17,7 @@ namespace EncosyTower.Collections
     /// Upon creation, a <see cref="List{T}"/> will also be allocated.
     /// </remarks>
     public readonly struct ProxiedList<T> : IList<T>, IReadOnlyList<T>
-        , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IToArray<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
         , IAddRangeSpan<T>, IContains<T>

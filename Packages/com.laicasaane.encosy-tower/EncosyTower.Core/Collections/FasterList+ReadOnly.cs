@@ -37,7 +37,7 @@ namespace EncosyTower.Collections
         public ReadOnly AsReadOnly()
             => new(this);
 
-        public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>
+        public readonly struct ReadOnly : IReadOnlyList<T>, IAsReadOnlySpan<T>, IToArray<T>
             , ICopyToSpan<T>, ITryCopyToSpan<T>, IContains<T>, IHasCapacity, IHasCount, IIsCreated
         {
             private static readonly ReadOnly s_empty = new(null);

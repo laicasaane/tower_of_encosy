@@ -17,7 +17,7 @@ namespace EncosyTower.Collections
     /// as the external state for this list.
     /// </summary>
     public readonly partial struct StatelessList<TState, T> : IList<T>, IReadOnlyList<T>
-        , IAsSpan<T>, IAsReadOnlySpan<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IToArray<T>
         , ICopyFromSpan<T>, ITryCopyFromSpan<T>
         , ICopyToSpan<T>, ITryCopyToSpan<T>
         , IAddRangeSpan<T>, IContains<T>

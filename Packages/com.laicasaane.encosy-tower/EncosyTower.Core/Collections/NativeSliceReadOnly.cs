@@ -17,7 +17,7 @@ namespace EncosyTower.Collections
     [NativeContainerSupportsMinMaxWriteRestriction]
     [DebuggerDisplay("Length = {Length}")]
     [DebuggerTypeProxy(typeof(NativeSliceReadOnlyDebugView<>))]
-    public unsafe struct NativeSliceReadOnly<T> : IEnumerable<T>, IEquatable<NativeSliceReadOnly<T>>
+    public unsafe struct NativeSliceReadOnly<T> : IEnumerable<T>, IEquatable<NativeSliceReadOnly<T>>, IToArray<T>
         where T : struct
     {
         [NativeDisableUnsafePtrRestriction]
