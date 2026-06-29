@@ -86,7 +86,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 p.PrintBeginLine()
                     .Print("public abstract partial class ").Print(sheetName)
                     .Print(" : CBS.Sheet<").Print(sheetIdTypeName).Print(", ").Print(sheetDataTypeName).Print(">")
-                    .Print(", ETDBA.IDataSheet")
+                    .Print(", ETDBA.IDataSheet, ETDBA.IToDataArray<").Print(dataTypeFullName).Print(">")
                     .PrintEndLine();
                 p.OpenScope();
                 {
@@ -141,8 +141,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     p.PrintLine("partial void OnPostprocess(CBS.SheetConvertingContext context);");
                     p.PrintEndLine();
 
-                    p.PrintBeginLine("public ").Print(dataTypeFullName).Print("[] To")
-                        .Print(dataTypeSimpleName).PrintEndLine("Array()");
+                    p.PrintBeginLine("public ").Print(dataTypeFullName).PrintEndLine("[] ToDataArray()");
                     p.OpenScope();
                     {
                         p.PrintLine("if (this.Items == null || this.Count == 0)");
