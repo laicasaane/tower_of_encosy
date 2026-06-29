@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05bbc200403d49a48a7a21204bef0502, type: 3}
   m_Name: enemy_table_asset
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: EncosyTower.Samples.Data::EncosyTower.Samples.Data.EnemyTableAsset
   _entries:
   - _id:
       _entityId:

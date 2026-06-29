@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc8e94ac1d9580b4d8c98ebf172cd18d, type: 3}
   m_Name: string_table_asset
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: EncosyTower.Samples.Data::EncosyTower.Samples.Data.StringTableAsset
   _entries:
   - _id: 1
     _value: Richard

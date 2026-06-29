@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5830cd4808b6ae44ca984f7d730446ec, type: 3}
   m_Name: hero_table_asset
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: EncosyTower.Samples.Data::EncosyTower.Samples.Data.HeroTableAsset
   _entries:
   - _id:
       _kind: Hero

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea2970a9a7275b74eaf5b4926753aa0e, type: 3}
   m_Name: sample_database_asset
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: EncosyTower.Core::EncosyTower.Databases.DatabaseAsset
   _tables:
   - {fileID: 11400000, guid: 635dfc255853d0045aeba340617f5fd0, type: 2}
   - {fileID: 11400000, guid: 1c0b13c9416779643a79a60d24136ff4, type: 2}
