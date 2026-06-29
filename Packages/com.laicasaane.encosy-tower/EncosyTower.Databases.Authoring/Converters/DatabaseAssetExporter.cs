@@ -149,7 +149,7 @@ namespace EncosyTower.Databases.Authoring
                         }
 
                         if (TryGetGeneratedSheetAttribute(context, sheet, out var sheetAttrib) == false
-                            || TryGetToDataArrayMethod(context, sheet, sheetAttrib.DataType, out var toDataArrayMethod) == false
+                            || TryGetToDataArrayMethod(context, sheet, out var toDataArrayMethod) == false
                         )
                         {
                             continue;
@@ -236,21 +236,20 @@ namespace EncosyTower.Databases.Authoring
         private static bool TryGetToDataArrayMethod(
               SheetConvertingContext context
             , ISheet sheet
-            , Type dataType
             , out MethodInfo toDataArrayMethod
         )
         {
-            var sheetType = sheet.GetType();
-            var methodName = $"To{dataType.Name}Array";
+            const string METHOD_NAME = nameof(IToDataArray<int>.ToDataArray);
 
-            toDataArrayMethod = sheetType.GetMethod(methodName, Type.EmptyTypes);
+            var sheetType = sheet.GetType();
+            toDataArrayMethod = sheetType.GetMethod(METHOD_NAME, Type.EmptyTypes);
 
             if (toDataArrayMethod != null)
             {
                 return true;
             }
 
-            context.Logger.LogError("Cannot find {MethodName} method in {SheetType}", methodName, sheetType);
+            context.Logger.LogError("Cannot find method {MethodName} in {SheetType}", METHOD_NAME, sheetType);
             return false;
         }
 
