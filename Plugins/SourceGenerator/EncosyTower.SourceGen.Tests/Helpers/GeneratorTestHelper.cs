@@ -93,6 +93,46 @@ internal static class GeneratorTestHelper
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Minimal references (core + netstandard) for running a generator against self-contained stub sources
+    /// that do not depend on Unity or EncosyTower runtime assemblies.
+    /// </summary>
+    internal static IEnumerable<MetadataReference> CoreReferences { get; } = new[]
+    {
+        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+        MetadataReference.CreateFromFile(System.Reflection.Assembly.Load("netstandard").Location),
+        MetadataReference.CreateFromFile(System.Reflection.Assembly.Load("System.Runtime").Location),
+        MetadataReference.CreateFromFile(typeof(System.Collections.Generic.List<>).Assembly.Location),
+        MetadataReference.CreateFromFile(typeof(System.Linq.Enumerable).Assembly.Location),
+    };
+
+    /// <summary>
+    /// Runs <typeparamref name="TGenerator"/> against <paramref name="source"/> compiled with the supplied
+    /// <paramref name="references"/>, returning the generated source texts. Asserts the generator itself
+    /// produced no error diagnostics (binding errors in the input compilation are ignored, since stub code
+    /// may reference types only present in the generated output).
+    /// </summary>
+    internal static string[] RunDriverAndGetGeneratedSources<TGenerator>(
+          string source
+        , IEnumerable<MetadataReference> references
+    )
+        where TGenerator : IIncrementalGenerator, new()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(
+              source
+            , CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp10)
+        );
+
+        var compilation = CSharpCompilation.Create(
+              "TestAssembly"
+            , new[] { syntaxTree }
+            , references.ToImmutableArray()
+            , new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        return RunDriver<TGenerator>(compilation);
+    }
+
     internal static string[] RunDriverAndGetGeneratedSources<TGenerator>(string source = "")
         where TGenerator : IIncrementalGenerator, new()
     {
@@ -117,6 +157,47 @@ internal static class GeneratorTestHelper
             , new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         );
 
+        return RunDriver<TGenerator>(compilation);
+    }
+
+    /// <summary>
+    /// Compiles <paramref name="source"/> into an in-memory assembly and returns it as a reference, so a
+    /// second compilation can exercise cross-assembly scenarios. Throws if the source fails to compile.
+    /// </summary>
+    internal static MetadataReference CompileToReference(
+          string source
+        , IEnumerable<MetadataReference> references
+        , string assemblyName
+    )
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(
+              source
+            , CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp10)
+        );
+
+        var compilation = CSharpCompilation.Create(
+              assemblyName
+            , new[] { syntaxTree }
+            , references.ToImmutableArray()
+            , new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        using var stream = new System.IO.MemoryStream();
+        var result = compilation.Emit(stream);
+
+        if (result.Success == false)
+        {
+            throw new Microsoft.VisualStudio.TestTools.UnitTesting.AssertFailedException(
+                $"Reference compilation '{assemblyName}' failed:\n{string.Join("\n", result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))}");
+        }
+
+        stream.Position = 0;
+        return MetadataReference.CreateFromImage(stream.ToArray());
+    }
+
+    private static string[] RunDriver<TGenerator>(CSharpCompilation compilation)
+        where TGenerator : IIncrementalGenerator, new()
+    {
         var generator = new TGenerator();
         var driver = (CSharpGeneratorDriver)CSharpGeneratorDriver
             .Create(generator)

@@ -330,4 +330,149 @@ public class DatabaseAuthoringConverterTests
                 [AuthorDatabase(typeof(MyDb))]
                 public partial class MyAuthor { }
             """);
+
+    [TestMethod]
+    public Task ConflictingDataPropertyConverters_ReportsDuplicate()
+        => RunAsync(
+              """
+                  public class ConvA { public int Convert(string s) => 0; }
+                  public class ConvB { public int Convert(double d) => 0; }
+
+                  public class MyData : IData { }
+
+                  public class MyTable : DataTableAsset<int, MyData> { }
+
+                  [Database]
+                  public partial class MyDb
+                  {
+                      [Table]
+                      public MyTable Items { get; }
+                  }
+
+                  [{|#0:ConverterForDataProperty(typeof(MyData), "Foo", typeof(ConvA))|}]
+                  [{|#1:ConverterForDataProperty(typeof(MyData), "Foo", typeof(ConvB))|}]
+                  [AuthorDatabase(typeof(MyDb))]
+                  public partial class MyAuthor { }
+              """
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.DuplicateDataPropertyConverter)
+                .WithLocation(0)
+                .WithArguments("Foo", "global::TestProject.MyData", "all tables")
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.DuplicateDataPropertyConverter)
+                .WithLocation(1)
+                .WithArguments("Foo", "global::TestProject.MyData", "all tables")
+        );
+
+    [TestMethod]
+    public Task RedundantDataPropertyConverter_ReportsRedundant()
+        => RunAsync(
+              """
+                  public class ConvA { public int Convert(string s) => 0; }
+
+                  public class MyData : IData { }
+
+                  public class MyTable : DataTableAsset<int, MyData> { }
+
+                  [Database]
+                  public partial class MyDb
+                  {
+                      [Table]
+                      public MyTable Items { get; }
+                  }
+
+                  [{|#0:ConverterForDataProperty(typeof(MyData), "Foo", typeof(ConvA))|}]
+                  [{|#1:ConverterForDataProperty(typeof(MyData), "Foo", typeof(ConvA))|}]
+                  [AuthorDatabase(typeof(MyDb))]
+                  public partial class MyAuthor { }
+              """
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.RedundantDataPropertyConverter)
+                .WithLocation(0)
+                .WithArguments("global::TestProject.ConvA", "Foo", "global::TestProject.MyData", "all tables")
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.RedundantDataPropertyConverter)
+                .WithLocation(1)
+                .WithArguments("global::TestProject.ConvA", "Foo", "global::TestProject.MyData", "all tables")
+        );
+
+    [TestMethod]
+    public Task ConflictingTableConverters_SameSourceType_ReportsDuplicate()
+        => RunAsync(
+              """
+                  public class ConvA { public int Convert(string s) => 0; }
+                  public class ConvB { public int Convert(string s) => 0; }
+
+                  public class MyData : IData { }
+
+                  public class MyTable : DataTableAsset<int, MyData> { }
+
+                  [Database]
+                  public partial class MyDb
+                  {
+                      [Table]
+                      public MyTable Items { get; }
+                  }
+
+                  [{|#0:ConverterForTable("Items", typeof(ConvA))|}]
+                  [{|#1:ConverterForTable("Items", typeof(ConvB))|}]
+                  [AuthorDatabase(typeof(MyDb))]
+                  public partial class MyAuthor { }
+              """
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.DuplicateTableConverter)
+                .WithLocation(0)
+                .WithArguments("string", "table \"Items\"")
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.DuplicateTableConverter)
+                .WithLocation(1)
+                .WithArguments("string", "table \"Items\"")
+        );
+
+    [TestMethod]
+    public Task RedundantTableConverter_ByNameAndByType_ReportsRedundant()
+        => RunAsync(
+              """
+                  public class ConvA { public int Convert(string s) => 0; }
+
+                  public class MyData : IData { }
+
+                  public class MyTable : DataTableAsset<int, MyData> { }
+
+                  [Database]
+                  public partial class MyDb
+                  {
+                      [Table]
+                      public MyTable Items { get; }
+                  }
+
+                  [{|#0:ConverterForTable("Items", typeof(ConvA))|}]
+                  [{|#1:ConverterForTable(typeof(MyTable), typeof(ConvA))|}]
+                  [AuthorDatabase(typeof(MyDb))]
+                  public partial class MyAuthor { }
+              """
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.RedundantTableConverter)
+                .WithLocation(0)
+                .WithArguments("global::TestProject.ConvA", "string", "table \"Items\"")
+            , new DiagnosticResult(DatabaseAuthoringDiagnosticAnalyzer.RedundantTableConverter)
+                .WithLocation(1)
+                .WithArguments("global::TestProject.ConvA", "string", "table \"Items\"")
+        );
+
+    [TestMethod]
+    public Task TableScopedDataPropertyConverter_DoesNotConflictWithUnscoped()
+        => RunAsync("""
+                public class ConvA { public int Convert(string s) => 0; }
+                public class ConvB { public int Convert(double d) => 0; }
+
+                public class MyData : IData { }
+
+                public class MyTable : DataTableAsset<int, MyData> { }
+
+                [Database]
+                public partial class MyDb
+                {
+                    [Table]
+                    public MyTable Items { get; }
+                }
+
+                [ConverterForDataProperty(typeof(MyData), "Foo", typeof(ConvA))]
+                [ConverterForDataProperty(typeof(MyData), "Foo", typeof(ConvB), "Items")]
+                [AuthorDatabase(typeof(MyDb))]
+                public partial class MyAuthor { }
+            """);
 }

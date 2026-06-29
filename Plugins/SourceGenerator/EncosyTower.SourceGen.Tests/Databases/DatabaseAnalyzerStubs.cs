@@ -22,6 +22,14 @@ internal static class DatabaseAnalyzerStubs
 
             [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
             public sealed class DataAttribute : System.Attribute { }
+
+            [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field)]
+            public sealed class DataPropertyAttribute : System.Attribute
+            {
+                public DataPropertyAttribute() { }
+                public DataPropertyAttribute(System.Type fieldType) { }
+                public DataPropertyAttribute(System.Type fieldType, System.Type converterType) { }
+            }
         }
 
         namespace EncosyTower.Data.Authoring
@@ -68,8 +76,25 @@ internal static class DatabaseAnalyzerStubs
             [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
             public sealed class AuthorDatabaseAttribute : System.Attribute
             {
-                public AuthorDatabaseAttribute(System.Type databaseType) { }
+                public AuthorDatabaseAttribute(System.Type databaseType, params System.Type[] converters) { }
                 public System.Type DatabaseType { get; }
+                public System.Type[] Converters { get; }
+                public bool FullyQualifiedSheetNames { get; set; }
+            }
+
+            [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
+            public sealed class ConverterForTableAttribute : System.Attribute
+            {
+                public ConverterForTableAttribute(string tableName, System.Type converterType) { }
+                public ConverterForTableAttribute(System.Type tableType, System.Type converterType) { }
+            }
+
+            [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
+            public sealed class ConverterForDataPropertyAttribute : System.Attribute
+            {
+                public ConverterForDataPropertyAttribute(System.Type dataType, string propertyName, System.Type converterType) { }
+                public ConverterForDataPropertyAttribute(System.Type dataType, string propertyName, System.Type converterType, string tableName) { }
+                public ConverterForDataPropertyAttribute(System.Type dataType, string propertyName, System.Type converterType, System.Type tableType) { }
             }
         }
         """;
