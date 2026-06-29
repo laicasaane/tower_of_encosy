@@ -199,7 +199,7 @@ namespace EncosyTower.StringIds
 
             lock (_lock)
             {
-                var hash = HashValue64.FNV1a(str);
+                var hash = HashValue64.FNV1a(str).ToHashCode();
                 var registered = _map.TryGetValue(hash, out var id);
 
                 if (registered)
@@ -283,7 +283,7 @@ namespace EncosyTower.StringIds
                 return false;
             }
 
-            var hash = HashValue64.FNV1a(str);
+            var hash = HashValue64.FNV1a(str).ToHashCode();
             var registered = _map.TryGetValue(hash, out var id);
 
             if (registered && TryGetManagedString(id, out var registeredString) && str == registeredString)
