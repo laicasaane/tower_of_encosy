@@ -11,6 +11,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string dataTypeSimpleName;
         public string tableTypeFullName;
         public EquatableArray<string> nestedDataTypeFullNames;
+        public HashValue64 scopeKey;
         public string hintName;
 
         public readonly bool IsValid
@@ -24,6 +25,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && string.Equals(dataTypeSimpleName, other.dataTypeSimpleName, StringComparison.Ordinal)
             && string.Equals(tableTypeFullName, other.tableTypeFullName, StringComparison.Ordinal)
             && string.Equals(sheetName, other.sheetName, StringComparison.Ordinal)
+            && scopeKey == other.scopeKey
             && nestedDataTypeFullNames.Equals(other.nestedDataTypeFullNames)
             ;
 
@@ -38,6 +40,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , dataTypeSimpleName
                 , tableTypeFullName
                 , sheetName
+                , scopeKey
                 , nestedDataTypeFullNames
             );
     }

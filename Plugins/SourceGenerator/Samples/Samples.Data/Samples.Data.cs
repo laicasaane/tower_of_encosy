@@ -465,3 +465,58 @@ namespace Samples.Data.Databases.Settings
         public static bool Equals(string a, string b) => string.Equals(a, b, System.StringComparison.Ordinal);
     }
 }
+
+namespace Samples.Data.XDatabases
+{
+    using System;
+    using System.Runtime.CompilerServices;
+    using EncosyTower.Data;
+    using EncosyTower.Databases;
+
+    [DataTableAsset]
+    public sealed partial class PlacementTableAsset : DataTableAssetBase<int, PlacementData>
+    {
+    }
+
+    [Serializable]
+    public struct Vector2Int
+    {
+        public int x;
+        public int y;
+
+        public Vector2Int(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    [Data]
+    public partial struct PlacementData : IData
+    {
+        [DataProperty]
+        public readonly int Id => Get_Id();
+
+        [DataProperty]
+        public readonly Vector2Int Size => Get_Size();
+
+        [DataProperty(typeof(Vector2Int[]))]
+        public readonly ReadOnlyMemory<Vector2Int> Locations => Get_Locations();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector2Int[] Convert(ReadOnlyMemory<Vector2Int> value)
+            => value.ToArray();
+    }
+}
+
+namespace Samples.Data.XDatabases
+{
+    using EncosyTower.Databases;
+    using EncosyTower.Naming;
+
+    [Database(NameCasing.SnakeLower, AssetName = $"{nameof(GameDatabase)}Asset")]
+    public readonly partial struct GameDatabase
+    {
+        [Table] public readonly PlacementTableAsset Placements => Get_Placements();
+    }
+}

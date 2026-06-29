@@ -56,7 +56,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             var fileName = $"{databaseIdentifier}_SheetContainer";
             var containerHintName = syntaxTree.GetHintName(authoringTypeSyntax, fileName);
 
-            var dbConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
+            var authorDbMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
+            var databaseMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
             var ignoredTypes = new IgnoredTypes();
             var resultTypes = new ResultTypes();
             var nameCasing = NameCasing.Pascal;
@@ -65,11 +66,24 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             ProcessAttributes(
                   authorAttrib
                 , databaseAttrib
-                , dbConverterMap
+                , authorDbMap
+                , databaseMap
                 , ignoredTypes
                 , resultTypes
                 , ref nameCasing
                 , ref fullyQualifiedSheetNames
+                , token
+            );
+
+            var cfgTableEntries = new List<ConverterForTableEntry>();
+            var cfgPropEntries = new List<ConverterForDataPropertyEntry>();
+
+            ExtractConverterAttributes(
+                  authoringTypeSymbol
+                , cfgTableEntries
+                , cfgPropEntries
+                , ignoredTypes
+                , resultTypes
                 , token
             );
 
@@ -88,12 +102,30 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             if (tableInfoList.Count < 1)
             {
+                hlBuilder.Dispose();
                 return default;
             }
 
             token.ThrowIfCancellationRequested();
 
-            var dataMap = BuildDataMap(tableInfoList, dbConverterMap, ignoredTypes, resultTypes, token);
+            var dataMap = BuildShapeDataMap(tableInfoList, ignoredTypes, resultTypes, token);
+
+            var scopedConvertersBuilder = ImmutableArrayBuilder<ScopedConverterSpec>.Rent();
+
+            ResolveConverters(
+                  tableInfoList
+                , dataMap
+                , authorDbMap
+                , databaseMap
+                , cfgTableEntries
+                , cfgPropEntries
+                , ref scopedConvertersBuilder
+                , token
+            );
+
+            var scopedConverters = scopedConvertersBuilder.ToImmutable().AsEquatableArray();
+            scopedConvertersBuilder.Dispose();
+
             var sheetGroupMap = new Dictionary<string, SheetGroupInfo>(StringComparer.Ordinal);
             var sheetGroupListOrder = new List<string>();
             var typeNameList = new List<string>();
@@ -191,6 +223,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 closingSource = closingSource,
                 containerHintName = containerHintName,
                 allDataModels = dataSpecListBuilder.ToImmutable().AsEquatableArray(),
+                scopedConverters = scopedConverters,
                 horizontalListEntries = horizontalListEntries,
                 tables = tableSpecListBuilder.ToImmutable().AsEquatableArray(),
                 sheetGroups = sheetGroupListBuilder.ToImmutable().AsEquatableArray(),
@@ -202,7 +235,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         private static void ProcessAttributes(
               AttributeData authorAttrib
             , AttributeData databaseAttrib
-            , Dictionary<string, ConverterSpec> dbConverterMap
+            , Dictionary<string, ConverterSpec> authorDbMap
+            , Dictionary<string, ConverterSpec> databaseMap
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
             , ref NameCasing nameCasing
@@ -225,26 +259,28 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             token.ThrowIfCancellationRequested();
 
+            // Precedence #3: AuthorDatabaseAttribute converters.
             foreach (var arg in authorAttrib.ConstructorArguments)
             {
                 token.ThrowIfCancellationRequested();
 
                 if (arg.Kind == TypedConstantKind.Array)
                 {
-                    BuildConverterMap(arg.Values, dbConverterMap, ignoredTypes, resultTypes, token);
+                    BuildConverterMap(arg.Values, authorDbMap, ignoredTypes, resultTypes, token);
                     break;
                 }
             }
 
             token.ThrowIfCancellationRequested();
 
+            // Precedence #6: DatabaseAttribute converters.
             foreach (var arg in databaseAttrib.ConstructorArguments)
             {
                 token.ThrowIfCancellationRequested();
 
                 if (arg.Kind == TypedConstantKind.Array)
                 {
-                    BuildConverterMap(arg.Values, dbConverterMap, ignoredTypes, resultTypes, token);
+                    BuildConverterMap(arg.Values, databaseMap, ignoredTypes, resultTypes, token);
                     break;
                 }
             }
@@ -278,7 +314,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             token.ThrowIfCancellationRequested();
 
             // HorizontalListMap: targetTypeFullName -> containingTypeFullName -> HashSet<propertyName>
-            var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(StringComparer.Ordinal);
+            var stringComparer = StringComparer.Ordinal;
+            var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(stringComparer);
             var dbMembers = databaseSymbol.GetMembers();
 
             foreach (var member in dbMembers)
@@ -312,7 +349,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 token.ThrowIfCancellationRequested();
 
                 var tableNameCasing = nameCasing;
-                var tableConverterMap = new Dictionary<string, ConverterSpec>(StringComparer.Ordinal);
+                var tableConverterMap = new Dictionary<string, ConverterSpec>(stringComparer);
 
                 foreach (var arg in tableAttrib.ConstructorArguments)
                 {
@@ -478,10 +515,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         {
             token.ThrowIfCancellationRequested();
 
-            // baseSheetName -> dataTypeFullName -> TableInfo list
-            var dedupTableInfoMap = new Dictionary<string, Dictionary<string, List<TableInfo>>>(StringComparer.Ordinal);
-            var dedupTableAssetMap = new Dictionary<string, bool>(StringComparer.Ordinal);
-            var processedTableTypes = new HashSet<string>(StringComparer.Ordinal);
+            var stringComparer = StringComparer.Ordinal;
+
+            // dataTypeFullName -> baseSheetName ("simple" form), used to detect name collisions across data types
+            var dataTypesPerBase = new Dictionary<string, HashSet<string>>(stringComparer);
+
+            // dataTypeFullName -> (scopeKey -> stable index), used to disambiguate per-table converter divergence
+            var scopeIndexByData = new Dictionary<string, Dictionary<HashValue64, int>>(stringComparer);
+
+            var dedupTableAssetMap = new Dictionary<string, bool>(stringComparer);
+            var processedTableTypes = new HashSet<string>(stringComparer);
 
             foreach (var tableInfo in tableInfoList)
             {
@@ -494,23 +537,24 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     continue;
                 }
 
-                var baseSheetName = fullyQualifiedSheetNames
-                    ? $"{dataTypeFullName.ToValidIdentifier()}Sheet"
-                    : $"{tableInfo.dataTypeSimpleName}Sheet";
+                var simpleBaseSheetName = $"{tableInfo.dataTypeSimpleName}Sheet";
 
-                if (dedupTableInfoMap.TryGetValue(baseSheetName, out var infoListMap) == false)
+                if (dataTypesPerBase.TryGetValue(simpleBaseSheetName, out var dataTypeSet) == false)
                 {
-                    infoListMap = new Dictionary<string, List<TableInfo>>(1);
-                    dedupTableInfoMap[baseSheetName] = infoListMap;
+                    dataTypesPerBase[simpleBaseSheetName] = dataTypeSet = new HashSet<string>(stringComparer);
                 }
 
-                if (infoListMap.TryGetValue(dataTypeFullName, out var infoList) == false)
+                dataTypeSet.Add(dataTypeFullName);
+
+                if (scopeIndexByData.TryGetValue(dataTypeFullName, out var scopeIndexMap) == false)
                 {
-                    infoList = new List<TableInfo>(1);
-                    infoListMap[dataTypeFullName] = infoList;
+                    scopeIndexByData[dataTypeFullName] = scopeIndexMap = new Dictionary<HashValue64, int>();
                 }
 
-                infoList.Add(tableInfo);
+                if (scopeIndexMap.ContainsKey(tableInfo.scopeKey) == false)
+                {
+                    scopeIndexMap[tableInfo.scopeKey] = scopeIndexMap.Count;
+                }
 
                 var tableTypeSimpleName = tableInfo.tableTypeSimpleName;
                 var existingTableAsset = dedupTableAssetMap.ContainsKey(tableTypeSimpleName);
@@ -519,83 +563,91 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             token.ThrowIfCancellationRequested();
 
-            foreach (var pair in dedupTableInfoMap)
+            foreach (var tableInfo in tableInfoList)
             {
                 token.ThrowIfCancellationRequested();
 
-                var infoListMap = pair.Value;
-                var fullyQualified = infoListMap.Count > 1 || fullyQualifiedSheetNames;
+                var dataTypeFullName = tableInfo.dataTypeFullName;
 
-                foreach (var infoList in infoListMap.Values)
+                if (dataMap.ContainsKey(dataTypeFullName) == false)
                 {
-                    token.ThrowIfCancellationRequested();
-
-                    foreach (var tableInfo in infoList)
-                    {
-                        token.ThrowIfCancellationRequested();
-
-                        var tableTypeSimpleName = tableInfo.tableTypeSimpleName;
-                        var baseSheetNamePerInfo = fullyQualified
-                        ? $"{tableInfo.dataTypeFullName.ToValidIdentifier()}Sheet"
-                        : pair.Key;
-
-                        var uniqueSheetName = $"{tableTypeSimpleName}_{baseSheetNamePerInfo}_{tableInfo.propertyName}";
-                        typeNameList.Add(uniqueSheetName);
-
-                        if (sheetGroupMap.TryGetValue(baseSheetNamePerInfo, out var existing) == false)
-                        {
-                            var newRef = new SheetGroupInfo {
-                                baseSheetName = baseSheetNamePerInfo,
-                                sheets = new List<SheetInfoSpec>(),
-                            };
-
-                            sheetGroupMap[baseSheetNamePerInfo] = newRef;
-                            sheetGroupListOrder.Add(baseSheetNamePerInfo);
-                            existing = newRef;
-                        }
-
-                        existing.sheets.Add(new SheetInfoSpec {
-                            tableName = tableTypeSimpleName,
-                            propertyName = tableInfo.propertyName,
-                        });
-
-                        dedupTableAssetMap.TryGetValue(tableTypeSimpleName, out var deduplicateAssetName);
-
-                        tableSpecList.Add(new TableSpec {
-                            typeFullName = tableInfo.tableTypeFullName,
-                            typeSimpleName = tableTypeSimpleName,
-                            idTypeFullName = tableInfo.idTypeFullName,
-                            dataTypeFullName = tableInfo.dataTypeFullName,
-                            propertyName = tableInfo.propertyName,
-                            nameCasing = tableInfo.nameCasing,
-                            baseSheetName = baseSheetNamePerInfo,
-                            uniqueSheetName = uniqueSheetName,
-                            deduplicateAssetName = deduplicateAssetName,
-                        });
-
-                        if (processedTableTypes.Contains(baseSheetNamePerInfo))
-                        {
-                            continue;
-                        }
-
-                        processedTableTypes.Add(baseSheetNamePerInfo);
-
-                        var fileName = $"{databaseIdentifier}_{baseSheetNamePerInfo}";
-                        var hintName = syntaxTree.GetHintName(typeSyntax, fileName);
-                        var nestedFullNames = BuildNestedDataTypeFullNames(tableInfo, dataMap, token);
-
-                        sheetList.Add(new SheetSpec {
-                            hintName = hintName,
-                            idTypeFullName = tableInfo.idTypeFullName,
-                            idTypeSimpleName = tableInfo.idType.Name,
-                            dataTypeFullName = tableInfo.dataTypeFullName,
-                            dataTypeSimpleName = tableInfo.dataTypeSimpleName,
-                            tableTypeFullName = tableInfo.tableTypeFullName,
-                            sheetName = baseSheetNamePerInfo,
-                            nestedDataTypeFullNames = nestedFullNames,
-                        });
-                    }
+                    continue;
                 }
+
+                var tableTypeSimpleName = tableInfo.tableTypeSimpleName;
+                var simpleBaseSheetName = $"{tableInfo.dataTypeSimpleName}Sheet";
+
+                var collision = fullyQualifiedSheetNames
+                    || (dataTypesPerBase.TryGetValue(simpleBaseSheetName, out var dataTypeSet)
+                        && dataTypeSet.Count > 1
+                    );
+
+                var baseSheetNamePerInfo = collision
+                    ? $"{dataTypeFullName.ToValidIdentifier()}Sheet"
+                    : simpleBaseSheetName;
+
+                var scopeIndexMap = scopeIndexByData[dataTypeFullName];
+
+                if (scopeIndexMap.Count > 1)
+                {
+                    baseSheetNamePerInfo = $"{baseSheetNamePerInfo}_{scopeIndexMap[tableInfo.scopeKey]}";
+                }
+
+                var uniqueSheetName = $"{tableTypeSimpleName}_{baseSheetNamePerInfo}_{tableInfo.propertyName}";
+                typeNameList.Add(uniqueSheetName);
+
+                if (sheetGroupMap.TryGetValue(baseSheetNamePerInfo, out var existing) == false)
+                {
+                    var newRef = new SheetGroupInfo {
+                        baseSheetName = baseSheetNamePerInfo,
+                        sheets = new List<SheetInfoSpec>(),
+                    };
+
+                    sheetGroupMap[baseSheetNamePerInfo] = newRef;
+                    sheetGroupListOrder.Add(baseSheetNamePerInfo);
+                    existing = newRef;
+                }
+
+                existing.sheets.Add(new SheetInfoSpec {
+                    tableName = tableTypeSimpleName,
+                    propertyName = tableInfo.propertyName,
+                });
+
+                dedupTableAssetMap.TryGetValue(tableTypeSimpleName, out var deduplicateAssetName);
+
+                tableSpecList.Add(new TableSpec {
+                    typeFullName = tableInfo.tableTypeFullName,
+                    typeSimpleName = tableTypeSimpleName,
+                    idTypeFullName = tableInfo.idTypeFullName,
+                    dataTypeFullName = tableInfo.dataTypeFullName,
+                    propertyName = tableInfo.propertyName,
+                    nameCasing = tableInfo.nameCasing,
+                    baseSheetName = baseSheetNamePerInfo,
+                    uniqueSheetName = uniqueSheetName,
+                    deduplicateAssetName = deduplicateAssetName,
+                });
+
+                if (processedTableTypes.Contains(baseSheetNamePerInfo))
+                {
+                    continue;
+                }
+
+                processedTableTypes.Add(baseSheetNamePerInfo);
+
+                var fileName = $"{databaseIdentifier}_{baseSheetNamePerInfo}";
+                var hintName = syntaxTree.GetHintName(typeSyntax, fileName);
+
+                sheetList.Add(new SheetSpec {
+                    hintName = hintName,
+                    idTypeFullName = tableInfo.idTypeFullName,
+                    idTypeSimpleName = tableInfo.idType.Name,
+                    dataTypeFullName = tableInfo.dataTypeFullName,
+                    dataTypeSimpleName = tableInfo.dataTypeSimpleName,
+                    tableTypeFullName = tableInfo.tableTypeFullName,
+                    sheetName = baseSheetNamePerInfo,
+                    scopeKey = tableInfo.scopeKey,
+                    nestedDataTypeFullNames = tableInfo.nestedDataTypeFullNames,
+                });
             }
         }
 
@@ -651,9 +703,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static Dictionary<string, DataSpec> BuildDataMap(
+        private static Dictionary<string, DataSpec> BuildShapeDataMap(
               List<TableInfo> tableInfoList
-            , Dictionary<string, ConverterSpec> dbConverterMap
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
             , CancellationToken token
@@ -696,8 +747,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                     var dataModel = ExtractDataModel(
                           type
-                        , dbConverterMap
-                        , tableInfo.tableConverterMap
                         , ignoredTypes
                         , resultTypes
                         , token
@@ -723,8 +772,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static DataSpec ExtractDataModel(
               ITypeSymbol type
-            , Dictionary<string, ConverterSpec> dbConverterMap
-            , Dictionary<string, ConverterSpec> tableConverterMap
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
             , CancellationToken token
@@ -734,8 +781,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             ExtractMemberModels(
                   type
-                , dbConverterMap
-                , tableConverterMap
                 , ignoredTypes
                 , resultTypes
                 , out var propRefs
@@ -758,8 +803,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
                 ExtractMemberModels(
                       baseType
-                    , dbConverterMap
-                    , tableConverterMap
                     , ignoredTypes
                     , resultTypes
                     , out var basePropRefs
@@ -804,8 +847,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
         private static void ExtractMemberModels(
               ITypeSymbol type
-            , Dictionary<string, ConverterSpec> dbConverterMap
-            , Dictionary<string, ConverterSpec> tableConverterMap
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
             , out EquatableArray<MemberSpec> propRefs
@@ -957,8 +998,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , member.member
                     , sourceMemberSymbol
                     , member.fieldType
-                    , dbConverterMap
-                    , tableConverterMap
                     , ignoredTypes
                     , resultTypes
                     , token
@@ -989,8 +1028,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                     , member.member
                     , generatedFromMember
                     , member.fieldType
-                    , dbConverterMap
-                    , tableConverterMap
                     , ignoredTypes
                     , resultTypes
                     , token
@@ -1006,8 +1043,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             , ISymbol memberSymbol
             , ISymbol sourceMemberSymbol
             , ITypeSymbol fieldType
-            , Dictionary<string, ConverterSpec> dbConverterMap
-            , Dictionary<string, ConverterSpec> tableConverterMap
             , IgnoredTypes ignoredTypes
             , ResultTypes resultTypes
             , CancellationToken token
@@ -1017,120 +1052,82 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             TryAddToResultTypes(fieldType, ignoredTypes, resultTypes);
 
-            var manualAuthoring = ExtractManualAuthoring(memberSymbol, ignoredTypes, resultTypes, token);
+            var manualAuthoring = ExtractManualAuthoring(
+                  memberSymbol
+                , ignoredTypes
+                , resultTypes
+                , token
+            );
 
             if (manualAuthoring.defined == false && sourceMemberSymbol != null)
             {
-                manualAuthoring = ExtractManualAuthoring(sourceMemberSymbol, ignoredTypes, resultTypes, token);
+                manualAuthoring = ExtractManualAuthoring(
+                      sourceMemberSymbol
+                    , ignoredTypes
+                    , resultTypes
+                    , token
+                );
             }
 
-            var converter = TryMakeConverterModel(memberSymbol, fieldType, ignoredTypes, resultTypes, token);
+            var memberConverter = TryMakeConverterModel(
+                  memberSymbol
+                , fieldType
+                , ignoredTypes
+                , resultTypes
+                , token
+            );
 
-            if (converter.kind == ConverterKind.None && sourceMemberSymbol != null)
+            if (memberConverter.kind == ConverterKind.None && sourceMemberSymbol != null)
             {
-                converter = TryMakeConverterModel(sourceMemberSymbol, fieldType, ignoredTypes, resultTypes, token);
+                memberConverter = TryMakeConverterModel(
+                      sourceMemberSymbol
+                    , fieldType
+                    , ignoredTypes
+                    , resultTypes
+                    , token
+                );
             }
 
-            if (converter.kind == ConverterKind.None)
-            {
-                var fieldTypeFull = fieldType.ToFullName();
-
-                if (tableConverterMap.TryGetValue(fieldTypeFull, out var tableConv))
-                {
-                    converter = tableConv;
-                }
-                else if (dbConverterMap.TryGetValue(fieldTypeFull, out var dbConv))
-                {
-                    converter = dbConv;
-                }
-            }
-
-            if (converter.kind == ConverterKind.None)
-            {
-                converter = TryFallbackConverterModel(fieldType, ignoredTypes, resultTypes, token);
-            }
-
-            var sheetConverter = default(ConverterSpec);
-            var collection = MakeCollectionModel(fieldType, ignoredTypes, resultTypes, token);
-
-            if (collection.kind == CollectionKind.NotCollection
-                && converter.kind != ConverterKind.None
-            )
-            {
-                if (IsStringSourceConverter(converter))
-                {
-                    sheetConverter = converter;
-                    converter = default;
-                }
-                else if (converter.sourceCollection.kind == CollectionKind.NotCollection && TryGetStringSourceConverter(
-                      converter.sourceType.fullName
-                    , tableConverterMap
-                    , dbConverterMap
-                    , out var sourceConverter
-                ))
-                {
-                    sheetConverter = sourceConverter;
-                }
-            }
+            var localConverter = TryFallbackConverterModel(
+                  fieldType
+                , ignoredTypes
+                , resultTypes
+                , token
+            );
 
             return new MemberSpec {
                 propertyName = propertyName,
                 manualAuthoring = manualAuthoring,
                 type = MakeTypeModel(fieldType, token),
-                collection = collection,
-                converter = converter,
-                sheetConverter = sheetConverter,
+                collection = MakeCollectionModel(fieldType, ignoredTypes, resultTypes, token),
+                memberConverter = memberConverter,
+                localConverter = localConverter,
             };
+        }
 
-            static ConverterSpec TryFallbackConverterModel(
-                  ITypeSymbol fieldType
-                , IgnoredTypes ignoredTypes
-                , ResultTypes resultTypes
-                , CancellationToken token
-            )
+        private static ConverterSpec TryFallbackConverterModel(
+              ITypeSymbol fieldType
+            , IgnoredTypes ignoredTypes
+            , ResultTypes resultTypes
+            , CancellationToken token
+        )
+        {
+            if (fieldType is not INamedTypeSymbol namedReturn)
             {
-                if (fieldType is not INamedTypeSymbol namedReturn)
-                {
-                    return default;
-                }
-
-                if (TryGetConvertMethod(namedReturn, token, out var convertMethod, namedReturn) == false)
-                {
-                    return default;
-                }
-
-                return MakeConverterModelFromMethod(namedReturn, convertMethod, ignoredTypes, resultTypes, token);
+                return default;
             }
+
+            if (TryGetConvertMethod(namedReturn, token, out var convertMethod, namedReturn) == false)
+            {
+                return default;
+            }
+
+            return MakeConverterModelFromMethod(namedReturn, convertMethod, ignoredTypes, resultTypes, token);
         }
 
         private static bool IsStringSourceConverter(ConverterSpec converter)
             => converter.sourceCollection.kind == CollectionKind.NotCollection
             && converter.sourceType.fullName == "string";
-
-        private static bool TryGetStringSourceConverter(
-              string targetTypeFullName
-            , Dictionary<string, ConverterSpec> tableConverterMap
-            , Dictionary<string, ConverterSpec> dbConverterMap
-            , out ConverterSpec converter
-        )
-        {
-            if (tableConverterMap.TryGetValue(targetTypeFullName, out converter)
-                && IsStringSourceConverter(converter)
-            )
-            {
-                return true;
-            }
-
-            if (dbConverterMap.TryGetValue(targetTypeFullName, out converter)
-                && IsStringSourceConverter(converter)
-            )
-            {
-                return true;
-            }
-
-            converter = default;
-            return false;
-        }
 
         private static TypeSpec MakeTypeModel(ITypeSymbol type, CancellationToken token)
             => new() {
@@ -1140,7 +1137,11 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 hasParameterlessConstructor = CheckParameterlessConstructor(type, token),
             };
 
-        private static void EnqueueTypes(Queue<ITypeSymbol> queue, HashSet<ITypeSymbol> types, CancellationToken token)
+        private static void EnqueueTypes(
+              Queue<ITypeSymbol> queue
+            , HashSet<ITypeSymbol> types
+            , CancellationToken token
+        )
         {
             token.ThrowIfCancellationRequested();
 
@@ -1686,123 +1687,6 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             }
         }
 
-        private static EquatableArray<string> BuildNestedDataTypeFullNames(
-              TableInfo tableInfo
-            , Dictionary<string, DataSpec> dataMap
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            var uniqueTypes = new HashSet<string>(StringComparer.Ordinal);
-            var typeQueue = new Queue<string>();
-
-            var idKey = tableInfo.idTypeFullName;
-            var dataKey = tableInfo.dataTypeFullName;
-
-            if (dataMap.ContainsKey(idKey))
-            {
-                typeQueue.Enqueue(idKey);
-                uniqueTypes.Add(idKey);
-            }
-
-            if (dataMap.ContainsKey(dataKey))
-            {
-                typeQueue.Enqueue(dataKey);
-                uniqueTypes.Add(dataKey);
-            }
-
-            while (typeQueue.Count > 0)
-            {
-                token.ThrowIfCancellationRequested();
-
-                var key = typeQueue.Dequeue();
-
-                if (dataMap.TryGetValue(key, out var dm) == false)
-                {
-                    continue;
-                }
-
-                TryEnqueueMembers(dm.propRefs, dataMap, uniqueTypes, typeQueue, token);
-                TryEnqueueMembers(dm.fieldRefs, dataMap, uniqueTypes, typeQueue, token);
-
-                foreach (var layer in dm.baseTypeRefs)
-                {
-                    TryEnqueueMembers(layer.propRefs, dataMap, uniqueTypes, typeQueue, token);
-                    TryEnqueueMembers(layer.fieldRefs, dataMap, uniqueTypes, typeQueue, token);
-                }
-            }
-
-            token.ThrowIfCancellationRequested();
-
-            uniqueTypes.Remove(idKey);
-            uniqueTypes.Remove(dataKey);
-
-            if (uniqueTypes.Count < 1)
-            {
-                return default;
-            }
-
-            using var builder = ImmutableArrayBuilder<string>.Rent();
-
-            foreach (var n in uniqueTypes)
-            {
-                token.ThrowIfCancellationRequested();
-
-                builder.Add(n);
-            }
-
-            return builder.ToImmutable().AsEquatableArray();
-        }
-
-        private static void TryEnqueueMembers(
-              EquatableArray<MemberSpec> members
-            , Dictionary<string, DataSpec> dataMap
-            , HashSet<string> uniqueTypes
-            , Queue<string> queue
-            , CancellationToken token
-        )
-        {
-            token.ThrowIfCancellationRequested();
-
-            foreach (var member in members)
-            {
-                token.ThrowIfCancellationRequested();
-
-                var manualAuthoring = member.manualAuthoring;
-
-                if (manualAuthoring.defined && manualAuthoring.type.IsValid)
-                {
-                    Enqueue(manualAuthoring.collection, manualAuthoring.type, dataMap, uniqueTypes, queue);
-                }
-
-                Enqueue(member.SelectCollection(), member.SelectType(), dataMap, uniqueTypes, queue);
-            }
-
-            static void Enqueue(
-                  CollectionSpec collection
-                , TypeSpec type
-                , Dictionary<string, DataSpec> dataMap
-                , HashSet<string> uniqueTypes
-                , Queue<string> queue
-            )
-            {
-                if (collection.kind == CollectionKind.Dictionary)
-                {
-                    TryEnqueue(collection.keyType.fullName, dataMap, uniqueTypes, queue);
-                    TryEnqueue(collection.elementType.fullName, dataMap, uniqueTypes, queue);
-                }
-                else if (collection.kind != CollectionKind.NotCollection)
-                {
-                    TryEnqueue(collection.elementType.fullName, dataMap, uniqueTypes, queue);
-                }
-                else
-                {
-                    TryEnqueue(type.fullName, dataMap, uniqueTypes, queue);
-                }
-            }
-        }
-
         private static void TryAddToResultTypes(ITypeSymbol type, IgnoredTypes ignored, ResultTypes result)
         {
             if (ignored.Contains(type) == false)
@@ -1877,6 +1761,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             public string propertyName;
             public Dictionary<string, ConverterSpec> tableConverterMap;
             public NameCasing nameCasing;
+            public HashValue64 scopeKey;
+            public EquatableArray<string> nestedDataTypeFullNames;
         }
 
         private struct SheetGroupInfo

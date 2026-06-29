@@ -8,25 +8,41 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
     {
         public readonly string WriteSheet(in SheetSpec sheet)
         {
+            var stringComparer = System.StringComparer.Ordinal;
             var databaseTypeName = this.databaseTypeName;
             var databaseTypeKeyword = this.databaseTypeKeyword;
-            var dataMap = new Dictionary<string, DataSpec>(allDataModels.Count, System.StringComparer.Ordinal);
+            var converterMap = new Dictionary<string, ScopedConverterSpec>(stringComparer);
+
+            foreach (var scopedConverter in scopedConverters)
+            {
+                if (scopedConverter.scopeKey == sheet.scopeKey)
+                {
+                    var key = ScopedConverterSpec.MakeMemberKey(
+                          scopedConverter.declaringDataTypeFullName
+                        , scopedConverter.propertyName
+                    );
+
+                    converterMap[key] = scopedConverter;
+                }
+            }
+
+            var dataMap = new Dictionary<string, DataSpec>(allDataModels.Count, stringComparer);
 
             foreach (var dm in allDataModels)
             {
-                dataMap[dm.fullName] = dm;
+                dataMap[dm.fullName] = ApplyScopedConverters(dm, converterMap);
             }
 
-            var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(System.StringComparer.Ordinal);
+            var horizontalListMap = new Dictionary<string, Dictionary<string, HashSet<string>>>(stringComparer);
 
             foreach (var entry in horizontalListEntries)
             {
                 if (horizontalListMap.TryGetValue(entry.targetTypeFullName, out var innerMap) == false)
                 {
-                    horizontalListMap[entry.targetTypeFullName] = innerMap = new(System.StringComparer.Ordinal);
+                    horizontalListMap[entry.targetTypeFullName] = innerMap = new(stringComparer);
                 }
 
-                var propertyNames = new HashSet<string>(System.StringComparer.Ordinal);
+                var propertyNames = new HashSet<string>(stringComparer);
 
                 foreach (var pn in entry.propertyNames)
                 {
@@ -204,6 +220,68 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
 
             p = p.DecreasedIndent();
             return p.Result;
+        }
+
+        private static DataSpec ApplyScopedConverters(
+              in DataSpec shape
+            , Dictionary<string, ScopedConverterSpec> converterLookup
+        )
+        {
+            if (converterLookup.Count < 1)
+            {
+                return shape;
+            }
+
+            var copy = shape;
+            copy.propRefs = ApplyScopedConverters(shape.fullName, shape.propRefs, converterLookup);
+            copy.fieldRefs = ApplyScopedConverters(shape.fullName, shape.fieldRefs, converterLookup);
+
+            if (shape.baseTypeRefs.Count > 0)
+            {
+                using var baseBuilder = ImmutableArrayBuilder<BaseDataSpec>.Rent();
+
+                foreach (var layer in shape.baseTypeRefs)
+                {
+                    var layerCopy = layer;
+                    layerCopy.propRefs = ApplyScopedConverters(layer.fullName, layer.propRefs, converterLookup);
+                    layerCopy.fieldRefs = ApplyScopedConverters(layer.fullName, layer.fieldRefs, converterLookup);
+                    baseBuilder.Add(layerCopy);
+                }
+
+                copy.baseTypeRefs = baseBuilder.ToImmutable().AsEquatableArray();
+            }
+
+            return copy;
+        }
+
+        private static EquatableArray<MemberSpec> ApplyScopedConverters(
+              string declaringTypeFullName
+            , EquatableArray<MemberSpec> members
+            , Dictionary<string, ScopedConverterSpec> converterLookup
+        )
+        {
+            if (members.Count < 1)
+            {
+                return members;
+            }
+
+            using var builder = ImmutableArrayBuilder<MemberSpec>.Rent();
+
+            foreach (var member in members)
+            {
+                var copy = member;
+                var key = ScopedConverterSpec.MakeMemberKey(declaringTypeFullName, member.propertyName);
+
+                if (converterLookup.TryGetValue(key, out var resolution))
+                {
+                    copy.converter = resolution.converter;
+                    copy.sheetConverter = resolution.sheetConverter;
+                }
+
+                builder.Add(copy);
+            }
+
+            return builder.ToImmutable().AsEquatableArray();
         }
     }
 }

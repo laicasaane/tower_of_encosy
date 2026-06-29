@@ -12,6 +12,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public string closingSource;
         public string containerHintName;
         public EquatableArray<DataSpec> allDataModels;
+        public EquatableArray<ScopedConverterSpec> scopedConverters;
         public EquatableArray<HorizontalListSpec> horizontalListEntries;
         public EquatableArray<TableSpec> tables;
         public EquatableArray<SheetGroupSpec> sheetGroups;
@@ -32,6 +33,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && string.Equals(closingSource, other.closingSource, StringComparison.Ordinal)
             && string.Equals(containerHintName, other.containerHintName, StringComparison.Ordinal)
             && allDataModels.Equals(other.allDataModels)
+            && scopedConverters.Equals(other.scopedConverters)
             && horizontalListEntries.Equals(other.horizontalListEntries)
             && tables.Equals(other.tables)
             && sheetGroups.Equals(other.sheetGroups)
@@ -53,6 +55,7 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
                 , allDataModels
                 , horizontalListEntries
             )
+            .Add(scopedConverters)
             .Add(tables)
             .Add(sheetGroups)
             .Add(typeNames)

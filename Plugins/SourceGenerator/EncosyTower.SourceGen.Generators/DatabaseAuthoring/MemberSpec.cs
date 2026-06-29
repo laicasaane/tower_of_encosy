@@ -8,6 +8,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
         public MemberManualAuthoring manualAuthoring;
         public TypeSpec type;
         public CollectionSpec collection;
+        public ConverterSpec memberConverter;
+        public ConverterSpec localConverter;
         public ConverterSpec converter;
         public ConverterSpec sheetConverter;
 
@@ -22,6 +24,8 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             && manualAuthoring.Equals(other.manualAuthoring)
             && type.Equals(other.type)
             && collection.Equals(other.collection)
+            && memberConverter.Equals(other.memberConverter)
+            && localConverter.Equals(other.localConverter)
             && converter.Equals(other.converter)
             && sheetConverter.Equals(other.sheetConverter)
             ;
@@ -30,7 +34,16 @@ namespace EncosyTower.SourceGen.Generators.DatabaseAuthoring
             => obj is MemberSpec other && Equals(other);
 
         public readonly override int GetHashCode()
-            => HashValue.Combine(propertyName, manualAuthoring, type, collection, converter, sheetConverter);
+            => HashValue.Combine(
+                  propertyName
+                , manualAuthoring
+                , type
+                , collection
+                , memberConverter
+                , localConverter
+                , converter
+                , sheetConverter
+            );
     }
 
     public struct MemberManualAuthoring : IEquatable<MemberManualAuthoring>
