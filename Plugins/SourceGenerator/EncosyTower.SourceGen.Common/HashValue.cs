@@ -42,7 +42,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         public const int EMPTY_COLLECTION_BASIS = 1111111231;
 
-        private readonly int  _value = BASIS;
+        private readonly int _value = BASIS;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HashValue"/> struct.
@@ -70,21 +70,21 @@ namespace EncosyTower.SourceGen
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(long value)
+        public static HashValue FNV1a(long value)
             => FNV1a((ulong)value);
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(double value)
+        public static HashValue FNV1a(double value)
             => FNV1a((ulong)value);
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(ulong value)
+        public static HashValue FNV1a(ulong value)
         {
             unchecked
             {
@@ -99,26 +99,26 @@ namespace EncosyTower.SourceGen
                 result = (((value & 0x00FF000000000000) >> 48) ^ result) * PRIME;
                 result = (((value & 0xFF00000000000000) >> 56) ^ result) * PRIME;
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
-        public static int FNV1a(float value)
+        public static HashValue FNV1a(float value)
             => FNV1a((uint)value);
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
-        public static int FNV1a(int value)
+        public static HashValue FNV1a(int value)
             => FNV1a((uint)value);
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
-        public static int FNV1a(uint value)
+        public static HashValue FNV1a(uint value)
         {
             unchecked
             {
@@ -130,7 +130,7 @@ namespace EncosyTower.SourceGen
                 result = (((val & 0x00FF0000) >> 16) ^ result) * PRIME;
                 result = (((val & 0xFF000000) >> 24) ^ result) * PRIME;
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -138,14 +138,14 @@ namespace EncosyTower.SourceGen
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(short value)
+        public static HashValue FNV1a(short value)
             => FNV1a((ushort)value);
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(ushort value)
+        public static HashValue FNV1a(ushort value)
         {
             unchecked
             {
@@ -155,7 +155,7 @@ namespace EncosyTower.SourceGen
                 result = ((val & 255) ^ result) * PRIME;
                 result = ((val >> 08) ^ result) * PRIME;
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -163,14 +163,14 @@ namespace EncosyTower.SourceGen
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(sbyte value)
+        public static HashValue FNV1a(sbyte value)
             => FNV1a((byte)value);
 
         /// <summary>
         /// Generates a FNV1a hash.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(byte value)
+        public static HashValue FNV1a(byte value)
         {
             unchecked
             {
@@ -179,7 +179,7 @@ namespace EncosyTower.SourceGen
 
                 result = (val ^ result) * PRIME;
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -189,7 +189,7 @@ namespace EncosyTower.SourceGen
         /// <param name="text">Text to hash.</param>
         /// <returns>Hash of input string.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int FNV1a(string text)
+        public static HashValue FNV1a(string text)
         {
             return FNV1a(text.AsSpan());
         }
@@ -199,7 +199,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Span to hash.</param>
         /// <returns>Hash of input span.</returns>
-        public static int FNV1a(ReadOnlySpan<long> span)
+        public static HashValue FNV1a(ReadOnlySpan<long> span)
         {
             unchecked
             {
@@ -219,7 +219,7 @@ namespace EncosyTower.SourceGen
                     result = (((val & 0xFF00000000000000) >> 56) ^ result) * PRIME;
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -228,7 +228,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Span to hash.</param>
         /// <returns>Hash of input span.</returns>
-        public static int FNV1a(ReadOnlySpan<ulong> span)
+        public static HashValue FNV1a(ReadOnlySpan<ulong> span)
         {
             unchecked
             {
@@ -246,7 +246,7 @@ namespace EncosyTower.SourceGen
                     result = (((item & 0xFF00000000000000) >> 56) ^ result) * PRIME;
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -255,7 +255,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Span to hash.</param>
         /// <returns>Hash of input span.</returns>
-        public static int FNV1a(ReadOnlySpan<double> span)
+        public static HashValue FNV1a(ReadOnlySpan<double> span)
         {
             unchecked
             {
@@ -275,7 +275,7 @@ namespace EncosyTower.SourceGen
                     result = (((val & 0xFF00000000000000) >> 56) ^ result) * PRIME;
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -284,7 +284,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Span to hash.</param>
         /// <returns>Hash of input span.</returns>
-        public static int FNV1a(ReadOnlySpan<int> span)
+        public static HashValue FNV1a(ReadOnlySpan<int> span)
         {
             unchecked
             {
@@ -300,7 +300,7 @@ namespace EncosyTower.SourceGen
                     result = (((val & 0xFF000000) >> 24) ^ result) * PRIME;
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -309,7 +309,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Span to hash.</param>
         /// <returns>Hash of input span.</returns>
-        public static int FNV1a(ReadOnlySpan<float> span)
+        public static HashValue FNV1a(ReadOnlySpan<float> span)
         {
             unchecked
             {
@@ -325,7 +325,7 @@ namespace EncosyTower.SourceGen
                     result = (((val & 0xFF000000) >> 24) ^ result) * PRIME;
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -334,7 +334,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Text to hash.</param>
         /// <returns>Hash of input string.</returns>
-        public static int FNV1a(ReadOnlySpan<char> span)
+        public static HashValue FNV1a(ReadOnlySpan<char> span)
         {
             unchecked
             {
@@ -346,7 +346,7 @@ namespace EncosyTower.SourceGen
                     result = PRIME * (result ^ (byte)(item >> 8));
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -355,7 +355,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="text">Text to hash.</param>
         /// <returns>Hash of input string.</returns>
-        public static int FNV1a(ReadOnlySpan<short> text)
+        public static HashValue FNV1a(ReadOnlySpan<short> text)
         {
             unchecked
             {
@@ -367,7 +367,7 @@ namespace EncosyTower.SourceGen
                     result = PRIME * (result ^ (byte)(c >> 8));
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -376,7 +376,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="text">Text to hash.</param>
         /// <returns>Hash of input string.</returns>
-        public static int FNV1a(ReadOnlySpan<ushort> text)
+        public static HashValue FNV1a(ReadOnlySpan<ushort> text)
         {
             unchecked
             {
@@ -388,7 +388,7 @@ namespace EncosyTower.SourceGen
                     result = PRIME * (result ^ (byte)(c >> 8));
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -397,7 +397,7 @@ namespace EncosyTower.SourceGen
         /// </summary>
         /// <param name="span">Span to hash.</param>
         /// <returns>Hash of input span.</returns>
-        public static int FNV1a(ReadOnlySpan<byte> span)
+        public static HashValue FNV1a(ReadOnlySpan<byte> span)
         {
             unchecked
             {
@@ -409,7 +409,7 @@ namespace EncosyTower.SourceGen
                     result = PRIME * (result ^ span[i]);
                 }
 
-                return (int)result;
+                return new((int)result);
             }
         }
 
@@ -787,18 +787,9 @@ namespace EncosyTower.SourceGen
         public int ToHashCode()
             => _value;
 
-        /// <summary>
-        /// Throws <see cref="NotSupportedException"/>.
-        /// </summary>
-        /// <returns>Does not return.</returns>
-        /// <exception cref="NotSupportedException">
-        /// Implicitly convert this struct to an <see cref="int" /> to get the hash code.
-        /// </exception>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode()
-            => throw new NotSupportedException(
-                "Implicitly convert this struct to an int to get the hash code or use ToHashCode method."
-            );
+            => ToHashCode();
 
         /// <summary>
         /// Combines a FNV1a hash with a value.
