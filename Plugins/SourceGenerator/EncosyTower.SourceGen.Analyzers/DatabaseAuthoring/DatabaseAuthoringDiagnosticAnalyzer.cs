@@ -17,6 +17,8 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
         private const string DATA_NAMESPACE = "EncosyTower.Data";
 
         private const string AUTHOR_DATABASE_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.AuthorDatabaseAttribute";
+        private const string CONVERTER_FOR_TABLE_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.ConverterForTableAttribute";
+        private const string CONVERTER_FOR_DATA_PROPERTY_ATTRIBUTE = $"global::{DATABASES_AUTHORING_NAMESPACE}.ConverterForDataPropertyAttribute";
         private const string DATABASE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.DatabaseAttribute";
         private const string TABLE_ATTRIBUTE = $"global::{DATABASES_NAMESPACE}.TableAttribute";
         private const string DATA_AUTHORING_CONVERTER_ATTRIBUTE = $"global::{DATA_NAMESPACE}.Authoring.DataAuthoringConverterAttribute";
@@ -148,6 +150,42 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
             , isEnabledByDefault: true
         );
 
+        public static readonly DiagnosticDescriptor DuplicateDataPropertyConverter = new DiagnosticDescriptor(
+              id: "SG_AUTHOR_DATABASE_0090"
+            , title: "Conflicting data property converters"
+            , messageFormat: "Multiple different converters are specified by \"ConverterForDataProperty\" for property \"{0}\" of data type \"{1}\" within {2}"
+            , category: "DatabaseGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+        );
+
+        public static readonly DiagnosticDescriptor RedundantDataPropertyConverter = new DiagnosticDescriptor(
+              id: "SG_AUTHOR_DATABASE_0091"
+            , title: "Redundant data property converter"
+            , messageFormat: "The converter \"{0}\" is specified more than once by \"ConverterForDataProperty\" for property \"{1}\" of data type \"{2}\" within {3}"
+            , category: "DatabaseGenerator"
+            , defaultSeverity: DiagnosticSeverity.Warning
+            , isEnabledByDefault: true
+        );
+
+        public static readonly DiagnosticDescriptor DuplicateTableConverter = new DiagnosticDescriptor(
+              id: "SG_AUTHOR_DATABASE_0092"
+            , title: "Conflicting table converters"
+            , messageFormat: "Multiple different converters are specified by \"ConverterForTable\" for source type \"{0}\" within {1}"
+            , category: "DatabaseGenerator"
+            , defaultSeverity: DiagnosticSeverity.Error
+            , isEnabledByDefault: true
+        );
+
+        public static readonly DiagnosticDescriptor RedundantTableConverter = new DiagnosticDescriptor(
+              id: "SG_AUTHOR_DATABASE_0093"
+            , title: "Redundant table converter"
+            , messageFormat: "The converter \"{0}\" is specified more than once by \"ConverterForTable\" for source type \"{1}\" within {2}"
+            , category: "DatabaseGenerator"
+            , defaultSeverity: DiagnosticSeverity.Warning
+            , isEnabledByDefault: true
+        );
+
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
@@ -165,6 +203,10 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 , AbstractTypeNotSupported
                 , OpenGenericTypeNotSupported
                 , ConverterAmbiguity
+                , DuplicateDataPropertyConverter
+                , RedundantDataPropertyConverter
+                , DuplicateTableConverter
+                , RedundantTableConverter
             );
 
         public override void Initialize(AnalysisContext context)
@@ -192,7 +234,9 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                 return;
             }
 
-            if (authorAttrib.ConstructorArguments.Length != 1
+            // AuthorDatabaseAttribute is (Type databaseType, params Type[] converters), so real usages have
+            // two constructor arguments. Only the first (the database type) is required here.
+            if (authorAttrib.ConstructorArguments.Length < 1
                 || authorAttrib.ConstructorArguments[0].Kind != TypedConstantKind.Type
                 || authorAttrib.ConstructorArguments[0].Value is not INamedTypeSymbol databaseSymbol
             )
@@ -217,6 +261,10 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                     }
                 }
             }
+
+            token.ThrowIfCancellationRequested();
+
+            AnalyzeConverterAttributes(context, authoringSymbol, databaseSymbol, token);
 
             token.ThrowIfCancellationRequested();
 
@@ -406,6 +454,315 @@ namespace EncosyTower.SourceGen.Analyzers.DatabaseAuthoring
                     converterMap[returnTypeName] = converterType;
                 }
             }
+        }
+
+        private static void AnalyzeConverterAttributes(
+              SymbolAnalysisContext context
+            , INamedTypeSymbol authoringSymbol
+            , INamedTypeSymbol databaseSymbol
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            var tableTypeByPropName = new Dictionary<string, INamedTypeSymbol>(System.StringComparer.Ordinal);
+
+            foreach (var member in databaseSymbol.GetMembers())
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (member is IPropertySymbol property
+                    && property.GetAttribute(TABLE_ATTRIBUTE, token) != null
+                    && property.Type is INamedTypeSymbol tableType
+                )
+                {
+                    tableTypeByPropName[property.Name] = tableType;
+                }
+            }
+
+            var dataPropGroups = new Dictionary<string, List<ConverterEntry>>(System.StringComparer.Ordinal);
+            var tableGroups = new Dictionary<string, List<ConverterEntry>>(System.StringComparer.Ordinal);
+
+            foreach (var attrib in authoringSymbol.GetAttributes())
+            {
+                token.ThrowIfCancellationRequested();
+
+                var attribClass = attrib.AttributeClass;
+
+                if (attribClass == null)
+                {
+                    continue;
+                }
+
+                if (attribClass.HasFullName(CONVERTER_FOR_DATA_PROPERTY_ATTRIBUTE, token))
+                {
+                    CollectDataPropertyConverter(context, attrib, tableTypeByPropName, dataPropGroups, token);
+                }
+                else if (attribClass.HasFullName(CONVERTER_FOR_TABLE_ATTRIBUTE, token))
+                {
+                    CollectTableConverter(context, attrib, tableTypeByPropName, tableGroups, token);
+                }
+            }
+
+            ReportDuplicateGroups(context, dataPropGroups, DuplicateDataPropertyConverter, RedundantDataPropertyConverter, isDataProperty: true);
+            ReportDuplicateGroups(context, tableGroups, DuplicateTableConverter, RedundantTableConverter, isDataProperty: false);
+        }
+
+        private static void CollectDataPropertyConverter(
+              SymbolAnalysisContext context
+            , AttributeData attrib
+            , Dictionary<string, INamedTypeSymbol> tableTypeByPropName
+            , Dictionary<string, List<ConverterEntry>> groups
+            , CancellationToken token
+        )
+        {
+            var args = attrib.ConstructorArguments;
+
+            if (args.Length < 3
+                || args[0].Value is not INamedTypeSymbol dataType
+                || args[1].Value is not string propertyName
+                || string.IsNullOrWhiteSpace(propertyName)
+                || args[2].Value is not INamedTypeSymbol converterType
+            )
+            {
+                return;
+            }
+
+            var syntax = attrib.ApplicationSyntaxReference?.GetSyntax(token);
+            ValidateConverterType(context, converterType, syntax, returnType: null);
+
+            var location = syntax?.GetLocation() ?? Location.None;
+            var converterFullName = converterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var dataTypeFullName = dataType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            ReadTableScope(args, 3, out var tableName, out var tableType);
+
+            foreach (var scopeKey in ResolveScopeKeys(tableName, tableType, tableTypeByPropName))
+            {
+                token.ThrowIfCancellationRequested();
+
+                var groupKey = $"{dataTypeFullName}|{propertyName}|{scopeKey}";
+
+                AddEntry(groups, groupKey, new ConverterEntry {
+                    location = location,
+                    converterTypeFullName = converterFullName,
+                    descPrimary = propertyName,
+                    descSecondary = dataTypeFullName,
+                    descScope = ScopeLabel(scopeKey),
+                });
+            }
+        }
+
+        private static void CollectTableConverter(
+              SymbolAnalysisContext context
+            , AttributeData attrib
+            , Dictionary<string, INamedTypeSymbol> tableTypeByPropName
+            , Dictionary<string, List<ConverterEntry>> groups
+            , CancellationToken token
+        )
+        {
+            var args = attrib.ConstructorArguments;
+
+            if (args.Length != 2 || args[1].Value is not INamedTypeSymbol converterType)
+            {
+                return;
+            }
+
+            var syntax = attrib.ApplicationSyntaxReference?.GetSyntax(token);
+            ValidateConverterType(context, converterType, syntax, returnType: null);
+
+            if (TryFindConvertSourceType(converterType, out var sourceTypeFullName, token) == false)
+            {
+                return;
+            }
+
+            ReadTableScope(args, 0, out var tableName, out var tableType);
+
+            if (tableName == null && tableType == null)
+            {
+                return;
+            }
+
+            var location = syntax?.GetLocation() ?? Location.None;
+            var converterFullName = converterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            foreach (var scopeKey in ResolveScopeKeys(tableName, tableType, tableTypeByPropName))
+            {
+                token.ThrowIfCancellationRequested();
+
+                var groupKey = $"{scopeKey}|{sourceTypeFullName}";
+
+                AddEntry(groups, groupKey, new ConverterEntry {
+                    location = location,
+                    converterTypeFullName = converterFullName,
+                    descPrimary = sourceTypeFullName,
+                    descSecondary = string.Empty,
+                    descScope = ScopeLabel(scopeKey),
+                });
+            }
+        }
+
+        private static void ReportDuplicateGroups(
+              SymbolAnalysisContext context
+            , Dictionary<string, List<ConverterEntry>> groups
+            , DiagnosticDescriptor conflictDescriptor
+            , DiagnosticDescriptor redundantDescriptor
+            , bool isDataProperty
+        )
+        {
+            foreach (var pair in groups)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+
+                var entries = pair.Value;
+
+                if (entries.Count < 2)
+                {
+                    continue;
+                }
+
+                var distinctConverters = new HashSet<string>(System.StringComparer.Ordinal);
+
+                foreach (var entry in entries)
+                {
+                    distinctConverters.Add(entry.converterTypeFullName);
+                }
+
+                var conflict = distinctConverters.Count > 1;
+
+                foreach (var entry in entries)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+
+                    if (conflict)
+                    {
+                        context.ReportDiagnostic(isDataProperty
+                            ? Diagnostic.Create(conflictDescriptor, entry.location, entry.descPrimary, entry.descSecondary, entry.descScope)
+                            : Diagnostic.Create(conflictDescriptor, entry.location, entry.descPrimary, entry.descScope)
+                        );
+                    }
+                    else
+                    {
+                        context.ReportDiagnostic(isDataProperty
+                            ? Diagnostic.Create(redundantDescriptor, entry.location, entry.converterTypeFullName, entry.descPrimary, entry.descSecondary, entry.descScope)
+                            : Diagnostic.Create(redundantDescriptor, entry.location, entry.converterTypeFullName, entry.descPrimary, entry.descScope)
+                        );
+                    }
+                }
+            }
+        }
+
+        private static void ReadTableScope(
+              ImmutableArray<TypedConstant> args
+            , int index
+            , out string tableName
+            , out INamedTypeSymbol tableType
+        )
+        {
+            tableName = null;
+            tableType = null;
+
+            if (args.Length <= index)
+            {
+                return;
+            }
+
+            if (args[index].Value is string nameValue)
+            {
+                tableName = nameValue;
+            }
+            else if (args[index].Value is INamedTypeSymbol typeValue)
+            {
+                tableType = typeValue;
+            }
+        }
+
+        private static List<string> ResolveScopeKeys(
+              string tableName
+            , INamedTypeSymbol tableType
+            , Dictionary<string, INamedTypeSymbol> tableTypeByPropName
+        )
+        {
+            var keys = new List<string>(1);
+
+            if (tableName != null)
+            {
+                keys.Add(tableName);
+                return keys;
+            }
+
+            if (tableType != null)
+            {
+                foreach (var pair in tableTypeByPropName)
+                {
+                    if (SymbolEqualityComparer.Default.Equals(pair.Value, tableType))
+                    {
+                        keys.Add(pair.Key);
+                    }
+                }
+
+                if (keys.Count == 0)
+                {
+                    keys.Add(tableType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                }
+
+                return keys;
+            }
+
+            keys.Add("*");
+            return keys;
+        }
+
+        private static string ScopeLabel(string scopeKey)
+            => string.Equals(scopeKey, "*", System.StringComparison.Ordinal)
+                ? "all tables"
+                : $"table \"{scopeKey}\"";
+
+        private static void AddEntry(Dictionary<string, List<ConverterEntry>> groups, string key, ConverterEntry entry)
+        {
+            if (groups.TryGetValue(key, out var list) == false)
+            {
+                groups[key] = list = new List<ConverterEntry>(1);
+            }
+
+            list.Add(entry);
+        }
+
+        private static bool TryFindConvertSourceType(
+              INamedTypeSymbol converterType
+            , out string sourceTypeName
+            , CancellationToken token
+        )
+        {
+            token.ThrowIfCancellationRequested();
+
+            foreach (var member in converterType.GetMembers("Convert"))
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (member is IMethodSymbol method
+                    && method.DeclaredAccessibility == Accessibility.Public
+                    && method.IsGenericMethod == false
+                    && method.Parameters.Length == 1
+                    && method.ReturnsVoid == false
+                )
+                {
+                    sourceTypeName = method.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    return true;
+                }
+            }
+
+            sourceTypeName = null;
+            return false;
+        }
+
+        private struct ConverterEntry
+        {
+            public Location location;
+            public string converterTypeFullName;
+            public string descPrimary;
+            public string descSecondary;
+            public string descScope;
         }
 
         private static bool TryFindConvertReturnType(
