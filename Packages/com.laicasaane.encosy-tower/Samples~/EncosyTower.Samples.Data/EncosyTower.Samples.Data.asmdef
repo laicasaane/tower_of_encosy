@@ -23,7 +23,7 @@
     ],
     "versionDefines": [
         {
-            "name": "com.cathei.bakingsheet",
+            "name": "com.laicasaane.bakingsheet",
             "expression": "",
             "define": "BAKING_SHEET"
         },
