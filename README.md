@@ -23,20 +23,11 @@ applied will be justified based on the document to give a real world example of 
 While the project remains an OSS, anything related to the game mechanics won't be available
 to public until the first playable version is published on some marketplaces.
 
-> [!IMPORTANT]
-> Please keep in mind that this is a personal playground. That implies I may be building APIs, editor tools,
-> extensional functionality for my private projects, while the main features of this project are neglected.
->
-> I believe any feature shared within this project can be useful to the broader community,
-> not just the promised gameplay made in ECS.
-
 ### Licenses
 
-- Code under `Packages/com.laicasaane.encosy-tower` folder is under the [MIT License][mit], unless stated otherwise.
 - The code inside `Assets/Game` folder is under the [Apache License 2.0][apache].
 - The game design document is under the [CC BY-NC-SA 4.0 License][cc].
 
-[mit]: https://opensource.org/licenses/MIT
 [apache]: https://www.apache.org/licenses/LICENSE-2.0
 [cc]: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
@@ -51,6 +42,21 @@ to public until the first playable version is published on some marketplaces.
 
 [init]: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init
 
+## Project Status
+
+The game project is currently on hold. While I'm actively working on the [EncosyTower][encosy-module] package.
+
+[encosy-module]: https://github.com/laicasaane/EncosyTower
+
+> [!IMPORTANT]
+> Please keep in mind this is a personal playground. That implies I may be building APIs, editor tools,
+> supplemental functionality packages, while this game project are being on hold.
+>
+> I believe any OSS work can be useful to the broader community, not just the promised gameplay made in ECS.
+>
+> Thank you for your understanding.
+
+<!--
 ## First Goals
 
 1. Characters and environment setup with Entities Graphics + Latios Kinemation
@@ -61,14 +67,7 @@ to public until the first playable version is published on some marketplaces.
 6. Character animating systems
 7. Basic Utility AI for the monsters
 8. Character attack systems
-
-## Project Status
-
-At this time, the first goals have yet reached.
-
-I'm currently working on features within the [EncosyTower module][encosy-module].
-
-[encosy-module]: https://github.com/laicasaane/tower_of_encosy/tree/main/Packages/com.laicasaane.encosy-tower
+-->
 
 ## Credits
 
