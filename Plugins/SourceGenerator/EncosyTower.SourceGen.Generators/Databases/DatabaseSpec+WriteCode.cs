@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace EncosyTower.SourceGen.Generators.Databases
 {
     using static EncosyTower.SourceGen.Generators.Databases.Helpers;
@@ -225,7 +223,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
         private static void WriteThrows(ref Printer p, string typeName)
         {
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintLine("[SD.Conditional(\"__SUPERGAME_VALIDATION__\")]");
+            p.PrintLine("[SD.Conditional(\"__ENCOSY_VALIDATION__\")]");
             p.PrintLine("private static void ThrowIfInvalid(global::UnityEngine.Object asset)");
             p.OpenScope();
             {
@@ -240,7 +238,7 @@ namespace EncosyTower.SourceGen.Generators.Databases
             p.PrintEndLine();
 
             p.PrintBeginLine(PR_EXCLUDE_COVERAGE).PrintEndLine(PR_GENERATED_CODE);
-            p.PrintLine("[SD.Conditional(\"__SUPERGAME_VALIDATION__\")]");
+            p.PrintLine("[SD.Conditional(\"__ENCOSY_VALIDATION__\")]");
             p.PrintBeginLine("private static void ThrowIfNotCreated(")
                 .Print(PR_DOES_NOT_RETURN_IF_FALSE)
                 .PrintEndLine(" bool value)");
