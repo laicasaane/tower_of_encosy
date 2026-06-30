@@ -38,6 +38,7 @@ MonoBehaviour:
     - com.bgtools.playerprefseditor
     - com.cysharp.unitask
     - com.laicasaane.bakingsheet
+    - com.laicasaane.unityeditor-darkmode
     - com.latios.latiosframework
     - com.needle.compilation-visualizer
     - com.needle.console

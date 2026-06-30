@@ -66,12 +66,22 @@
       "url": "https://package.openupm.com"
     },
     "com.laicasaane.encosy-tower": {
+      "version": "https://github.com/laicasaane/EncosyTower.git?path=/Packages/com.laicasaane.encosy-tower#0.1.6-preview.1",
       "depth": 0,
+      "source": "git",
       "dependencies": {
         "com.unity.burst": "1.8.28",
         "com.unity.collections": "2.6.5",
+        "com.unity.mathematics": "1.3.3"
+      },
+      "hash": "bda65b141b5fac54fd2f5b2cbf66825f8fe835fe"
     },
+    "com.laicasaane.unityeditor-darkmode": {
+      "version": "6.3.0",
       "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
     },
     "com.latios.latiosframework": {
       "version": "0.15.6",
