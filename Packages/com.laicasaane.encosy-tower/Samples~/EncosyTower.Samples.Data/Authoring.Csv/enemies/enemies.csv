@@ -1,7 +1,0 @@
-id,,,$,name,type,$,stat,
-entity_id,,rarity,,,,,hp,atk
-kind,sub_id,,,,,,,
-Enemy,1,1,,Wolf,N,,1,1
-Enemy,2,1,,Goblin,N,,2,2
-Enemy,2,2,,Hob Goblin,E,,3,3
-Enemy,2,3,,King Goblin,B,,5,5

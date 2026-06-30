@@ -1,7 +1,0 @@
-[Bb]in/
-[Oo]bj/
-[Bb]uild/
-
-!**/*.csproj
-!**/*.sln
-!**/*.slnx

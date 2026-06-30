@@ -116,9 +116,13 @@ crashlytics-build.properties
 
 [Aa]ssets/[Ss]ettings/[Ee]ditor/[Uu]ser/
 
-[Pp]ackages/com.0x7c13.unityeditor-darkmode/
+[Aa]ssets/[Pp]lugins/com.0x7c13.unityeditor-darkmode
+[Aa]ssets/[Pp]lugins/com.0x7c13.unityeditor-darkmode.meta
 
-[Ee]ncosy[Tt]ower.[Ss]amples.[Uu]ser[Dd]ata[Vv]ault.[Ss]ave[Ff]iles/
+[Aa]ssets/[Pp]lugins/com.laicasaane.unityeditor-darkmode
+[Aa]ssets/[Pp]lugins/com.laicasaane.unityeditor-darkmode.meta
+
+[Ee]ncosy[Tt]ower.[Ss]amples.[Pp]ersistence.[Ss]ave[Ff]iles/
 
 # Other generated contents
 .gitnexus

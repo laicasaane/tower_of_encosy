@@ -36,7 +36,6 @@ MonoBehaviour:
     m_Scopes:
     - com.annulusgames.unity-codegen
     - com.bgtools.playerprefseditor
-    - com.cysharp.slnmerge
     - com.cysharp.unitask
     - com.laicasaane.bakingsheet
     - com.latios.latiosframework

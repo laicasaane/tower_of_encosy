@@ -1,7 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <RootNamespace>Samples.Mvvm</RootNamespace>
-    </PropertyGroup>
-
-</Project>

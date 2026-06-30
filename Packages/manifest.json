@@ -2,7 +2,6 @@
   "dependencies": {
     "com.annulusgames.unity-codegen": "1.0.0",
     "com.bgtools.playerprefseditor": "1.2.4",
-    "com.cysharp.slnmerge": "2.0.1",
     "com.cysharp.unitask": "2.5.11",
     "com.kaykit.character-pack.adventurers": "file:com.kaykit.character-pack.adventurers-1.0.0.tgz",
     "com.kaykit.character-pack.skeletons": "file:com.kaykit.character-pack.skeletons-1.0.0.tgz",
@@ -75,7 +74,6 @@
       "scopes": [
         "com.annulusgames.unity-codegen",
         "com.bgtools.playerprefseditor",
-        "com.cysharp.slnmerge",
         "com.cysharp.unitask",
         "com.laicasaane.bakingsheet",
         "com.latios.latiosframework",

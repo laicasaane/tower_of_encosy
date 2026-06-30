@@ -1,2 +1,0 @@
-@import url("project://database/Packages/com.laicasaane.encosy-tower/EncosyTower.Core/UIElements/StyleSheets/EncosyUIElements.tss");
-@import url("DatabaseCollectionSettings.uss");

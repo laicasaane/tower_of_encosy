@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="netstandard/netstandard.csproj" />
-  <Project Path="Bcl.RuntimeUnsafe/Bcl.RuntimeUnsafe.csproj" />
-  <Project Path="Bcl.Runtime/Bcl.Runtime.csproj" />
-</Solution>
